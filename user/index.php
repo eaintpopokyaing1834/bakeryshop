@@ -219,7 +219,7 @@ $bestSellers = $db->query("
                     <div class="w-px h-8 bg-gray-200"></div>
                     <div>
                         <p class="text-2xl font-bold text-gray-800">500+</p>
-                        <p class="text-xs text-gray-400 mt-0.5">Happy Customers</p>
+                        <p class="text-xs text-gray-400 mt-0.5">Happy Customer</p>
                     </div>
                     <div class="w-px h-8 bg-gray-200"></div>
                     <div>

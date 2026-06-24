@@ -43,7 +43,7 @@ $isAdmin = ($isLoggedIn && $_SESSION['role'] === 'admin');
 
             <!-- Logo -->
             <a href="/sweetheaven/user/index.php" class="flex items-center gap-2 shrink-0">
-                <img src="/sweetheaven/images/shoplogo.png" class="h-10 w-auto" alt="Sweet Heaven">
+                <img src="../images/shoplogo.png" class="h-10 w-auto" alt="Sweet Heaven">
                 <span class="text-2xl font-bold text-stone-800 hidden sm:block">Sweet Heaven</span>
             </a>
 
