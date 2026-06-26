@@ -9,6 +9,20 @@ if (isset($_SESSION['cart'])) {
 }
 $isLoggedIn = isset($_SESSION['user_id']);
 $isAdmin = ($isLoggedIn && $_SESSION['role'] === 'admin');
+require_once __DIR__ . '/../config/db.php';
+$db = getDB();
+// Per-user unread count (customers only)
+$totalNotifications = 0;
+$wishlistCount = 0;
+if ($isLoggedIn && !$isAdmin) {
+    $userId = (int) $_SESSION['user_id'];
+    $nstmt = $db->prepare("SELECT COUNT(*) FROM notifications WHERE user_id=? AND is_seen=0");
+    $nstmt->execute([$userId]);
+    $totalNotifications = (int) $nstmt->fetchColumn();
+    $wstmt = $db->prepare("SELECT COUNT(*) FROM wishlist WHERE user_id=?");
+    $wstmt->execute([$userId]);
+    $wishlistCount = (int) $wstmt->fetchColumn();
+}
 ?>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet">
@@ -53,8 +67,7 @@ $isAdmin = ($isLoggedIn && $_SESSION['role'] === 'admin');
                         class="nav-link hover:text-rose-500 transition-colors">Home</a></li>
                 <li><a href="/sweetheaven/user/products.php"
                         class="nav-link hover:text-rose-500 transition-colors">Products</a></li>
-                <li><a href="/sweetheaven/user/products.php#categories"
-                        class="nav-link hover:text-rose-500 transition-colors">Categories</a></li>
+
                 <?php if ($isAdmin): ?>
                     <li><a href="/sweetheaven/admin/dashboard.php"
                             class="bg-rose-50 text-rose-600 px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-rose-100 transition-colors">Admin
@@ -63,9 +76,39 @@ $isAdmin = ($isLoggedIn && $_SESSION['role'] === 'admin');
             </ul>
 
             <!-- Right Actions -->
-            <div class="flex items-center gap-3">
+            <div class="flex flex-row items-center gap-3">
                 <?php if ($isLoggedIn): ?>
                     <?php if (!$isAdmin): ?>
+                        <!-- notification bell -->
+                        <div class="relative" id="notifWrapper">
+                            <button onclick="toggleNotifDropdown()"
+                                class="relative p-2 rounded-lg hover:bg-stone-100 transition-colors text-stone-500">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                <?php if ($totalNotifications > 0): ?>
+                                    <span id="notifBadge"
+                                        class="absolute -top-0.5 -right-0.5 bg-rose-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                        <?= $totalNotifications > 99 ? '99+' : $totalNotifications ?>
+                                    </span>
+                                <?php endif; ?>
+                            </button>
+
+                            <!-- Notification Dropdown -->
+                            <div id="notifDropdown"
+                                class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-stone-100 z-50 overflow-hidden">
+                                <div class="flex items-center justify-between px-4 py-3 border-b border-stone-100">
+                                    <h4 class="font-bold text-stone-800 text-sm">Notifications</h4>
+                                    <button onclick="markAllSeen()"
+                                        class="text-xs text-rose-500 hover:text-rose-600 font-semibold">Mark all read</button>
+                                </div>
+                                <div id="notifList" class="max-h-80 overflow-y-auto">
+                                    <p class="text-center text-stone-400 text-sm py-6">Loading...</p>
+                                </div>
+                            </div>
+                        </div><!-- /notifWrapper -->
+
                         <!-- Wishlist -->
                         <a href="/sweetheaven/user/wishlist.php"
                             class="relative p-2 text-stone-400 hover:text-rose-500 transition-colors" title="Wishlist">
@@ -73,6 +116,13 @@ $isAdmin = ($isLoggedIn && $_SESSION['role'] === 'admin');
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                     d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
+                            <?php if ($wishlistCount > 0): ?>
+                                <span id="wishlistBadge"
+                                    class="absolute -top-2 -right-2 bg-rose-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold"><?= $wishlistCount ?></span>
+                            <?php else: ?>
+                                <span id="wishlistBadge"
+                                    class="absolute -top-2 -right-2 bg-rose-500 text-white text-xs rounded-full w-4 h-4 <?= $wishlistCount > 0 ? 'flex' : 'hidden' ?> items-center justify-center font-bold"><?= $wishlistCount ?></span>
+                            <?php endif; ?>
                         </a>
 
                         <!-- Cart -->
@@ -84,10 +134,10 @@ $isAdmin = ($isLoggedIn && $_SESSION['role'] === 'admin');
                             </svg>
                             <?php if ($cartCount > 0): ?>
                                 <span id="cartBadge"
-                                    class="absolute -top-1 -right-1 bg-rose-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"><?= $cartCount ?></span>
+                                    class="absolute -top-2 -right-2 bg-rose-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold"><?= $cartCount ?></span>
                             <?php else: ?>
                                 <span id="cartBadge"
-                                    class="absolute -top-1 -right-1 bg-rose-500 text-white text-xs rounded-full w-5 h-5 <?= $cartCount > 0 ? 'flex' : 'hidden' ?> items-center justify-center font-bold"><?= $cartCount ?></span>
+                                    class="absolute -top-2 -right-2 bg-rose-500 text-white text-xs rounded-full w-4 h-4 <?= $cartCount > 0 ? 'flex' : 'hidden' ?> items-center justify-center font-bold"><?= $cartCount ?></span>
                             <?php endif; ?>
                         </a>
                     <?php endif; ?>
@@ -123,6 +173,15 @@ $isAdmin = ($isLoggedIn && $_SESSION['role'] === 'admin');
                                 </svg>
                                 Wishlist
                             </a>
+                            <a href="/sweetheaven/user/profile.php?tab=orders"
+                                class="flex items-center gap-2 px-4 py-3 text-sm text-stone-600 hover:bg-stone-50 hover:text-rose-500 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                </svg>
+                                My Orders
+                            </a>
+
                             <?php if ($isAdmin): ?>
                                 <a href="/sweetheaven/admin/dashboard.php"
                                     class="flex items-center gap-2 px-4 py-3 text-sm text-stone-600 hover:bg-stone-50 hover:text-rose-500 transition-colors">
@@ -197,18 +256,170 @@ $isAdmin = ($isLoggedIn && $_SESSION['role'] === 'admin');
         </div>
     </div>
 </nav>
-
 <script>
+
+    /* ── Profile dropdown ── */
     function toggleProfile() {
         document.getElementById('profileMenu').classList.toggle('hidden');
+        // close notif if open
+        document.getElementById('notifDropdown')?.classList.add('hidden');
     }
+
     function toggleMobileMenu() {
         document.getElementById('mobileMenu').classList.toggle('hidden');
     }
+
+    /* ── Notification bell ── */
+    let notifLoaded = false;
+
+    function toggleNotifDropdown() {
+        const dd = document.getElementById('notifDropdown');
+        if (!dd) return;
+        const isHidden = dd.classList.contains('hidden');
+        dd.classList.toggle('hidden');
+        // close profile if open
+        document.getElementById('profileMenu')?.classList.add('hidden');
+        if (isHidden) {
+            notifLoaded = false; // always fresh-load on open
+            loadNotifications();
+        }
+    }
+
+    function loadNotifications() {
+        fetch('/sweetheaven/api/user_notifications.php?action=list')
+            .then(r => r.json())
+            .then(data => {
+                notifLoaded = true;
+                const list = document.getElementById('notifList');
+                if (!list) return;
+                if (!Array.isArray(data) || data.length === 0) {
+                    list.innerHTML = `<div class="flex flex-col items-center py-10 text-stone-400">
+                        <svg class="w-10 h-10 mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                        <p class="text-sm font-medium">No notifications yet</p>
+                    </div>`;
+                    return;
+                }
+                const statusIcons = {
+                    'order_status': '📦',
+                    'new_order': '🛒',
+                };
+                list.innerHTML = data.map(n => {
+                    const icon = statusIcons[n.type] || '🔔';
+                    const time = timeAgo(n.created_at);
+                    const unread = n.is_seen == 0 ? 'bg-rose-50 border-l-4 border-rose-400' : '';
+                    const orderId = n.order_id ? n.order_id : null;
+                    const link = orderId ? `/sweetheaven/user/profile.php?tab=orders` : '#';
+                    return `<a href="${link}" onclick="markAllSeen()" class="flex items-start gap-3 px-4 py-3 hover:bg-stone-50 transition-colors ${unread} cursor-pointer">
+                        <span class="text-xl mt-0.5">${icon}</span>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm text-stone-700 leading-snug">${escHtml(n.message)}</p>
+                            <p class="text-xs text-stone-400 mt-1">${time}</p>
+                        </div>
+                        ${n.is_seen == 0 ? '<span class="w-2 h-2 rounded-full bg-rose-500 mt-1.5 shrink-0"></span>' : ''}
+                    </a>`;
+                }).join('');
+            })
+            .catch(() => {
+                const list = document.getElementById('notifList');
+                if (list) list.innerHTML = '<p class="text-center text-stone-400 text-sm py-6">Could not load notifications.</p>';
+            });
+    }
+
+    function markAllSeen() {
+        fetch('/sweetheaven/api/user_notifications.php?action=mark_seen', { method: 'POST' })
+            .then(r => r.json())
+            .then(() => {
+                // hide badge
+                const badge = document.getElementById('notifBadge');
+                if (badge) badge.remove();
+                // remove unread highlights
+                document.querySelectorAll('#notifList a').forEach(el => {
+                    el.classList.remove('bg-rose-50', 'border-l-4', 'border-rose-400');
+                    const dot = el.querySelector('.bg-rose-500.rounded-full');
+                    if (dot) dot.remove();
+                });
+                notifLoaded = false; // allow reload next open
+            });
+    }
+
+    /* ── Live badge polling (every 30 seconds) ── */
+    <?php if ($isLoggedIn && !$isAdmin): ?>
+        let _lastNotifCount = <?= $totalNotifications ?>;
+
+        function pollNotifCount() {
+            fetch('/sweetheaven/api/user_notifications.php?action=count')
+                .then(r => r.json())
+                .then(data => {
+                    const count = data.count || 0;
+                    const badge = document.getElementById('notifBadge');
+                    if (count > 0) {
+                        if (badge) {
+                            badge.textContent = count > 99 ? '99+' : count;
+                        } else {
+                            // Create badge if it's new
+                            const bellBtn = document.querySelector('#notifWrapper button');
+                            if (bellBtn) {
+                                const span = document.createElement('span');
+                                span.id = 'notifBadge';
+                                span.className = 'absolute -top-0.5 -right-0.5 bg-rose-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center animate-bounce';
+                                span.textContent = count > 99 ? '99+' : count;
+                                bellBtn.appendChild(span);
+                                // Animate in briefly then settle
+                                setTimeout(() => span.classList.remove('animate-bounce'), 3000);
+                            }
+                        }
+                        // If new notifications came in while dropdown is open, reload the list
+                        if (count > _lastNotifCount) {
+                            const dd = document.getElementById('notifDropdown');
+                            if (dd && !dd.classList.contains('hidden')) {
+                                notifLoaded = false;
+                                loadNotifications();
+                            }
+                        }
+                    } else {
+                        if (badge) badge.remove();
+                    }
+                    _lastNotifCount = count;
+                })
+                .catch(() => { }); // silently ignore network errors
+        }
+
+        // Poll every 30 seconds
+        setInterval(pollNotifCount, 30000);
+    <?php endif; ?>
+
+    function updateWishlistBadge(count) {
+        const badge = document.getElementById('wishlistBadge');
+        if (!badge) return;
+        badge.textContent = count;
+        badge.classList.toggle('hidden', count === 0);
+    }
+
+    function timeAgo(dateStr) {
+        const now = new Date();
+        const then = new Date(dateStr);
+        const secs = Math.floor((now - then) / 1000);
+        if (secs < 60) return 'Just now';
+        if (secs < 3600) return Math.floor(secs / 60) + 'm ago';
+        if (secs < 86400) return Math.floor(secs / 3600) + 'h ago';
+        return Math.floor(secs / 86400) + 'd ago';
+    }
+
+    function escHtml(str) {
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    /* ── Close dropdowns on outside click ── */
     document.addEventListener('click', function (e) {
-        const dropdown = document.getElementById('profileDropdown');
-        if (dropdown && !dropdown.contains(e.target)) {
+        // Profile
+        const profileDd = document.getElementById('profileDropdown');
+        if (profileDd && !profileDd.contains(e.target)) {
             document.getElementById('profileMenu')?.classList.add('hidden');
+        }
+        // Notifications
+        const notifWrapper = document.getElementById('notifWrapper');
+        if (notifWrapper && !notifWrapper.contains(e.target)) {
+            document.getElementById('notifDropdown')?.classList.add('hidden');
         }
     });
 </script>

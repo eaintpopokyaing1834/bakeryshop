@@ -180,47 +180,52 @@ if ($isLoggedIn && !$isAdmin) {
                 $isWished = in_array($product['id'], $wishlistIds);
                 $stars    = round($product['avg_rating']);
                 ?>
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md hover:-translate-y-1 transition-all duration-300">
-                    <div class="relative h-52 overflow-hidden bg-rose-50">
+                <div class="product-card group bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 cursor-pointer"
+                     onclick="toggleProductName(<?= $product['id'] ?>)">
+                    <div class="relative overflow-hidden bg-gradient-to-br from-rose-50 to-amber-50 aspect-[4/3]">
                         <img src="<?= htmlspecialchars($imgSrc) ?>" alt="<?= htmlspecialchars($product['name']) ?>"
-                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                        <button onclick="toggleWishlist(<?= $product['id'] ?>, this)"
-                            class="absolute top-3 right-3 w-9 h-9 rounded-full <?= $isWished ? 'bg-rose-500 text-white' : 'bg-white text-gray-400' ?> shadow-md flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all duration-200">
+                             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        <button onclick="event.stopPropagation(); toggleWishlist(<?= $product['id'] ?>, this)"
+                            class="absolute top-3 right-3 w-9 h-9 rounded-full <?= $isWished ? 'bg-rose-500 text-white' : 'bg-white/90 text-gray-400' ?> shadow-md flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all duration-200 backdrop-blur-sm">
                             <svg class="w-4 h-4" fill="<?= $isWished ? 'currentColor' : 'none' ?>" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                         </button>
                         <?php if ($product['stock'] === 0): ?>
-                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
-                            <span class="bg-red-600 text-white text-sm font-bold px-4 py-2 rounded-full">Out of Stock</span>
+                        <div class="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm">
+                            <span class="bg-red-600 text-white text-sm font-bold px-5 py-2 rounded-full shadow-lg">Out of Stock</span>
                         </div>
                         <?php elseif ($product['stock'] < 10): ?>
-                        <div class="absolute top-3 left-3 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full">Only <?= $product['stock'] ?> left</div>
+                        <div class="absolute top-3 left-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">Only <?= $product['stock'] ?> left</div>
                         <?php endif; ?>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                     </div>
 
                     <div class="p-5">
-                        <p class="text-xs text-rose-400 font-semibold mb-1"><?= htmlspecialchars($product['category_name']) ?></p>
-                        <a href="/sweetheaven/user/product_detail.php?id=<?= $product['id'] ?>">
-                            <h3 class="font-bold text-gray-800 mb-2 hover:text-rose-500 transition-colors line-clamp-1"><?= htmlspecialchars($product['name']) ?></h3>
-                        </a>
-                        <p class="text-xs text-gray-400 mb-3 line-clamp-2"><?= htmlspecialchars($product['description']) ?></p>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-rose-400 mb-2"><?= htmlspecialchars($product['category_name']) ?></p>
 
-                        <div class="flex items-center gap-1 mb-4">
+                        <div class="flex items-center gap-0.5 mb-3">
                             <?php for ($s=1;$s<=5;$s++): ?>
-                            <svg class="w-3 h-3 <?= $s<=$stars?'text-amber-400':'text-gray-200' ?>" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-3.5 h-3.5 <?= $s<=$stars?'text-amber-400':'text-gray-200' ?>" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                             <?php endfor; ?>
-                            <span class="text-xs text-gray-400 ml-1">(<?= number_format($product['avg_rating'],1) ?>)</span>
+                            <span class="text-xs text-gray-400 ml-1.5">(<?= number_format($product['avg_rating'],1) ?>)</span>
                         </div>
 
-                        <div class="flex items-center justify-between">
+                        <div id="productName_<?= $product['id'] ?>" class="overflow-hidden transition-all duration-300 max-h-0 opacity-0 mb-0">
+                            <a href="/sweetheaven/user/product_detail.php?id=<?= $product['id'] ?>" onclick="event.stopPropagation()">
+                                <h3 class="font-bold text-gray-800 text-base hover:text-rose-500 transition-colors"><?= htmlspecialchars($product['name']) ?></h3>
+                            </a>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-3 mt-1 border-t border-gray-50">
                             <span class="text-lg font-bold text-rose-500"><?= number_format($product['price']) ?> <span class="text-xs font-normal text-gray-400">MMK</span></span>
                             <div class="flex gap-2">
                                 <a href="/sweetheaven/user/product_detail.php?id=<?= $product['id'] ?>"
+                                   onclick="event.stopPropagation()"
                                    class="border border-stone-200 text-rose-500 px-3 py-2 rounded-xl text-xs font-semibold hover:bg-rose-50 transition-colors">
                                     View
                                 </a>
                                 <?php if ($product['stock'] > 0 && !$isAdmin): ?>
-                                <button onclick="addToCart(<?= $product['id'] ?>, '<?= addslashes($product['name']) ?>')"
-                                    class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-2 rounded-xl text-xs font-semibold transition-colors">
+                                <button onclick="event.stopPropagation(); addToCart(<?= $product['id'] ?>, '<?= addslashes($product['name']) ?>')"
+                                    class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-2 rounded-xl text-xs font-semibold transition-colors shadow-sm shadow-rose-200">
                                     + Cart
                                 </button>
                                 <?php endif; ?>
@@ -244,6 +249,28 @@ if ($isLoggedIn && !$isAdmin) {
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
 
 <script>
+let activeProductId = null;
+
+function toggleProductName(productId) {
+    const prevEl = document.getElementById('productName_' + activeProductId);
+    if (prevEl) {
+        prevEl.style.maxHeight = '0';
+        prevEl.style.opacity = '0';
+    }
+
+    if (activeProductId === productId) {
+        activeProductId = null;
+        return;
+    }
+
+    activeProductId = productId;
+    const el = document.getElementById('productName_' + productId);
+    if (el) {
+        el.style.maxHeight = '48px';
+        el.style.opacity = '1';
+    }
+}
+
 function addToCart(productId, name) {
     fetch('/sweetheaven/api/cart.php', {
         method: 'POST',
@@ -269,7 +296,8 @@ function toggleWishlist(productId, btn) {
             btn.classList.toggle('bg-rose-500', data.is_wishlisted);
             btn.classList.toggle('text-white', data.is_wishlisted);
             svg.setAttribute('fill', data.is_wishlisted ? 'currentColor' : 'none');
-            showToast(data.is_wishlisted ? '❤️ Added to wishlist' : '💔 Removed from wishlist');
+            showToast(data.is_wishlisted ? '❤️ ' + (data.message || 'Added to wishlist') : '💔 Removed from wishlist');
+            if (typeof updateWishlistBadge === 'function') updateWishlistBadge(data.wishlist_count);
         } else if (data.redirect) window.location.href='/sweetheaven/auth/login.php';
     });
 }

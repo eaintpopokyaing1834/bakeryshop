@@ -23,11 +23,25 @@ if (!$productId) {
 // Check if already wishlisted
 $exists = $db->prepare("SELECT id FROM wishlist WHERE user_id=? AND product_id=?");
 $exists->execute([$userId, $productId]);
+$alreadyWishlisted = $exists->fetch();
 
-if ($exists->fetch()) {
+if ($alreadyWishlisted) {
     $db->prepare("DELETE FROM wishlist WHERE user_id=? AND product_id=?")->execute([$userId, $productId]);
-    echo json_encode(['success' => true, 'is_wishlisted' => false]);
+    $prodName = '';
 } else {
+    $prod = $db->prepare("SELECT name FROM products WHERE id=?");
+    $prod->execute([$productId]);
+    $prodName = $prod->fetchColumn() ?: 'Item';
     $db->prepare("INSERT INTO wishlist (user_id, product_id) VALUES (?,?)")->execute([$userId, $productId]);
-    echo json_encode(['success' => true, 'is_wishlisted' => true]);
+}
+
+// Get updated wishlist count
+$wcount = $db->prepare("SELECT COUNT(*) FROM wishlist WHERE user_id=?");
+$wcount->execute([$userId]);
+$wishlistCount = (int)$wcount->fetchColumn();
+
+if ($alreadyWishlisted) {
+    echo json_encode(['success' => true, 'is_wishlisted' => false, 'message' => 'Removed from wishlist', 'wishlist_count' => $wishlistCount]);
+} else {
+    echo json_encode(['success' => true, 'is_wishlisted' => true, 'message' => $prodName . ' added to wishlist!', 'wishlist_count' => $wishlistCount]);
 }

@@ -1,4 +1,4 @@
-﻿CREATE DATABASE IF NOT EXISTS sweetheaven_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS sweetheaven_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE sweetheaven_db;
 
 CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100) NOT NULL, email VARCHAR(150) UNIQUE NOT NULL, password VARCHAR(255) NOT NULL, role ENUM('admin','customer') DEFAULT 'customer', profile_image VARCHAR(255) DEFAULT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS order_items (id INT AUTO_INCREMENT PRIMARY KEY, order
 CREATE TABLE IF NOT EXISTS payment_methods (id INT AUTO_INCREMENT PRIMARY KEY, payment_name VARCHAR(100) NOT NULL, acc_name VARCHAR(100), acc_no VARCHAR(50), qr_image VARCHAR(255));
 
 CREATE TABLE IF NOT EXISTS payment (id INT AUTO_INCREMENT PRIMARY KEY, order_id INT NOT NULL, payment_method_id INT NOT NULL, payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, status ENUM('pending','paid','failed') DEFAULT 'pending', paid_at TIMESTAMP NULL DEFAULT NULL, FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE, FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id));
+
+CREATE TABLE IF NOT EXISTS notifications (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NULL, order_id INT NULL, type VARCHAR(50) NOT NULL DEFAULT 'general', title VARCHAR(200) NULL, message TEXT, is_seen TINYINT(1) NOT NULL DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX idx_user_seen (user_id, is_seen), FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL);
 
 INSERT IGNORE INTO users (name, email, password, role) VALUES ('Admin', 'admin@sweetheaven.com', '\\\.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
 INSERT IGNORE INTO users (name, email, password, role) VALUES ('Ma Aye', 'customer@sweetheaven.com', '\\\.PJy4cUH0.2w7j1OeivX.BoFxWxHXNAuPJ0eE.iDN4XkZi', 'customer');

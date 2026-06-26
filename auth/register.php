@@ -34,13 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt   = $db->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'customer')");
             $stmt->execute([$name, $email, $hashed]);
 
-            // Insert notification for admin
-            $db->prepare("INSERT INTO notifications (type, title, message) VALUES ('new_user', ?, ?)")
-               ->execute([
-                   'New User Registration',
-                   htmlspecialchars($name) . " (" . htmlspecialchars($email) . ") just created an account"
-               ]);
-
             $success = 'Account created! You can now sign in.';
         }
     }

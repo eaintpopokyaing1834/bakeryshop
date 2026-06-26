@@ -109,7 +109,11 @@ function removeFromWishlist(productId, btn) {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `product_id=${productId}`
     }).then(r=>r.json()).then(data=>{
-        if (data.success) { document.getElementById(`wishlist-item-${productId}`)?.remove(); showToast('Removed from wishlist'); }
+        if (data.success) {
+            document.getElementById(`wishlist-item-${productId}`)?.remove();
+            showToast('Removed from wishlist');
+            if (typeof updateWishlistBadge === 'function') updateWishlistBadge(data.wishlist_count);
+        }
     });
 }
 

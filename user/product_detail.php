@@ -333,7 +333,8 @@ $relatedProducts = $relatedProducts->fetchAll();
                     btn.classList.toggle('border-rose-400', data.is_wishlisted);
                     btn.classList.toggle('bg-rose-50', data.is_wishlisted);
                     btn.classList.toggle('text-rose-500', data.is_wishlisted);
-                    showToast(data.is_wishlisted ? '❤️ Added to wishlist' : '💔 Removed from wishlist');
+                    showToast(data.is_wishlisted ? '❤️ ' + (data.message || 'Added to wishlist') : '💔 Removed from wishlist');
+                    if (typeof updateWishlistBadge === 'function') updateWishlistBadge(data.wishlist_count);
                 } else if (data.redirect) window.location.href = '/sweetheaven/auth/login.php';
             });
         }

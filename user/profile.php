@@ -51,7 +51,7 @@ $user = $user->fetch();
 
 // Orders
 $orders = $db->prepare("
-    SELECT o.*, pm.payment_name FROM orders o
+    SELECT o.*, pm.payment_name, p.status AS pay_status, p.screenshot FROM orders o
     LEFT JOIN payment p ON p.order_id = o.id
     LEFT JOIN payment_methods pm ON pm.id = p.payment_method_id
     WHERE o.user_id=?
@@ -224,7 +224,19 @@ $statusColors = [
                     <?php endforeach; ?>
                 </div>
                 <?php if ($order['payment_name']): ?>
-                <p class="text-xs text-gray-400 mt-3">Payment: <?= htmlspecialchars($order['payment_name']) ?></p>
+                <p class="text-xs text-gray-400 mt-3">Payment: <?= htmlspecialchars($order['payment_name']) ?>
+                    <?php if ($order['pay_status']): ?>
+                    <span class="inline-block text-xs font-semibold px-2 py-0.5 rounded-full ml-1
+                        <?= $order['pay_status'] === 'approved' ? 'bg-green-100 text-green-700' : '' ?>
+                        <?= $order['pay_status'] === 'pending' ? 'bg-amber-100 text-amber-700' : '' ?>
+                        <?= $order['pay_status'] === 'rejected' ? 'bg-red-100 text-red-700' : '' ?>">
+                        <?= ucfirst($order['pay_status']) ?>
+                    </span>
+                    <?php endif; ?>
+                    <?php if (!empty($order['screenshot'])): ?>
+                    &middot; <a href="/sweetheaven/<?= htmlspecialchars($order['screenshot']) ?>" target="_blank" class="text-rose-500 hover:underline">View Receipt</a>
+                    <?php endif; ?>
+                </p>
                 <?php endif; ?>
                 <p class="text-xs text-gray-400">Shipping to: <?= htmlspecialchars($order['shipping_address']) ?></p>
             </div>
@@ -300,7 +312,11 @@ function removeFromWishlist(productId, btn) {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `product_id=${productId}`
     }).then(r=>r.json()).then(data=>{
-        if (data.success) { btn.closest('.bg-white').remove(); showToast('Removed from wishlist'); }
+        if (data.success) {
+            btn.closest('.bg-white').remove();
+            showToast('Removed from wishlist');
+            if (typeof updateWishlistBadge === 'function') updateWishlistBadge(data.wishlist_count);
+        }
     });
 }
 

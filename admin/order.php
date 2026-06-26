@@ -5,14 +5,57 @@ require_once __DIR__ . '/../config/db.php';
 $db = getDB();
 $message = $error = '';
 
+// DB migration: ensure payment table has screenshot column and correct ENUM
+try {
+    $db->exec("ALTER TABLE payment ADD COLUMN screenshot VARCHAR(255) DEFAULT NULL AFTER payment_method_id");
+} catch (Exception $e) {}
+try {
+    $db->exec("ALTER TABLE payment MODIFY COLUMN status ENUM('pending','approved','rejected') DEFAULT 'pending'");
+} catch (Exception $e) {}
+
+// Handle payment approve/reject
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payment_action'])) {
+    $orderId  = (int)$_POST['order_id'];
+    $newStatus = $_POST['payment_action'] === 'approve' ? 'approved' : 'rejected';
+    $db->prepare("UPDATE payment SET status=? WHERE order_id=?")->execute([$newStatus, $orderId]);
+    echo json_encode(['success' => true]);
+    exit;
+}
+
 // ── Handle AJAX Status Update ────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_status'])) {
-    $orderId  = (int)$_POST['order_id'];
+    $orderId   = (int)$_POST['order_id'];
     $newStatus = $_POST['status'];
     $allowed   = ['pending','processing','shipped','delivered','cancelled'];
+
     if (in_array($newStatus, $allowed)) {
-        $stmt = $db->prepare("UPDATE orders SET status=? WHERE id=?");
-        $stmt->execute([$newStatus, $orderId]);
+        // Fetch old status + owner before updating
+        $order = $db->prepare("SELECT user_id, status FROM orders WHERE id=?");
+        $order->execute([$orderId]);
+        $order = $order->fetch();
+
+        // Update order status
+        $db->prepare("UPDATE orders SET status=? WHERE id=?")->execute([$newStatus, $orderId]);
+
+        if ($order && $order['status'] !== $newStatus) {
+            // Build a friendly notification message with emoji
+            $statusLabels = [
+                'pending'    => 'is pending review ⏳',
+                'processing' => 'is confirmed and being processed 🛠️',
+                'shipped'    => 'has been shipped 🚚',
+                'delivered'  => 'has been delivered ✅',
+                'cancelled'  => 'has been cancelled ❌',
+            ];
+            $label   = $statusLabels[$newStatus] ?? "status changed to $newStatus";
+            $orderNo = '#' . str_pad($orderId, 4, '0', STR_PAD_LEFT);
+            $message = "Your order $orderNo $label. Thank you for shopping with Sweet Heaven! 🍰";
+
+            $db->prepare("
+                INSERT INTO notifications (user_id, order_id, type, message, is_seen)
+                VALUES (?, ?, 'order_status', ?, 0)
+            ")->execute([$order['user_id'], $orderId, $message]);
+        }
+
         echo json_encode(['success' => true]);
     } else {
         echo json_encode(['success' => false]);
@@ -31,7 +74,8 @@ $whereSQL = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
 $orders = $db->prepare("
     SELECT o.*, u.name AS customer_name, u.email AS customer_email,
-           pm.payment_name, p.status AS pay_status
+           pm.payment_name, pm.acc_name, pm.acc_no, pm.qr_image,
+           p.status AS pay_status, p.screenshot
     FROM orders o
     JOIN users u ON o.user_id = u.id
     LEFT JOIN payment p ON p.order_id = o.id
@@ -124,7 +168,17 @@ $statusColors = [
                 </td>
                 <td class="px-6 py-4 font-semibold text-gray-700 text-sm"><?= number_format($order['total_amount']) ?> MMK</td>
                 <td class="px-6 py-4 text-sm text-gray-600 capitalize"><?= $order['shipping_method'] ?></td>
-                <td class="px-6 py-4 text-sm text-gray-600"><?= $order['payment_name'] ?? 'N/A' ?></td>
+                <td class="px-6 py-4 text-sm">
+                    <p class="text-gray-600"><?= htmlspecialchars($order['payment_name'] ?? 'N/A') ?></p>
+                    <?php if ($order['pay_status']): ?>
+                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full inline-block mt-1
+                        <?= $order['pay_status'] === 'approved' ? 'bg-green-100 text-green-700' : '' ?>
+                        <?= $order['pay_status'] === 'pending' ? 'bg-amber-100 text-amber-700' : '' ?>
+                        <?= $order['pay_status'] === 'rejected' ? 'bg-red-100 text-red-700' : '' ?>">
+                        <?= ucfirst($order['pay_status']) ?>
+                    </span>
+                    <?php endif; ?>
+                </td>
                 <td class="px-6 py-4">
                     <select onchange="updateStatus(<?= $order['id'] ?>, this.value, this)"
                         class="text-xs font-semibold px-3 py-1.5 rounded-full border cursor-pointer focus:outline-none focus:ring-2 focus:ring-rose-300 transition-colors
@@ -158,6 +212,46 @@ $statusColors = [
                     <?php if ($order['request_note']): ?>
                     <p class="text-xs text-gray-500 mt-1">📝 <?= htmlspecialchars($order['request_note']) ?></p>
                     <?php endif; ?>
+                    <?php if ($order['payment_name']): ?>
+                    <div class="mt-3 pt-3 border-t border-stone-200">
+                        <p class="text-xs font-semibold text-stone-600 mb-2">💳 Payment Details</p>
+                        <p class="text-xs text-gray-500">Method: <?= htmlspecialchars($order['payment_name']) ?></p>
+                        <?php if ($order['acc_name']): ?>
+                        <p class="text-xs text-gray-500">Account: <?= htmlspecialchars($order['acc_name']) ?> — <?= htmlspecialchars($order['acc_no']) ?></p>
+                        <?php endif; ?>
+                        <?php if (!empty($order['qr_image'])): ?>
+                        <img src="/sweetheaven/<?= htmlspecialchars($order['qr_image']) ?>"
+                            class="w-16 h-16 object-contain mt-1 border border-stone-200 rounded-lg" alt="QR">
+                        <?php endif; ?>
+                        <?php if (!empty($order['screenshot'])): ?>
+                        <div class="mt-2">
+                            <p class="text-xs text-gray-500 mb-1">Receipt screenshot:</p>
+                            <a href="/sweetheaven/<?= htmlspecialchars($order['screenshot']) ?>" target="_blank">
+                                <img src="/sweetheaven/<?= htmlspecialchars($order['screenshot']) ?>"
+                                    class="w-24 h-24 object-cover rounded-lg border border-stone-200">
+                            </a>
+                        </div>
+                        <?php endif; ?>
+                        <div class="mt-2 flex gap-2" id="paymentActions-<?= $order['id'] ?>">
+                            <?php if ($order['pay_status'] === 'pending' && !empty($order['screenshot'])): ?>
+                            <button onclick="updatePayment(<?= $order['id'] ?>, 'approve')"
+                                class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors">
+                                Approve Payment
+                            </button>
+                            <button onclick="updatePayment(<?= $order['id'] ?>, 'reject')"
+                                class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors">
+                                Reject Payment
+                            </button>
+                            <?php elseif ($order['pay_status'] === 'approved'): ?>
+                            <span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-green-100 text-green-700">Payment Approved ✅</span>
+                            <?php elseif ($order['pay_status'] === 'rejected'): ?>
+                            <span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-100 text-red-700">Payment Rejected ❌</span>
+                            <?php else: ?>
+                            <span class="text-xs text-gray-400 italic">Awaiting receipt upload</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </td>
             </tr>
             <?php endforeach; ?>
@@ -168,6 +262,28 @@ $statusColors = [
 </div>
 
 <script>
+function updatePayment(orderId, action) {
+    fetch('/sweetheaven/admin/order.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `payment_action=${action}&order_id=${orderId}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Payment ' + action + 'd!');
+            document.getElementById('paymentActions-' + orderId).innerHTML =
+                `<span class="text-xs font-semibold px-3 py-1.5 rounded-lg ${action === 'approve' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">Payment ${action === 'approve' ? 'Approved' : 'Rejected'} ${action === 'approve' ? '✅' : '❌'}</span>`;
+            // Update the badge in the main table too
+            const row = document.querySelector(`#order-row-${orderId} td:nth-child(5) span`);
+            if (row) {
+                row.textContent = action === 'approve' ? 'Approved' : 'Rejected';
+                row.className = `text-xs font-semibold px-2 py-0.5 rounded-full inline-block mt-1 ${action === 'approve' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+            }
+        }
+    });
+}
+
 function updateStatus(orderId, newStatus, selectEl) {
     const original = selectEl.dataset.original || selectEl.value;
     fetch('/sweetheaven/admin/order.php', {
