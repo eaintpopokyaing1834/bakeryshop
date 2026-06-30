@@ -1,7 +1,7 @@
 <?php
 // check_notifications.php — Diagnostic + auto-fix for notifications table
 // DELETE AFTER USE!
-require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/../config/db.php';
 $db = getDB();
 
 echo "<pre style='font-family:monospace;font-size:14px;padding:20px;'>";

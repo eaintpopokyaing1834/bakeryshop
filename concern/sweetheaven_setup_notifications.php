@@ -10,7 +10,7 @@
  *   4. Show you the full notification list so you can verify
  */
 if (session_status() === PHP_SESSION_NONE) session_start();
-require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/../config/db.php';
 $db = getDB();
 
 $log = [];

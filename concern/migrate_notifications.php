@@ -1,7 +1,7 @@
 <?php
 // migrate_notifications.php — Run once to update the notifications table
 // DELETE THIS FILE after running!
-require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/../config/db.php';
 $db = getDB();
 
 $steps = [];

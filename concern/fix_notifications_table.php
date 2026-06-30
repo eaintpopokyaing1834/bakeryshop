@@ -1,7 +1,7 @@
 <?php
 // fix_notifications_table.php
 // Run this ONCE in your browser, then DELETE the file!
-require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/../config/db.php';
 $db = getDB();
 
 echo "<!DOCTYPE html><html><head><title>Notifications Fix</title>";

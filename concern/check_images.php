@@ -1,5 +1,5 @@
 <?php
-require 'c:/wamp64/www/sweetheaven/config/db.php';
+require_once __DIR__ . '/../config/db.php';
 $db = getDB();
 $cats = $db->query('SELECT * FROM categories ORDER BY name')->fetchAll();
 foreach ($cats as $c) {
