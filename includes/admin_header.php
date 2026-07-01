@@ -6,8 +6,8 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
 
 require_once __DIR__ . '/../config/db.php';
 $db = getDB();
-$newOrdersCount = (int) $db->query("SELECT COUNT(*) FROM notifications WHERE type='new_order' AND is_seen=0")->fetchColumn();
-$totalNotifications = (int) $db->query("SELECT COUNT(*) FROM notifications WHERE type='new_order' AND is_seen=0")->fetchColumn();
+$newOrdersCount = (int) $db->query("SELECT COUNT(*) FROM notifications WHERE (type='new_order' OR type='customize_request') AND is_seen=0")->fetchColumn();
+$totalNotifications = (int) $db->query("SELECT COUNT(*) FROM notifications WHERE (type='new_order' OR type='customize_request') AND is_seen=0")->fetchColumn();
 $pendingReviewsCount = (int) $db->query("SELECT COUNT(*) FROM customer_reviews WHERE status='pending'")->fetchColumn();
 ?>
 <!DOCTYPE html>
@@ -134,6 +134,24 @@ $pendingReviewsCount = (int) $db->query("SELECT COUNT(*) FROM customer_reviews W
                 <span>Users</span>
             </a>
 
+
+            <a href="/sweetheaven/admin/customize.php"
+                class="<?= $baseClass ?> <?= $currentPage === 'customize' ? $activeClass : '' ?>">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                <span>Customize</span>
+                <?php
+                $pendingCustomizeCount = (int)$db->query("SELECT COUNT(*) FROM customize_requests WHERE status='pending'")->fetchColumn();
+                if ($pendingCustomizeCount > 0): ?>
+                    <span
+                        class="ml-auto bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30">
+                        <?= $pendingCustomizeCount > 99 ? '99+' : $pendingCustomizeCount ?>
+                    </span>
+                <?php endif; ?>
+            </a>
+
             <a href="/sweetheaven/admin/review.php"
                 class="<?= $baseClass ?> <?= $currentPage === 'review' ? $activeClass : '' ?>">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -142,12 +160,20 @@ $pendingReviewsCount = (int) $db->query("SELECT COUNT(*) FROM customer_reviews W
                 </svg>
                 <span>Reviews</span>
                 <?php if ($pendingReviewsCount > 0): ?>
-                    <!-- Changed positioning to ml-auto and fixed dimensioning for a perfect inline circle layout -->
                     <span
                         class="ml-auto bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30">
                         <?= $pendingReviewsCount > 99 ? '99+' : $pendingReviewsCount ?>
                     </span>
                 <?php endif; ?>
+            </a>
+
+            <a href="/sweetheaven/admin/discount.php"
+                class="<?= $baseClass ?> <?= $currentPage === 'discount' ? $activeClass : '' ?>">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+                <span>Discounts</span>
             </a>
 
             <a href="/sweetheaven/admin/payment_settings.php"

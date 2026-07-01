@@ -13,11 +13,13 @@ $categories = $db->query("SELECT * FROM categories ORDER BY name")->fetchAll();
 $bestSellers = $db->query("
     SELECT p.*,
            c.name AS category_name,
+           d.name AS discount_name, d.type AS discount_type, d.value AS discount_value,
            pi.image_url AS primary_image,
            COALESCE(AVG(r.rating),0) AS avg_rating,
            COUNT(DISTINCT oi.id) AS total_sold
     FROM products p
     JOIN categories c ON p.category_id = c.id
+    LEFT JOIN discounts d ON p.discount_id = d.id
     LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_primary = 1
     LEFT JOIN reviews r ON r.product_id = p.id
     LEFT JOIN order_items oi ON oi.product_id = p.id
@@ -181,12 +183,12 @@ $customerReviews = $db->query("SELECT name, message, created_at FROM customer_re
     <?php require_once __DIR__ . '/../includes/header.php'; ?>
 
     <!-- ═══════════════════════════════════════ HERO ═══════════════════════════════════════ -->
-    <form method="GET" class="flex gap-2 items-center justify-center py-6">
+    <!-- <form method="GET" class="flex gap-2 items-center justify-center py-6">
         <input type="hidden" name="category_id" value="<?= $categoryId ?>">
         <input type="hidden" name="sort" value="<?= $sort ?>">
         <input type="search" name="search" placeholder="🔍 Search products..." value="<?= htmlspecialchars($search) ?>"
             class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 w-48">
-    </form>
+    </form> -->
     <section class="relative overflow-hidden bg-[#fdf8f3]">
 
         <div class="max-w-7xl mx-auto px-6 py-10 md:py-10 grid md:grid-cols-2 gap-12 items-center">
@@ -225,20 +227,7 @@ $customerReviews = $db->query("SELECT name, message, created_at FROM customer_re
 
                 <!-- Stats row -->
                 <div class="flex items-center gap-8">
-                    <div>
-                        <p class="text-2xl font-bold text-gray-800">50+</p>
-                        <p class="text-xs text-gray-400 mt-0.5">Products</p>
-                    </div>
-                    <div class="w-px h-8 bg-gray-200"></div>
-                    <div>
-                        <p class="text-2xl font-bold text-gray-800">500+</p>
-                        <p class="text-xs text-gray-400 mt-0.5">Happy Customer</p>
-                    </div>
-                    <div class="w-px h-8 bg-gray-200"></div>
-                    <div>
-                        <p class="text-2xl font-bold text-gray-800">⭐ 4.9</p>
-                        <p class="text-xs text-gray-400 mt-0.5">Rating</p>
-                    </div>
+
                 </div>
             </div>
 
@@ -248,10 +237,10 @@ $customerReviews = $db->query("SELECT name, message, created_at FROM customer_re
                 <div class="absolute -top-8 -right-8 w-72 h-72 rounded-full"
                     style="background:var(--rose-light);z-index:0;"></div>
                 <div class="relative z-10 grid grid-cols-2 gap-3">
-                    <img src="../images/ceremony.jpg" alt="Beautiful cake" class="collage-img w-full h-52 shadow-md">
-                    <img src="../images/pudd.jpg" alt="Croissant" class="collage-img w-full h-52 shadow-md mt-8">
-                    <img src="../images/lemon.jpg" alt="Cupcakes" class="collage-img w-full h-52 shadow-md">
-                    <img src="../images/donut.jpg" alt="Fresh bread" class="collage-img w-full h-52 shadow-md mt-8">
+                    <img src="../images/heropincake.jpg" alt="Beautiful cake" class="collage-img w-full h-52 shadow-md">
+                    <img src="../images/donutgrop.jpg" alt="Croissant" class="collage-img w-full h-52 shadow-md mt-8">
+                    <img src="../images/cro.jpg" alt="Cupcakes" class="collage-img w-full h-52 shadow-md">
+                    <img src="../images/minicake.jpg" alt="Fresh bread" class="collage-img w-full h-52 shadow-md mt-8">
                 </div>
             </div>
         </div>
@@ -538,19 +527,23 @@ $customerReviews = $db->query("SELECT name, message, created_at FROM customer_re
 
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                <?php foreach ($bestSellers as $product): ?>
+                    <?php foreach ($bestSellers as $product): ?>
                     <?php
                     $imgSrc = $product['primary_image']
                         ? '/sweetheaven/' . $product['primary_image']
                         : '/sweetheaven/images/maincake.jpg';
-                    $rating = round($product['avg_rating']);
+                    $hasDiscount = $product['discount_name'] && $product['discount_value'];
+                    if ($hasDiscount) {
+                        $discountedPrice = $product['discount_type'] === 'percentage'
+                            ? $product['price'] * (1 - $product['discount_value'] / 100)
+                            : max(0, $product['price'] - $product['discount_value']);
+                    }
                     ?>
-                    <div class="product-card group bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 cursor-pointer"
-                        onclick="toggleProductName(<?= $product['id'] ?>)">
+                    <div class="product-card group bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2">
                         <div class="relative overflow-hidden bg-gradient-to-br from-rose-50 to-amber-50 aspect-[4/3]">
                             <img src="<?= htmlspecialchars($imgSrc) ?>" alt="<?= htmlspecialchars($product['name']) ?>"
                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                            <button onclick="event.stopPropagation(); toggleWishlist(<?= $product['id'] ?>)"
+                            <button onclick="event.stopPropagation(); toggleWishlist(<?= $product['id'] ?>, this)"
                                 class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 text-gray-400 shadow-md flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all duration-200 backdrop-blur-sm"
                                 title="Wishlist">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -558,7 +551,11 @@ $customerReviews = $db->query("SELECT name, message, created_at FROM customer_re
                                         d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
                             </button>
-                            <?php if ($product['stock'] < 5): ?>
+                            <?php if ($hasDiscount): ?>
+                                <div class="absolute top-3 left-3 bg-gradient-to-r from-green-400 to-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                                    <?= htmlspecialchars($product['discount_name']) ?>
+                                </div>
+                            <?php elseif ($product['stock'] < 5): ?>
                                 <div
                                     class="absolute top-3 left-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
                                     Low Stock</div>
@@ -573,34 +570,34 @@ $customerReviews = $db->query("SELECT name, message, created_at FROM customer_re
                                 <?= htmlspecialchars($product['category_name']) ?>
                             </p>
 
-                            <div class="flex items-center gap-0.5 mb-3">
-                                <?php for ($s = 1; $s <= 5; $s++): ?>
-                                    <svg class="w-3.5 h-3.5 <?= $s <= $rating ? 'text-amber-400' : 'text-gray-200' ?>"
-                                        fill="currentColor" viewBox="0 0 20 20">
-                                        <path
-                                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                    </svg>
-                                <?php endfor; ?>
-                            </div>
-
-                            <div id="productName_<?= $product['id'] ?>"
-                                class="overflow-hidden transition-all duration-300 max-h-0 opacity-0 mb-0">
-                                <a href="/sweetheaven/user/product_detail.php?id=<?= $product['id'] ?>"
-                                    onclick="event.stopPropagation()">
-                                    <h3 class="font-bold text-gray-800 text-sm hover:text-rose-500 transition-colors">
-                                        <?= htmlspecialchars($product['name']) ?>
-                                    </h3>
-                                </a>
-                            </div>
+                            <a href="/sweetheaven/user/product_detail.php?id=<?= $product['id'] ?>">
+                                <h3 class="font-bold text-gray-800 text-sm hover:text-rose-500 transition-colors mb-3">
+                                    <?= htmlspecialchars($product['name']) ?>
+                                </h3>
+                            </a>
 
                             <div class="flex items-center justify-between pt-3 mt-1 border-t border-gray-50">
-                                <span class="font-bold text-[15px] text-rose-500"><?= number_format($product['price']) ?>
+                                <span class="font-bold text-[15px] text-rose-500">
+                                    <?php if ($hasDiscount): ?>
+                                        <span class="text-xs line-through text-gray-400 font-normal mr-1"><?= number_format($product['price']) ?></span>
+                                        <?= number_format($discountedPrice) ?>
+                                    <?php else: ?>
+                                        <?= number_format($product['price']) ?>
+                                    <?php endif; ?>
                                     <span class="text-xs font-normal text-gray-400">MMK</span></span>
-                                <button
-                                    onclick="event.stopPropagation(); addToCart(<?= $product['id'] ?>, '<?= addslashes($product['name']) ?>')"
-                                    class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-1.5 rounded-full text-xs font-semibold transition-colors shadow-sm shadow-rose-200">
-                                    Add to Cart
-                                </button>
+                                <div class="flex gap-2">
+                                    <a href="/sweetheaven/user/product_detail.php?id=<?= $product['id'] ?>"
+                                        class="border border-stone-200 text-rose-500 px-3 py-1.5 rounded-xl text-xs font-semibold hover:bg-rose-50 transition-colors">
+                                        View
+                                    </a>
+                                    <?php if (!$isAdmin): ?>
+                                    <button
+                                        onclick="addToCart(<?= $product['id'] ?>, '<?= addslashes($product['name']) ?>')"
+                                        class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shadow-sm shadow-rose-200">
+                                        + Cart
+                                    </button>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -620,13 +617,76 @@ $customerReviews = $db->query("SELECT name, message, created_at FROM customer_re
         </div>
     </section>
 
+    <!-- ═════════════════════════ CUSTOMIZE CAKE ═════════════════════════ -->
+    <section class="py-20 bg-gradient-to-br from-pink-50 via-white to-rose-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="relative">
+                    <div class="rounded-3xl overflow-hidden shadow-xl">
+                        <img src="/sweetheaven/images/hero1.jpg" alt="Customize your cake"
+                            class="w-full h-96 object-cover">
+                    </div>
+                    <div class="absolute -bottom-5 -right-5 bg-white rounded-2xl shadow-lg px-6 py-4 hidden md:block">
+                        <p class="text-3xl font-bold text-rose-500">🎨</p>
+                        <p class="text-sm font-semibold text-gray-700">Your Design</p>
+                        <p class="text-xs text-gray-400">We'll Bake It</p>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <p class="text-md font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;">Make It
+                            Yours</p>
+                        <h2 class="serif text-4xl text-gray-800">Customize Your Cake</h2>
+                    </div>
+                    <p class="text-gray-500 leading-relaxed text-lg">
+                        Can't find what you're looking for? Tell us your dream cake and we'll bring it to life.
+                        Choose your size, flavor, color, and message — add a reference image and we'll handle the rest.
+                    </p>
+                    <div class="flex flex-wrap gap-6 text-sm">
+                        <div class="flex items-center gap-3">
+                            <span
+                                class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center text-rose-500 text-lg">🎂</span>
+                            <div>
+                                <p class="font-semibold text-gray-700">Any Size & Flavor</p>
+                                <p class="text-gray-400 text-xs">From 1lb to tiered cakes</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span
+                                class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center text-rose-500 text-lg">✏️</span>
+                            <div>
+                                <p class="font-semibold text-gray-700">Personalized Message</p>
+                                <p class="text-gray-400 text-xs">Write anything you want</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span
+                                class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center text-rose-500 text-lg">🖼️</span>
+                            <div>
+                                <p class="font-semibold text-gray-700">Reference Image</p>
+                                <p class="text-gray-400 text-xs">Show us your inspiration</p>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="/sweetheaven/user/customize.php"
+                        class="inline-flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-bold px-8 py-4 rounded-2xl transition-all duration-300 shadow-lg shadow-rose-200 hover:shadow-xl hover:-translate-y-0.5 text-base">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Order Customize Cake
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- ═════════════════════════ WHY CHOOSE US ═════════════════════════ -->
     <section class="py-20 bg-[#fdf8f3]">
         <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
             <!-- Image -->
             <div class="rounded-3xl overflow-hidden shadow-lg fade-up">
-                <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=700&q=80&auto=format&fit=crop"
-                    alt="Baker at work" class="w-full h-80 object-cover">
+                <img src="../images/onegirl.jpg" alt="Baker at work" class="w-full h-80 object-cover">
             </div>
             <!-- Text -->
             <div class="fade-up fade-up-d2">
@@ -855,28 +915,6 @@ $customerReviews = $db->query("SELECT name, message, created_at FROM customer_re
     <?php require_once __DIR__ . '/../includes/footer.php'; ?>
 
     <script>
-        let activeProductId = null;
-
-        function toggleProductName(productId) {
-            const prevEl = document.getElementById('productName_' + activeProductId);
-            if (prevEl) {
-                prevEl.style.maxHeight = '0';
-                prevEl.style.opacity = '0';
-            }
-
-            if (activeProductId === productId) {
-                activeProductId = null;
-                return;
-            }
-
-            activeProductId = productId;
-            const el = document.getElementById('productName_' + productId);
-            if (el) {
-                el.style.maxHeight = '48px';
-                el.style.opacity = '1';
-            }
-        }
-
         function addToCart(productId, productName) {
             fetch('/sweetheaven/api/cart.php', {
                 method: 'POST',
@@ -895,7 +933,7 @@ $customerReviews = $db->query("SELECT name, message, created_at FROM customer_re
                 });
         }
 
-        function toggleWishlist(productId) {
+        function toggleWishlist(productId, btn) {
             fetch('/sweetheaven/api/wishlist.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -904,6 +942,12 @@ $customerReviews = $db->query("SELECT name, message, created_at FROM customer_re
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {
+                        const svg = btn.querySelector('svg');
+                        btn.classList.toggle('bg-rose-500', data.is_wishlisted);
+                        btn.classList.toggle('bg-white/90', !data.is_wishlisted);
+                        btn.classList.toggle('text-white', data.is_wishlisted);
+                        btn.classList.toggle('text-gray-400', !data.is_wishlisted);
+                        svg.setAttribute('fill', data.is_wishlisted ? 'currentColor' : 'none');
                         showToast(data.is_wishlisted ? '❤️ ' + (data.message || 'Added to wishlist!') : '💔 Removed from wishlist');
                         if (typeof updateWishlistBadge === 'function') updateWishlistBadge(data.wishlist_count);
                     } else if (data.redirect) window.location.href = '/sweetheaven/auth/login.php';

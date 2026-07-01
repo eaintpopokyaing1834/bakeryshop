@@ -1,0 +1,360 @@
+<?php
+if (session_status() === PHP_SESSION_NONE)
+    session_start();
+require_once __DIR__ . '/../middleware/customer_check.php';
+require_once __DIR__ . '/../config/db.php';
+$db = getDB();
+
+$success = '';
+$error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $size = trim($_POST['size'] ?? '');
+    $flavor = trim($_POST['flavor'] ?? '');
+    $color = trim($_POST['color'] ?? '');
+    $cakeMessage = trim($_POST['cake_message'] ?? '');
+    $deliveryDate = trim($_POST['delivery_date'] ?? '');
+    $additionalNotes = trim($_POST['additional_notes'] ?? '');
+
+    if (!$size || !$flavor || !$deliveryDate) {
+        $error = 'Please fill in all required fields.';
+    } else {
+        $referenceImage = null;
+        if (!empty($_FILES['reference_image']['tmp_name'])) {
+            $file = $_FILES['reference_image'];
+            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+            if (!in_array($ext, $allowed)) {
+                $error = 'Only JPG, JPEG, PNG & WEBP files are allowed.';
+            } else {
+                $uploadDir = __DIR__ . '/../uploads/customize/';
+                if (!is_dir($uploadDir))
+                    mkdir($uploadDir, 0777, true);
+                $filename = 'customize_' . $_SESSION['user_id'] . '_' . time() . '.' . $ext;
+                move_uploaded_file($file['tmp_name'], $uploadDir . $filename);
+                $referenceImage = 'uploads/customize/' . $filename;
+            }
+        }
+
+        if (!$error) {
+            $db->prepare("INSERT INTO customize_requests (user_id, size, flavor, color, cake_message, reference_image, delivery_date, additional_notes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')")
+                ->execute([$_SESSION['user_id'], $size, $flavor, $color ?: null, $cakeMessage ?: null, $referenceImage, $deliveryDate, $additionalNotes ?: null]);
+
+            // Notify admin
+            $db->prepare("INSERT INTO notifications (type, title, message) VALUES ('customize_request', ?, ?)")
+                ->execute([
+                    'New Customize Cake Request',
+                    "Customer " . htmlspecialchars($_SESSION['name']) . " submitted a cake customization request."
+                ]);
+
+            $success = 'Your cake customization request has been submitted successfully! We will review it and get back to you soon.';
+        }
+    }
+}
+
+// Fetch user's existing customize requests
+$myRequests = $db->prepare("SELECT * FROM customize_requests WHERE user_id=? ORDER BY created_at DESC");
+$myRequests->execute([$_SESSION['user_id']]);
+$myRequests = $myRequests->fetchAll();
+
+$reqStatusColors = [
+    'pending' => 'bg-amber-100 text-amber-700',
+    'approved' => 'bg-green-100 text-green-700',
+    'rejected' => 'bg-red-100 text-red-700',
+    'ordered' => 'bg-blue-100 text-blue-700',
+];
+?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customize Your Cake — Sweet Heaven Bakery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght=300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <?php require_once __DIR__ . '/../includes/header.php'; ?>
+    <div class="max-w-7xl mx-auto px-6 py-10">
+        <div class="flex items-center gap-4 mb-8">
+            <div class="w-14 h-14 bg-rose-100 rounded-2xl flex items-center justify-center">
+                <svg class="w-7 h-7 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Customize Your Cake</h1>
+                <p class="text-gray-400 text-sm">Tell us your dream cake and we'll make it real!</p>
+            </div>
+        </div>
+
+        <?php if ($success): ?>
+            <div class="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">✅
+                <?= $success ?>
+            </div>
+        <?php endif; ?>
+        <?php if ($error): ?>
+            <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">⚠️ <?= $error ?>
+            </div>
+        <?php endif; ?>
+
+        <div class="grid lg:grid-cols-2 gap-8 items-start">
+            <div>
+                <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
+                        <div class="grid sm:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Cake Size *</label>
+                                <select name="size" required
+                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
+                                    <option value="">Select size</option>
+                                    <option value="1 lb (6 inch)">1 lb (6 inch)</option>
+                                    <option value="2 lb (8 inch)">2 lb (8 inch)</option>
+                                    <option value="3 lb (10 inch)">3 lb (10 inch)</option>
+                                    <option value="5 lb (12 inch)">5 lb (12 inch)</option>
+                                    <option value="Tier 2 (6+8 inch)">Tier 2 (6+8 inch)</option>
+                                    <option value="Tier 3 (6+8+10 inch)">Tier 3 (6+8+10 inch)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Cake Flavor *</label>
+                                <select name="flavor" required
+                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
+                                    <option value="">Select flavor</option>
+                                    <option value="Chocolate">Chocolate</option>
+                                    <option value="Vanilla">Vanilla</option>
+                                    <option value="Red Velvet">Red Velvet</option>
+                                    <option value="Lemon">Lemon</option>
+                                    <option value="Strawberry">Strawberry</option>
+                                    <option value="Coffee">Coffee</option>
+                                    <option value="Matcha">Matcha</option>
+                                    <option value="Pandan">Pandan</option>
+                                    <option value="Mango">Mango</option>
+                                    <option value="Black Forest">Black Forest</option>
+                                    <option value="Custom">Custom (specify in notes)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Cake Color / Theme</label>
+                            <input type="text" name="color" placeholder="e.g. Pink & White, Rainbow, Blue..."
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Message on the Cake</label>
+                            <textarea name="cake_message" rows="2" placeholder="e.g. Happy Birthday Mom!"
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Reference Cake Image
+                                (optional)</label>
+                            <div class="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center hover:border-rose-300 transition-colors cursor-pointer"
+                                id="uploadDropzone">
+                                <input type="file" name="reference_image" id="referenceImage"
+                                    accept="image/jpeg,image/png,image/webp" class="hidden">
+                                <div id="uploadPlaceholder">
+                                    <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <p class="text-sm text-gray-400">Click to upload a reference image</p>
+                                    <p class="text-xs text-gray-300 mt-1">JPG, JPEG, PNG, WEBP</p>
+                                </div>
+                                <div id="uploadPreview" class="hidden relative">
+                                    <img id="previewImage" class="max-h-48 mx-auto rounded-xl shadow-sm">
+                                    <button type="button" id="removeImage"
+                                        class="absolute -top-2 -right-2 w-7 h-7 bg-red-500 text-white rounded-full text-sm font-bold hover:bg-red-600 transition-colors shadow-md">✕</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Preferred Delivery/Pickup Date
+                                *</label>
+                            <input type="date" name="delivery_date" required
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Additional Notes <span
+                                    class="text-gray-400 font-normal">(optional)</span></label>
+                            <textarea name="additional_notes" rows="3"
+                                placeholder="Any special requests, dietary restrictions, or additional details..."
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"></textarea>
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 rounded-2xl transition-colors shadow-sm shadow-rose-100 text-base">
+                        Submit Customization Request
+                    </button>
+                </form>
+            </div>
+
+            <div>
+                <?php if (!empty($myRequests)): ?>
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800">My Requests</h2>
+                            <p class="text-sm text-gray-400">Track your cake customization requests</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <?php foreach ($myRequests as $req): ?>
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                                <div class="px-6 py-4 flex items-center justify-between border-b border-gray-50">
+                                    <div class="flex items-center gap-4">
+                                        <p class="font-bold text-gray-800">#<?= str_pad($req['id'], 4, '0', STR_PAD_LEFT) ?>
+                                        </p>
+                                        <span
+                                            class="text-xs font-bold px-2.5 py-1 rounded-full <?= $reqStatusColors[$req['status']] ?? 'bg-gray-100 text-gray-600' ?>">
+                                            <?= ucfirst($req['status']) ?>
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-gray-400"><?= date('M j, Y', strtotime($req['created_at'])) ?>
+                                    </p>
+                                </div>
+                                <div class="px-6 py-4">
+                                    <div class="grid sm:grid-cols-2 gap-4 text-sm">
+                                        <div class="space-y-1">
+                                            <p><span class="font-semibold text-gray-600">Size:</span>
+                                                <?= htmlspecialchars($req['size']) ?></p>
+                                            <p><span class="font-semibold text-gray-600">Flavor:</span>
+                                                <?= htmlspecialchars($req['flavor']) ?></p>
+                                            <?php if ($req['color']): ?>
+                                                <p><span class="font-semibold text-gray-600">Color:</span>
+                                                    <?= htmlspecialchars($req['color']) ?></p><?php endif; ?>
+                                            <?php if ($req['cake_message']): ?>
+                                                <p><span class="font-semibold text-gray-600">Message:</span>
+                                                    <?= htmlspecialchars($req['cake_message']) ?></p><?php endif; ?>
+                                            <p><span class="font-semibold text-gray-600">Delivery:</span>
+                                                <?= date('M j, Y', strtotime($req['delivery_date'])) ?></p>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <?php if ($req['reference_image']): ?>
+                                                <div>
+                                                    <span class="font-semibold text-gray-600">Reference:</span>
+                                                    <a href="/sweetheaven/<?= htmlspecialchars($req['reference_image']) ?>"
+                                                        target="_blank" class="block mt-1">
+                                                        <img src="/sweetheaven/<?= htmlspecialchars($req['reference_image']) ?>"
+                                                            class="w-20 h-20 object-cover rounded-lg border border-gray-200">
+                                                    </a>
+                                                </div>
+                                            <?php endif; ?>
+                                            <?php if ($req['status'] === 'approved' && $req['admin_price']): ?>
+                                                <p class="mt-2"><span class="font-semibold text-gray-600">Price:</span> <span
+                                                        class="text-rose-500 font-bold text-base"><?= number_format($req['admin_price']) ?>
+                                                        MMK</span></p>
+                                            <?php endif; ?>
+                                            <?php if ($req['admin_note']): ?>
+                                                <p><span class="font-semibold text-gray-600">Admin Note:</span>
+                                                    <?= htmlspecialchars($req['admin_note']) ?></p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    <?php if ($req['additional_notes']): ?>
+                                        <p class="text-xs text-gray-400 mt-2">📝
+                                            <?= htmlspecialchars($req['additional_notes']) ?>
+                                        </p>
+                                    <?php endif; ?>
+                                    <div class="mt-4 flex gap-3">
+                                        <?php if ($req['status'] === 'approved'): ?>
+                                            <a href="/sweetheaven/user/checkout.php?customize_id=<?= $req['id'] ?>"
+                                                class="inline-flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-semibold px-6 py-3 rounded-xl transition-colors text-sm">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                </svg>
+                                                Order Customized Cake
+                                            </a>
+                                        <?php elseif ($req['status'] === 'pending'): ?>
+                                            <span
+                                                class="inline-flex items-center gap-2 text-amber-600 bg-amber-50 px-4 py-2.5 rounded-xl text-sm font-medium">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                Awaiting Review
+                                            </span>
+                                        <?php elseif ($req['status'] === 'rejected'): ?>
+                                            <span
+                                                class="inline-flex items-center gap-2 text-red-600 bg-red-50 px-4 py-2.5 rounded-xl text-sm font-medium">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                                Not Accepted
+                                            </span>
+                                        <?php elseif ($req['status'] === 'ordered'): ?>
+                                            <span
+                                                class="inline-flex items-center gap-2 text-blue-600 bg-blue-50 px-4 py-2.5 rounded-xl text-sm font-medium">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                Ordered
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
+                        <p class="text-4xl mb-3">🎂</p>
+                        <h3 class="text-lg font-bold text-gray-700 mb-1">No requests yet</h3>
+                        <p class="text-sm text-gray-400">Submit a customization request and it will appear here.</p>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+
+    <script>
+        const fileInput = document.getElementById('referenceImage');
+        const dropzone = document.getElementById('uploadDropzone');
+        const placeholder = document.getElementById('uploadPlaceholder');
+        const preview = document.getElementById('uploadPreview');
+        const previewImg = document.getElementById('previewImage');
+
+        dropzone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (!file) { placeholder.classList.remove('hidden'); preview.classList.add('hidden'); return; }
+            const reader = new FileReader();
+            reader.onload = e => { previewImg.src = e.target.result; placeholder.classList.add('hidden'); preview.classList.remove('hidden'); };
+            reader.readAsDataURL(file);
+        });
+        document.getElementById('removeImage').addEventListener('click', (e) => {
+            e.stopPropagation();
+            fileInput.value = '';
+            placeholder.classList.remove('hidden');
+            preview.classList.add('hidden');
+        });
+    </script>
+</body>
+
+</html>

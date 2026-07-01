@@ -5,8 +5,22 @@ require_once __DIR__ . '/../middleware/customer_check.php';
 require_once __DIR__ . '/../config/db.php';
 $db = getDB();
 
+$customizeId = (int)($_GET['customize_id'] ?? 0);
+$customizeRequest = null;
+
+if ($customizeId) {
+    // Customize cake order flow
+    $stmt = $db->prepare("SELECT * FROM customize_requests WHERE id=? AND user_id=? AND status='approved'");
+    $stmt->execute([$customizeId, $_SESSION['user_id']]);
+    $customizeRequest = $stmt->fetch();
+    if (!$customizeRequest) {
+        header('Location: /sweetheaven/user/customize.php');
+        exit;
+    }
+}
+
 $cart = $_SESSION['cart'] ?? [];
-if (empty($cart)) {
+if (empty($cart) && !$customizeRequest) {
     header('Location: /sweetheaven/user/cart.php');
     exit;
 }
@@ -21,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $shippingMethod = $_POST['shipping_method'] ?? 'standard';
     $requestNote = trim($_POST['request_note'] ?? '');
     $paymentMethodId = (int) ($_POST['payment_method_id'] ?? 0);
+    $customizeId = (int)($_POST['customize_id'] ?? 0);
 
     if (!$name || !$phone || !$address || !$paymentMethodId) {
         $error = 'Please fill in all required fields.';
@@ -34,57 +49,115 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Only JPG, JPEG, PNG & WEBP files are allowed.';
         } else {
             $shippingFee = $shippingMethod === 'express' ? 5000 : 2000;
-            $subtotal = array_sum(array_map(fn($i) => $i['price'] * $i['qty'], $cart));
-            $totalAmount = $subtotal + $shippingFee;
 
-            $db->beginTransaction();
-            try {
-                $stmt = $db->prepare("INSERT INTO orders (user_id,phone,shipping_method,shipping_address,total_amount,status,request_note)
-                                      VALUES (?,?,?,?,?,?,?)");
-                $stmt->execute([$_SESSION['user_id'], $phone, $shippingMethod, $address, $totalAmount, 'pending', $requestNote]);
-                $orderId = $db->lastInsertId();
-
-                foreach ($cart as $item) {
-                    $db->prepare("INSERT INTO order_items (order_id,product_id,quantity,price) VALUES (?,?,?,?)")
-                        ->execute([$orderId, $item['product_id'], $item['qty'], $item['price']]);
-                    $db->prepare("UPDATE products SET stock = stock - ? WHERE id=?")->execute([$item['qty'], $item['product_id']]);
+            if ($customizeId) {
+                $crStmt = $db->prepare("SELECT * FROM customize_requests WHERE id=? AND user_id=? AND status='approved'");
+                $crStmt->execute([$customizeId, $_SESSION['user_id']]);
+                $cr = $crStmt->fetch();
+                if (!$cr) {
+                    $error = 'Invalid customize request.';
+                } else {
+                    $subtotal = (float)$cr['admin_price'];
+                    $totalAmount = $subtotal + $shippingFee;
                 }
+            } else {
+                $subtotal = 0;
+                foreach ($cart as $cid => $citem) {
+                    $pStmt = $db->prepare("SELECT p.price, d.type AS discount_type, d.value AS discount_value FROM products p LEFT JOIN discounts d ON p.discount_id = d.id WHERE p.id=?");
+                    $pStmt->execute([$cid]);
+                    $pData = $pStmt->fetch();
+                    $unitPrice = (float)$pData['price'];
+                    if ($pData['discount_value']) {
+                        if ($pData['discount_type'] === 'percentage') {
+                            $unitPrice = $unitPrice * (1 - $pData['discount_value'] / 100);
+                        } else {
+                            $unitPrice = max(0, $unitPrice - $pData['discount_value']);
+                        }
+                    }
+                    $subtotal += $unitPrice * $citem['qty'];
+                }
+                $orderCount = $db->prepare("SELECT COUNT(*) FROM orders WHERE user_id=?");
+                $orderCount->execute([$_SESSION['user_id']]);
+                $isFirstOrder = $orderCount->fetchColumn() == 0;
+                $firstOrderDiscount = $isFirstOrder ? $subtotal * 0.10 : 0;
+                $totalAmount = $subtotal - $firstOrderDiscount + $shippingFee;
+            }
 
-                // Save screenshot
-                $uploadDir = __DIR__ . '/../uploads/payments/';
-                if (!is_dir($uploadDir))
-                    mkdir($uploadDir, 0777, true);
-                $filename = 'payment_' . $orderId . '_' . time() . '.' . $ext;
-                move_uploaded_file($file['tmp_name'], $uploadDir . $filename);
-                $screenshotPath = 'uploads/payments/' . $filename;
+            if (!$error) {
+                $db->beginTransaction();
+                try {
+                    if ($customizeId) {
+                        $stmt = $db->prepare("INSERT INTO orders (user_id,phone,shipping_method,shipping_address,total_amount,status,request_note,customize_request_id)
+                                              VALUES (?,?,?,?,?,?,?,?)");
+                        $stmt->execute([$_SESSION['user_id'], $phone, $shippingMethod, $address, $totalAmount, 'pending', $requestNote, $customizeId]);
+                    } else {
+                        $stmt = $db->prepare("INSERT INTO orders (user_id,phone,shipping_method,shipping_address,total_amount,status,request_note)
+                                              VALUES (?,?,?,?,?,?,?)");
+                        $stmt->execute([$_SESSION['user_id'], $phone, $shippingMethod, $address, $totalAmount, 'pending', $requestNote]);
+                    }
+                    $orderId = $db->lastInsertId();
 
-                // Insert payment record with screenshot
-                $db->prepare("INSERT INTO payment (order_id,payment_method_id,screenshot,status) VALUES (?,?,?,'pending')")
-                    ->execute([$orderId, $paymentMethodId, $screenshotPath]);
+                    if ($customizeId) {
+                        $db->prepare("INSERT INTO order_items (order_id,product_id,quantity,price) VALUES (?,NULL,1,?)")
+                            ->execute([$orderId, $subtotal]);
+                        $db->prepare("UPDATE customize_requests SET status='ordered' WHERE id=?")
+                            ->execute([$customizeId]);
+                    } else {
+                        foreach ($cart as $cid => $citem) {
+                            $pStmt = $db->prepare("SELECT p.price, d.type AS discount_type, d.value AS discount_value FROM products p LEFT JOIN discounts d ON p.discount_id = d.id WHERE p.id=?");
+                            $pStmt->execute([$cid]);
+                            $pData = $pStmt->fetch();
+                            $unitPrice = (float)$pData['price'];
+                            if ($pData['discount_value']) {
+                                if ($pData['discount_type'] === 'percentage') {
+                                    $unitPrice = $unitPrice * (1 - $pData['discount_value'] / 100);
+                                } else {
+                                    $unitPrice = max(0, $unitPrice - $pData['discount_value']);
+                                }
+                            }
+                            $db->prepare("INSERT INTO order_items (order_id,product_id,quantity,price) VALUES (?,?,?,?)")
+                                ->execute([$orderId, $cid, $citem['qty'], $unitPrice]);
+                            $db->prepare("UPDATE products SET stock = stock - ? WHERE id=?")->execute([$citem['qty'], $cid]);
+                        }
+                    }
 
-                // Admin notification
-                $db->prepare("INSERT INTO notifications (type, title, message) VALUES ('new_order', ?, ?)")
-                    ->execute([
-                        'New Order Received',
-                        "Customer " . htmlspecialchars($name) . " placed order #$orderId for " . number_format($totalAmount) . " MMK"
-                    ]);
+                    // Save screenshot
+                    $uploadDir = __DIR__ . '/../uploads/payments/';
+                    if (!is_dir($uploadDir))
+                        mkdir($uploadDir, 0777, true);
+                    $filename = 'payment_' . $orderId . '_' . time() . '.' . $ext;
+                    move_uploaded_file($file['tmp_name'], $uploadDir . $filename);
+                    $screenshotPath = 'uploads/payments/' . $filename;
 
-                // Customer notification
-                $orderNo = '#' . str_pad($orderId, 4, '0', STR_PAD_LEFT);
-                $db->prepare("INSERT INTO notifications (user_id, order_id, type, message, is_seen) VALUES (?, ?, 'new_order', ?, 0)")
-                    ->execute([
-                        $_SESSION['user_id'],
-                        $orderId,
-                        "Your order $orderNo has been placed successfully! Total: " . number_format($totalAmount) . " MMK. We'll notify you when it's processed. 🎉"
-                    ]);
+                    // Insert payment record with screenshot
+                    $db->prepare("INSERT INTO payment (order_id,payment_method_id,screenshot,status) VALUES (?,?,?,'pending')")
+                        ->execute([$orderId, $paymentMethodId, $screenshotPath]);
 
-                $db->commit();
-                $_SESSION['cart'] = [];
-                header("Location: /sweetheaven/user/order_confirmation.php?order_id=$orderId");
-                exit;
-            } catch (Exception $e) {
-                $db->rollBack();
-                $error = 'Database Error: ' . $e->getMessage();
+                    // Admin notification
+                    $orderLabel = $customizeId ? 'Custom Cake Order' : 'New Order Received';
+                    $db->prepare("INSERT INTO notifications (type, title, message) VALUES ('new_order', ?, ?)")
+                        ->execute([
+                            $orderLabel,
+                            "Customer " . htmlspecialchars($name) . " placed order #$orderId for " . number_format($totalAmount) . " MMK"
+                        ]);
+
+                    // Customer notification
+                    $orderNo = '#' . str_pad($orderId, 4, '0', STR_PAD_LEFT);
+                    $db->prepare("INSERT INTO notifications (user_id, order_id, type, message, is_seen) VALUES (?, ?, 'new_order', ?, 0)")
+                        ->execute([
+                            $_SESSION['user_id'],
+                            $orderId,
+                            "Your order $orderNo has been placed successfully! Total: " . number_format($totalAmount) . " MMK. We'll notify you when it's processed. 🎉"
+                        ]);
+
+                    $db->commit();
+                    if (!$customizeId) $_SESSION['cart'] = [];
+                    header("Location: /sweetheaven/user/order_confirmation.php?order_id=$orderId");
+                    exit;
+                } catch (Exception $e) {
+                    $db->rollBack();
+                    $error = 'Database Error: ' . $e->getMessage();
+                }
             }
         }
     }
@@ -96,20 +169,56 @@ $user = $db->prepare("SELECT * FROM users WHERE id=?");
 $user->execute([$_SESSION['user_id']]);
 $user = $user->fetch();
 
-// Build cart items from DB
-$ids = implode(',', array_map('intval', array_keys($cart)));
-$items = $db->query("
-    SELECT p.id, p.name, p.price, (SELECT image_url FROM product_images WHERE product_id=p.id AND is_primary=1 LIMIT 1) AS primary_image
-    FROM products p WHERE p.id IN ($ids)
-")->fetchAll();
 $cartDetails = [];
 $subtotal = 0;
-foreach ($items as $item) {
-    $qty = $cart[$item['id']]['qty'];
-    $item['qty'] = $qty;
-    $item['item_total'] = $item['price'] * $qty;
-    $subtotal += $item['item_total'];
-    $cartDetails[] = $item;
+$firstOrderDiscount = 0;
+$totalSavings = 0;
+
+if ($customizeRequest) {
+    $cartDetails[] = [
+        'id' => 0,
+        'name' => 'Custom ' . $customizeRequest['size'] . ' ' . $customizeRequest['flavor'] . ' Cake',
+        'price' => (float)$customizeRequest['admin_price'],
+        'qty' => 1,
+        'item_total' => (float)$customizeRequest['admin_price'],
+        'primary_image' => $customizeRequest['reference_image'],
+    ];
+    $subtotal = (float)$customizeRequest['admin_price'];
+} else {
+    // Build cart items from DB
+    $ids = implode(',', array_map('intval', array_keys($cart)));
+    $items = $db->query("
+        SELECT p.id, p.name, p.price,
+               d.name AS discount_name, d.type AS discount_type, d.value AS discount_value,
+               (SELECT image_url FROM product_images WHERE product_id=p.id AND is_primary=1 LIMIT 1) AS primary_image
+        FROM products p
+        LEFT JOIN discounts d ON p.discount_id = d.id
+        WHERE p.id IN ($ids)
+    ")->fetchAll();
+    foreach ($items as $item) {
+        $qty = $cart[$item['id']]['qty'];
+        $item['qty'] = $qty;
+        $unitPrice = (float)$item['price'];
+        if ($item['discount_value']) {
+            $item['discount_name_display'] = $item['discount_name'];
+            if ($item['discount_type'] === 'percentage') {
+                $unitPrice = $unitPrice * (1 - $item['discount_value'] / 100);
+            } else {
+                $unitPrice = max(0, $unitPrice - $item['discount_value']);
+            }
+        }
+        $item['unit_price'] = $unitPrice;
+        $item['item_total'] = $unitPrice * $qty;
+        $subtotal += $item['item_total'];
+        $cartDetails[] = $item;
+    }
+
+    // First-order discount
+    $orderCount = $db->prepare("SELECT COUNT(*) FROM orders WHERE user_id=?");
+    $orderCount->execute([$_SESSION['user_id']]);
+    $isFirstOrder = $orderCount->fetchColumn() == 0;
+    $firstOrderDiscount = $isFirstOrder ? $subtotal * 0.10 : 0;
+    $totalSavings = $subtotal ? array_sum(array_map(fn($i) => ($i['price'] * $i['qty']) - $i['item_total'], $cartDetails)) : 0;
 }
 ?>
 <!DOCTYPE html>
@@ -142,6 +251,9 @@ foreach ($items as $item) {
         <?php endif; ?>
 
         <form method="POST" id="checkoutForm" enctype="multipart/form-data">
+            <?php if ($customizeRequest): ?>
+                <input type="hidden" name="customize_id" value="<?= $customizeRequest['id'] ?>">
+            <?php endif; ?>
             <div class="grid lg:grid-cols-3 gap-8">
 
                 <!-- Left: Checkout Form -->
@@ -316,9 +428,18 @@ foreach ($items as $item) {
                                         <p class="text-sm font-medium text-gray-700 line-clamp-1">
                                             <?= htmlspecialchars($item['name']) ?>
                                         </p>
-                                        <p class="text-xs text-gray-400">x<?= $item['qty'] ?></p>
+                                        <p class="text-xs text-gray-400">x<?= $item['qty'] ?>
+                                            <?php if (!empty($item['discount_name_display'])): ?>
+                                                <span class="text-green-600 font-semibold"> • <?= htmlspecialchars($item['discount_name_display']) ?></span>
+                                            <?php endif; ?>
+                                        </p>
                                     </div>
-                                    <p class="text-sm font-bold text-gray-700"><?= number_format($item['item_total']) ?></p>
+                                    <div class="text-right">
+                                        <p class="text-sm font-bold text-gray-700"><?= number_format($item['item_total']) ?></p>
+                                        <?php if (!empty($item['discount_name_display'])): ?>
+                                            <p class="text-[10px] line-through text-gray-400"><?= number_format($item['price'] * $item['qty']) ?></p>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -328,6 +449,18 @@ foreach ($items as $item) {
                                 <span>Subtotal</span>
                                 <span><?= number_format($subtotal) ?> MMK</span>
                             </div>
+                            <?php if ($totalSavings > 0): ?>
+                            <div class="flex justify-between text-green-600 font-medium">
+                                <span>🤑 Product Discounts</span>
+                                <span>-<?= number_format($totalSavings) ?> MMK</span>
+                            </div>
+                            <?php endif; ?>
+                            <?php if ($firstOrderDiscount > 0): ?>
+                            <div class="flex justify-between text-blue-600 font-medium">
+                                <span>🎉 First Order Discount (10%)</span>
+                                <span>-<?= number_format($firstOrderDiscount) ?> MMK</span>
+                            </div>
+                            <?php endif; ?>
                             <div class="flex justify-between text-gray-500">
                                 <span>Shipping</span>
                                 <span id="shippingDisplay">2,000 MMK</span>
@@ -335,7 +468,7 @@ foreach ($items as $item) {
                             <div
                                 class="flex justify-between font-bold text-gray-800 text-base border-t border-gray-100 pt-2">
                                 <span>Total</span>
-                                <span id="totalDisplay"><?= number_format($subtotal + 2000) ?> MMK</span>
+                                <span id="totalDisplay"><?= number_format($subtotal - $firstOrderDiscount + 2000) ?> MMK</span>
                             </div>
                         </div>
 
@@ -353,6 +486,7 @@ foreach ($items as $item) {
 
     <script>
         const subtotal = <?= $subtotal ?>;
+        const firstOrderDiscount = <?= $firstOrderDiscount ?>;
         const shippingFees = { standard: 2000, express: 5000 };
         const paymentMethods = <?= json_encode($paymentMethods) ?>;
 
@@ -360,7 +494,7 @@ foreach ($items as $item) {
         document.querySelectorAll('input[name="shipping_method"]').forEach(radio => {
             radio.addEventListener('change', () => {
                 const fee = shippingFees[radio.value] || 2000;
-                const total = subtotal + fee;
+                const total = subtotal - firstOrderDiscount + fee;
                 document.getElementById('shippingDisplay').textContent = fee.toLocaleString('en') + ' MMK';
                 document.getElementById('totalDisplay').textContent = total.toLocaleString('en') + ' MMK';
             });

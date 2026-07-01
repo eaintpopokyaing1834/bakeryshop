@@ -18,17 +18,17 @@ $action = $_GET['action'] ?? $_POST['action'] ?? 'count';
 
 switch ($action) {
     case 'count':
-        $stmt = $db->query("SELECT COUNT(*) FROM notifications WHERE type = 'new_order' AND is_seen = 0");
+        $stmt = $db->query("SELECT COUNT(*) FROM notifications WHERE (type = 'new_order' OR type = 'customize_request') AND is_seen = 0");
         echo json_encode(['count' => (int)$stmt->fetchColumn()]);
         break;
 
     case 'list':
-        $stmt = $db->query("SELECT * FROM notifications WHERE type = 'new_order' ORDER BY created_at DESC LIMIT 20");
+        $stmt = $db->query("SELECT * FROM notifications WHERE (type = 'new_order' OR type = 'customize_request') ORDER BY created_at DESC LIMIT 20");
         echo json_encode($stmt->fetchAll());
         break;
 
     case 'mark_seen':
-        $db->exec("UPDATE notifications SET is_seen = 1 WHERE type = 'new_order' AND is_seen = 0");
+        $db->exec("UPDATE notifications SET is_seen = 1 WHERE (type = 'new_order' OR type = 'customize_request') AND is_seen = 0");
         echo json_encode(['success' => true]);
         break;
 

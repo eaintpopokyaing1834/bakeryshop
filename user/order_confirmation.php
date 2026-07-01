@@ -22,7 +22,7 @@ if (!$order) {
 }
 
 $orderItems = $db->prepare("
-    SELECT oi.*, p.name AS product_name FROM order_items oi JOIN products p ON oi.product_id=p.id WHERE oi.order_id=?
+    SELECT oi.*, COALESCE(p.name, 'Custom Cake') AS product_name FROM order_items oi LEFT JOIN products p ON oi.product_id=p.id WHERE oi.order_id=?
 ");
 $orderItems->execute([$orderId]);
 $orderItems = $orderItems->fetchAll();

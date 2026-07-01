@@ -40,7 +40,7 @@ if (!empty($cart)) {
 <div class="max-w-6xl mx-auto px-6 py-10">
     <div class="flex items-center gap-3 mb-8">
         <h1 class="text-3xl font-bold text-gray-800">My Cart</h1>
-        <span class="bg-rose-50 text-rose-600 text-sm font-semibold px-3 py-1 rounded-full"><?= count($cartProducts) ?> item<?= count($cartProducts) !== 1 ? 's' : '' ?></span>
+        <span id="cartCountText" class="bg-rose-50 text-rose-600 text-sm font-semibold px-3 py-1 rounded-full"><?= count($cartProducts) ?> item<?= count($cartProducts) !== 1 ? 's' : '' ?></span>
     </div>
 
     <?php if (empty($cartProducts)): ?>
@@ -144,6 +144,7 @@ function updateQty(productId, newQty) {
         if (!data.success) return;
         if (newQty <= 0) {
             document.getElementById(`cart-item-${productId}`)?.remove();
+            updateCartCountText();
         } else {
             const qtyEl = document.getElementById(`qty-${productId}`);
             const subEl = document.getElementById(`subtotal-${productId}`);
@@ -165,11 +166,19 @@ function removeItem(productId) {
     }).then(r=>r.json()).then(data=>{
         if (data.success) {
             document.getElementById(`cart-item-${productId}`)?.remove();
+            updateCartCountText();
             const badge = document.getElementById('cartBadge');
             if (badge) { badge.textContent = data.cart_count; if(data.cart_count===0)badge.classList.add('hidden'); }
             if (data.cart_count === 0) location.reload();
         }
     });
+}
+
+function updateCartCountText() {
+    const el = document.getElementById('cartCountText');
+    if (!el) return;
+    const count = document.querySelectorAll('#cartItemsContainer > div').length;
+    el.textContent = count + ' item' + (count !== 1 ? 's' : '');
 }
 </script>
 </body>

@@ -46,6 +46,29 @@ CREATE TABLE IF NOT EXISTS products (
 );
 
 -- -----------------------------------------------
+-- Table: discounts
+-- -----------------------------------------------
+CREATE TABLE IF NOT EXISTS discounts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    type ENUM('percentage','fixed') NOT NULL DEFAULT 'percentage',
+    value DECIMAL(10,2) NOT NULL,
+    status TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Add discount_id to products
+ALTER TABLE products ADD COLUMN discount_id INT DEFAULT NULL AFTER price,
+    ADD FOREIGN KEY (discount_id) REFERENCES discounts(id) ON DELETE SET NULL;
+
+-- Seed discount data
+INSERT IGNORE INTO discounts (id, name, type, value, status) VALUES
+(1, '10% OFF', 'percentage', 10, 1),
+(2, '15% OFF', 'percentage', 15, 1),
+(3, '20% OFF', 'percentage', 20, 1),
+(4, '5,000 MMK OFF', 'fixed', 5000, 1);
+
+-- -----------------------------------------------
 -- Table: product_images
 -- -----------------------------------------------
 CREATE TABLE IF NOT EXISTS product_images (
@@ -138,6 +161,31 @@ CREATE TABLE IF NOT EXISTS payment (
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
     FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id)
 );
+
+-- -----------------------------------------------
+-- Table: customize_requests
+-- -----------------------------------------------
+CREATE TABLE IF NOT EXISTS customize_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    size VARCHAR(50) NOT NULL,
+    flavor VARCHAR(100) NOT NULL,
+    color VARCHAR(100) DEFAULT NULL,
+    cake_message TEXT DEFAULT NULL,
+    reference_image VARCHAR(255) DEFAULT NULL,
+    delivery_date DATE NOT NULL,
+    additional_notes TEXT DEFAULT NULL,
+    status ENUM('pending', 'approved', 'rejected', 'ordered') DEFAULT 'pending',
+    admin_price DECIMAL(10,2) DEFAULT NULL,
+    admin_note TEXT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Add customize_request_id to orders (if not exists)
+-- This migration is done separately to avoid breaking existing setups
+-- ALTER TABLE orders ADD COLUMN customize_request_id INT DEFAULT NULL AFTER pickup_date;
 
 -- =============================================
 -- SEED DATA

@@ -67,6 +67,8 @@ if ($isLoggedIn && !$isAdmin) {
                         class="nav-link hover:text-rose-500 transition-colors">Home</a></li>
                 <li><a href="/sweetheaven/user/products.php"
                         class="nav-link hover:text-rose-500 transition-colors">Products</a></li>
+                <li><a href="/sweetheaven/user/customize.php"
+                        class="nav-link hover:text-rose-500 transition-colors">Customize Cake</a></li>
 
                 <?php if ($isAdmin): ?>
                     <li><a href="/sweetheaven/admin/dashboard.php"
@@ -110,6 +112,21 @@ if ($isLoggedIn && !$isAdmin) {
                         </div><!-- /notifWrapper -->
 
                         <!-- Wishlist -->
+                        <!-- <a href="/sweetheaven/user/wishlist.php"
+                            class="relative p-2 text-stone-400 hover:text-rose-500 transition-colors" title="Wishlist">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                            <?php if ($wishlistCount > 0): ?>
+                                <span id="wishlistBadge"
+                                    class="absolute -top-2 -right-2 bg-rose-500 text-white text-xs rounded-full min-w-[1.25rem] h-5 px-1 flex items-center justify-center font-bold leading-none"><?= $wishlistCount ?></span>
+                            <?php else: ?>
+                                <span id="wishlistBadge"
+                                    class="absolute -top-2 -right-2 bg-rose-500 text-white text-xs rounded-full min-w-[1.25rem] h-5 px-1 <?= $wishlistCount > 0 ? 'flex' : 'hidden' ?> items-center justify-center font-bold leading-none"><?= $wishlistCount ?></span>
+                            <?php endif; ?>
+                        </a> -->
+                        <!-- Wishlist -->
                         <a href="/sweetheaven/user/wishlist.php"
                             class="relative p-2 text-stone-400 hover:text-rose-500 transition-colors" title="Wishlist">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,10 +135,14 @@ if ($isLoggedIn && !$isAdmin) {
                             </svg>
                             <?php if ($wishlistCount > 0): ?>
                                 <span id="wishlistBadge"
-                                    class="absolute -top-2 -right-2 bg-rose-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold"><?= $wishlistCount ?></span>
+                                    class="absolute -top-1 -right-1 bg-rose-500 text-white text-[11px] font-bold rounded-full w-5 h-5 grid place-items-center text-center leading-none">
+                                    <?= $wishlistCount ?>
+                                </span>
                             <?php else: ?>
                                 <span id="wishlistBadge"
-                                    class="absolute -top-2 -right-2 bg-rose-500 text-white text-xs rounded-full w-4 h-4 <?= $wishlistCount > 0 ? 'flex' : 'hidden' ?> items-center justify-center font-bold"><?= $wishlistCount ?></span>
+                                    class="absolute -top-1 -right-1 bg-rose-500 text-white text-[11px] font-bold rounded-full w-5 h-5 hidden grid place-items-center text-center leading-none">
+                                    <?= $wishlistCount ?>
+                                </span>
                             <?php endif; ?>
                         </a>
 
@@ -134,10 +155,10 @@ if ($isLoggedIn && !$isAdmin) {
                             </svg>
                             <?php if ($cartCount > 0): ?>
                                 <span id="cartBadge"
-                                    class="absolute -top-2 -right-2 bg-rose-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold"><?= $cartCount ?></span>
+                                    class="absolute -top-1 -right-1 bg-rose-500 text-white text-[11px] font-bold rounded-full w-5 h-5 grid place-items-center text-center leading-none"><?= $cartCount ?></span>
                             <?php else: ?>
                                 <span id="cartBadge"
-                                    class="absolute -top-2 -right-2 bg-rose-500 text-white text-xs rounded-full w-4 h-4 <?= $cartCount > 0 ? 'flex' : 'hidden' ?> items-center justify-center font-bold"><?= $cartCount ?></span>
+                                    class="absolute -top-1 -right-1 bg-rose-500 text-white text-[11px] font-bold rounded-full w-5 h-5 hidden grid place-items-center text-center leading-none"><?= $cartCount ?></span>
                             <?php endif; ?>
                         </a>
                     <?php endif; ?>
@@ -165,22 +186,24 @@ if ($isLoggedIn && !$isAdmin) {
                                 </svg>
                                 My Profile
                             </a>
-                            <a href="/sweetheaven/user/wishlist.php"
-                                class="flex items-center gap-2 px-4 py-3 text-sm text-stone-600 hover:bg-stone-50 hover:text-rose-500 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                </svg>
-                                Wishlist
-                            </a>
-                            <a href="/sweetheaven/user/profile.php?tab=orders"
-                                class="flex items-center gap-2 px-4 py-3 text-sm text-stone-600 hover:bg-stone-50 hover:text-rose-500 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                                </svg>
-                                My Orders
-                            </a>
+                            <?php if (!$isAdmin): ?>
+                                <a href="/sweetheaven/user/wishlist.php"
+                                    class="flex items-center gap-2 px-4 py-3 text-sm text-stone-600 hover:bg-stone-50 hover:text-rose-500 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                    Wishlist
+                                </a>
+                                <a href="/sweetheaven/user/profile.php?tab=orders"
+                                    class="flex items-center gap-2 px-4 py-3 text-sm text-stone-600 hover:bg-stone-50 hover:text-rose-500 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                    </svg>
+                                    My Orders
+                                </a>
+                            <?php endif; ?>
 
                             <?php if ($isAdmin): ?>
                                 <a href="/sweetheaven/admin/dashboard.php"
@@ -231,6 +254,9 @@ if ($isLoggedIn && !$isAdmin) {
                 </li>
                 <li><a href="/sweetheaven/user/products.php"
                         class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm">Products</a>
+                </li>
+                <li><a href="/sweetheaven/user/customize.php"
+                        class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm">Customize Cake</a>
                 </li>
                 <?php if (!$isAdmin): ?>
                     <li><a href="/sweetheaven/user/cart.php"
@@ -299,16 +325,16 @@ if ($isLoggedIn && !$isAdmin) {
                     </div>`;
                     return;
                 }
-                const statusIcons = {
-                    'order_status': '📦',
-                    'new_order': '🛒',
-                };
-                list.innerHTML = data.map(n => {
-                    const icon = statusIcons[n.type] || '🔔';
-                    const time = timeAgo(n.created_at);
-                    const unread = n.is_seen == 0 ? 'bg-rose-50 border-l-4 border-rose-400' : '';
-                    const orderId = n.order_id ? n.order_id : null;
-                    const link = orderId ? `/sweetheaven/user/profile.php?tab=orders` : '#';
+            const statusIcons = {
+                'order_status': '📦',
+                'new_order': '🛒',
+            };
+            list.innerHTML = data.map(n => {
+                const icon = statusIcons[n.type] || '🔔';
+                const time = timeAgo(n.created_at);
+                const unread = n.is_seen == 0 ? 'bg-rose-50 border-l-4 border-rose-400' : '';
+                let link = '#';
+                if (n.order_id) link = `/sweetheaven/user/profile.php?tab=orders`;
                     return `<a href="${link}" onclick="markAllSeen()" class="flex items-start gap-3 px-4 py-3 hover:bg-stone-50 transition-colors ${unread} cursor-pointer">
                         <span class="text-xl mt-0.5">${icon}</span>
                         <div class="flex-1 min-w-0">

@@ -34,7 +34,7 @@ $wishlist = $wishlist->fetchAll();
 <div class="max-w-6xl mx-auto px-6 py-10">
     <div class="flex items-center gap-3 mb-8">
         <h1 class="text-3xl font-bold text-gray-800">My Wishlist</h1>
-        <span class="bg-rose-50 text-rose-600 text-sm font-semibold px-3 py-1 rounded-full"><?= count($wishlist) ?> item<?= count($wishlist) !== 1 ? 's' : '' ?></span>
+        <span id="wishlistCountText" class="bg-rose-50 text-rose-600 text-sm font-semibold px-3 py-1 rounded-full"><?= count($wishlist) ?> item<?= count($wishlist) !== 1 ? 's' : '' ?></span>
     </div>
 
     <?php if (empty($wishlist)): ?>
@@ -113,6 +113,21 @@ function removeFromWishlist(productId, btn) {
             document.getElementById(`wishlist-item-${productId}`)?.remove();
             showToast('Removed from wishlist');
             if (typeof updateWishlistBadge === 'function') updateWishlistBadge(data.wishlist_count);
+            const countText = document.getElementById('wishlistCountText');
+            if (countText) countText.textContent = data.wishlist_count + ' item' + (data.wishlist_count !== 1 ? 's' : '');
+            if (data.wishlist_count === 0) {
+                const grid = document.querySelector('.grid');
+                if (grid) grid.remove();
+                const container = document.querySelector('.max-w-6xl');
+                const heading = container?.querySelector('.flex');
+                const emptyHtml = '<div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-20 text-center">' +
+                    '<p class="text-6xl mb-6">❤️</p>' +
+                    '<h2 class="text-2xl font-bold text-gray-700 mb-3">Your wishlist is empty</h2>' +
+                    '<p class="text-gray-400 mb-8">Save items you love by clicking the heart icon on any product.</p>' +
+                    '<a href="/sweetheaven/user/products.php" class="bg-rose-500 hover:bg-rose-600 text-white px-8 py-4 rounded-2xl font-semibold transition-colors shadow-sm shadow-rose-100">Explore Products</a>' +
+                    '</div>';
+                container?.insertAdjacentHTML('beforeend', emptyHtml);
+            }
         }
     });
 }

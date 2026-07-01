@@ -1,0 +1,287 @@
+<?php
+require_once __DIR__ . '/../middleware/admin_check.php';
+require_once __DIR__ . '/../config/db.php';
+
+$db = getDB();
+
+// Handle approve/reject with price and note
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    $requestId = (int)$_POST['request_id'];
+    $action = $_POST['action'];
+    $adminPrice = !empty($_POST['admin_price']) ? (float)$_POST['admin_price'] : null;
+    $adminNote = trim($_POST['admin_note'] ?? '');
+
+    if ($action === 'approve') {
+        if (!$adminPrice) {
+            echo json_encode(['success' => false, 'error' => 'Please set a price for the cake.']);
+            exit;
+        }
+        $db->prepare("UPDATE customize_requests SET status='approved', admin_price=?, admin_note=? WHERE id=?")
+            ->execute([$adminPrice, $adminNote ?: null, $requestId]);
+
+        // Notify customer
+        $req = $db->prepare("SELECT user_id FROM customize_requests WHERE id=?");
+        $req->execute([$requestId]);
+        $reqData = $req->fetch();
+        if ($reqData) {
+            $db->prepare("INSERT INTO notifications (user_id, type, message, is_seen) VALUES (?, 'customize_approved', ?, 0)")
+                ->execute([
+                    $reqData['user_id'],
+                    "Your cake customization request #" . str_pad($requestId, 4, '0', STR_PAD_LEFT) . " has been approved! Price: " . number_format($adminPrice) . " MMK. You can now proceed to order."
+                ]);
+        }
+    } elseif ($action === 'reject') {
+        $db->prepare("UPDATE customize_requests SET status='rejected', admin_note=? WHERE id=?")
+            ->execute([$adminNote ?: null, $requestId]);
+
+        $req = $db->prepare("SELECT user_id FROM customize_requests WHERE id=?");
+        $req->execute([$requestId]);
+        $reqData = $req->fetch();
+        if ($reqData) {
+            $db->prepare("INSERT INTO notifications (user_id, type, message, is_seen) VALUES (?, 'customize_rejected', ?, 0)")
+                ->execute([
+                    $reqData['user_id'],
+                    "Your cake customization request #" . str_pad($requestId, 4, '0', STR_PAD_LEFT) . " has been rejected. " . ($adminNote ? "Reason: " . $adminNote : "Unfortunately, we cannot accommodate this design at this time.")
+                ]);
+        }
+    }
+
+    echo json_encode(['success' => true]);
+    exit;
+}
+
+// Filters
+$statusFilter = $_GET['status'] ?? 'all';
+$search = trim($_GET['search'] ?? '');
+$where = [];
+$params = [];
+if ($statusFilter !== 'all') { $where[] = "cr.status = ?"; $params[] = $statusFilter; }
+if ($search !== '') { $where[] = "(u.name LIKE ? OR cr.id LIKE ?)"; $params[] = "%$search%"; $params[] = "%$search%"; }
+$whereSQL = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+$requests = $db->prepare("
+    SELECT cr.*, u.name AS customer_name, u.email AS customer_email
+    FROM customize_requests cr
+    JOIN users u ON cr.user_id = u.id
+    $whereSQL
+    ORDER BY cr.created_at DESC
+");
+$requests->execute($params);
+$requests = $requests->fetchAll();
+
+$pageTitle = 'Customize Cake Requests';
+require_once __DIR__ . '/../includes/admin_header.php';
+
+$statusColors = [
+    'pending' => 'bg-amber-100 text-amber-700 border-amber-200',
+    'approved' => 'bg-green-100 text-green-700 border-green-200',
+    'rejected' => 'bg-red-100 text-red-700 border-red-200',
+    'ordered' => 'bg-blue-100 text-blue-700 border-blue-200',
+];
+?>
+
+<style>
+    [x-cloak] { display: none !important; }
+</style>
+
+<!-- Filters Bar -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
+    <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div class="flex flex-wrap gap-2">
+            <?php foreach (['all', 'pending', 'approved', 'rejected', 'ordered'] as $s): ?>
+                <a href="?status=<?= $s ?>&search=<?= urlencode($search) ?>"
+                    class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors
+                    <?= $statusFilter === $s ? 'bg-rose-500 text-white shadow-md shadow-rose-100' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>">
+                    <?= ucfirst($s) ?>
+                </a>
+            <?php endforeach; ?>
+        </div>
+        <form method="GET" class="flex gap-2">
+            <input type="hidden" name="status" value="<?= htmlspecialchars($statusFilter) ?>">
+            <input type="search" name="search" placeholder="Search..."
+                value="<?= htmlspecialchars($search) ?>"
+                class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 w-60">
+            <button class="bg-rose-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-rose-600">Search</button>
+        </form>
+    </div>
+</div>
+
+<!-- Requests Table -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h3 class="font-bold text-gray-800">Customize Requests <span class="text-gray-400 font-normal text-sm ml-2">(<?= count($requests) ?> total)</span></h3>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
+                <tr>
+                    <th class="px-6 py-4 text-left">ID</th>
+                    <th class="px-6 py-4 text-left">Customer</th>
+                    <th class="px-6 py-4 text-left">Details</th>
+                    <th class="px-6 py-4 text-left">Delivery Date</th>
+                    <th class="px-6 py-4 text-left">Status</th>
+                    <th class="px-6 py-4 text-left">Date</th>
+                    <th class="px-6 py-4 text-left">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                <?php if (empty($requests)): ?>
+                    <tr><td colspan="7" class="px-6 py-16 text-center text-gray-400">
+                        <p class="text-4xl mb-3">🎂</p>
+                        No customize requests found
+                    </td></tr>
+                <?php else: ?>
+                    <?php foreach ($requests as $req): ?>
+                        <tr class="hover:bg-gray-50/50 transition-colors" id="request-row-<?= $req['id'] ?>">
+                            <td class="px-6 py-4 font-mono text-rose-500 font-bold text-sm">#<?= str_pad($req['id'], 4, '0', STR_PAD_LEFT) ?></td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 font-bold text-sm">
+                                        <?= strtoupper(substr($req['customer_name'], 0, 1)) ?>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-700"><?= htmlspecialchars($req['customer_name']) ?></p>
+                                        <p class="text-xs text-gray-400"><?= htmlspecialchars($req['customer_email']) ?></p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-600">
+                                <p><span class="font-semibold">Size:</span> <?= htmlspecialchars($req['size']) ?></p>
+                                <p><span class="font-semibold">Flavor:</span> <?= htmlspecialchars($req['flavor']) ?></p>
+                                <?php if ($req['color']): ?><p><span class="font-semibold">Color:</span> <?= htmlspecialchars($req['color']) ?></p><?php endif; ?>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-600"><?= date('M j, Y', strtotime($req['delivery_date'])) ?></td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold <?= $statusColors[$req['status']] ?? 'bg-gray-100 text-gray-600' ?>">
+                                    <?= ucfirst($req['status']) ?>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-400"><?= date('M j, Y', strtotime($req['created_at'])) ?></td>
+                            <td class="px-6 py-4">
+                                <button onclick="toggleRequestDetails(<?= $req['id'] ?>)"
+                                    class="text-sm text-rose-500 hover:text-rose-600 font-medium flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    Details
+                                </button>
+                            </td>
+                        </tr>
+                        <tr id="details-<?= $req['id'] ?>" class="hidden bg-rose-50/30">
+                            <td colspan="7" class="px-8 py-4">
+                                <div class="grid sm:grid-cols-2 gap-6">
+                                    <div>
+                                        <h4 class="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wider">Request Details</h4>
+                                        <div class="space-y-2 text-sm">
+                                            <p><span class="font-semibold text-gray-600">Size:</span> <?= htmlspecialchars($req['size']) ?></p>
+                                            <p><span class="font-semibold text-gray-600">Flavor:</span> <?= htmlspecialchars($req['flavor']) ?></p>
+                                            <?php if ($req['color']): ?><p><span class="font-semibold text-gray-600">Color/Theme:</span> <?= htmlspecialchars($req['color']) ?></p><?php endif; ?>
+                                            <?php if ($req['cake_message']): ?><p><span class="font-semibold text-gray-600">Message:</span> <?= htmlspecialchars($req['cake_message']) ?></p><?php endif; ?>
+                                            <p><span class="font-semibold text-gray-600">Delivery Date:</span> <?= date('M j, Y', strtotime($req['delivery_date'])) ?></p>
+                                            <?php if ($req['additional_notes']): ?><p><span class="font-semibold text-gray-600">Notes:</span> <?= htmlspecialchars($req['additional_notes']) ?></p><?php endif; ?>
+                                            <?php if ($req['admin_price']): ?><p><span class="font-semibold text-gray-600">Price:</span> <?= number_format($req['admin_price']) ?> MMK</p><?php endif; ?>
+                                            <?php if ($req['admin_note']): ?><p><span class="font-semibold text-gray-600">Admin Note:</span> <?= htmlspecialchars($req['admin_note']) ?></p><?php endif; ?>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <?php if ($req['reference_image']): ?>
+                                            <h4 class="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wider">Reference Image</h4>
+                                            <a href="/sweetheaven/<?= htmlspecialchars($req['reference_image']) ?>" target="_blank">
+                                                <img src="/sweetheaven/<?= htmlspecialchars($req['reference_image']) ?>"
+                                                    class="w-48 h-48 object-cover rounded-xl border border-stone-200">
+                                            </a>
+                                        <?php endif; ?>
+
+                                        <?php if ($req['status'] === 'pending'): ?>
+                                            <div class="mt-4 p-4 bg-white rounded-xl border border-stone-200">
+                                                <h4 class="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wider">Review Request</h4>
+                                                <div class="space-y-3">
+                                                    <div>
+                                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Set Price (MMK) *</label>
+                                                        <input type="number" id="price-<?= $req['id'] ?>" placeholder="e.g. 45000"
+                                                            class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Admin Note <span class="text-gray-400">(optional)</span></label>
+                                                        <textarea id="note-<?= $req['id'] ?>" rows="2" placeholder="Note to customer..."
+                                                            class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"></textarea>
+                                                    </div>
+                                                    <div class="flex gap-2">
+                                                        <button onclick="handleAction(<?= $req['id'] ?>, 'approve')"
+                                                            class="flex-1 text-xs font-semibold px-3 py-2 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors">
+                                                            Approve
+                                                        </button>
+                                                        <button onclick="handleAction(<?= $req['id'] ?>, 'reject')"
+                                                            class="flex-1 text-xs font-semibold px-3 py-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors">
+                                                            Reject
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php elseif ($req['status'] === 'approved'): ?>
+                                            <div class="mt-4 p-4 bg-green-50 rounded-xl border border-green-200">
+                                                <p class="text-sm font-semibold text-green-700">✅ Approved</p>
+                                                <?php if ($req['admin_price']): ?>
+                                                    <p class="text-sm text-green-600 mt-1">Price: <?= number_format($req['admin_price']) ?> MMK</p>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php elseif ($req['status'] === 'rejected'): ?>
+                                            <div class="mt-4 p-4 bg-red-50 rounded-xl border border-red-200">
+                                                <p class="text-sm font-semibold text-red-700">❌ Rejected</p>
+                                            </div>
+                                        <?php elseif ($req['status'] === 'ordered'): ?>
+                                            <div class="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                                                <p class="text-sm font-semibold text-blue-700">📦 Ordered</p>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function toggleRequestDetails(id) {
+    const row = document.getElementById(`details-${id}`);
+    row.classList.toggle('hidden');
+}
+
+function handleAction(requestId, action) {
+    const price = document.getElementById(`price-${requestId}`)?.value;
+    const note = document.getElementById(`note-${requestId}`)?.value;
+
+    if (action === 'approve' && !price) {
+        showToast('Please set a price before approving.');
+        return;
+    }
+
+    fetch('/sweetheaven/admin/customize.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `action=${action}&request_id=${requestId}&admin_price=${price || ''}&admin_note=${encodeURIComponent(note || '')}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Request ' + action + 'd!');
+            location.reload();
+        } else {
+            showToast(data.error || 'Something went wrong.');
+        }
+    });
+}
+
+function showToast(msg) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.className = 'fixed bottom-6 right-6 bg-stone-800 text-white px-5 py-3 rounded-xl shadow-md text-sm font-medium z-50 transition-all duration-300';
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+</script>
+
+<?php require_once __DIR__ . '/../includes/admin_footer.php'; ?>

@@ -67,13 +67,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_product'])) {
     $stock = (int) $_POST['stock'];
     $description = trim($_POST['description']);
 
+    $discount_id = !empty($_POST['discount_id']) ? (int)$_POST['discount_id'] : null;
+
     if ($id > 0) {
-        $db->prepare("UPDATE products SET name=?,category_id=?,price=?,stock=?,description=?,updated_at=NOW() WHERE id=?")
-            ->execute([$name, $category_id, $price, $stock, $description, $id]);
+        $db->prepare("UPDATE products SET name=?,category_id=?,price=?,discount_id=?,stock=?,description=?,updated_at=NOW() WHERE id=?")
+            ->execute([$name, $category_id, $price, $discount_id, $stock, $description, $id]);
         $productId = $id;
     } else {
-        $db->prepare("INSERT INTO products (name,category_id,price,stock,description) VALUES (?,?,?,?,?)")
-            ->execute([$name, $category_id, $price, $stock, $description]);
+        $db->prepare("INSERT INTO products (name,category_id,price,discount_id,stock,description) VALUES (?,?,?,?,?,?)")
+            ->execute([$name, $category_id, $price, $discount_id, $stock, $description]);
         $productId = $db->lastInsertId();
     }
 
@@ -133,13 +135,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_category'])) {
 
 // ── Fetch Data ────────────────────────────────────────
 $products = $db->query("
-    SELECT p.*, c.name AS category_name,
+    SELECT p.*, c.name AS category_name, d.name AS discount_name, d.type AS discount_type, d.value AS discount_value,
            (SELECT image_url FROM product_images WHERE product_id=p.id AND is_primary=1 LIMIT 1) AS primary_image
-    FROM products p JOIN categories c ON p.category_id = c.id
+    FROM products p
+    JOIN categories c ON p.category_id = c.id
+    LEFT JOIN discounts d ON p.discount_id = d.id
     ORDER BY p.created_at DESC
 ")->fetchAll();
 
 $categories = $db->query("SELECT * FROM categories ORDER BY name")->fetchAll();
+$discounts = $db->query("SELECT * FROM discounts WHERE status=1 ORDER BY name")->fetchAll();
 
 $pageTitle = 'Product Management';
 require_once __DIR__ . '/../includes/admin_header.php';
@@ -187,6 +192,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                         <th class="px-6 py-4 text-left">Product</th>
                         <th class="px-6 py-4 text-left">Category</th>
                         <th class="px-6 py-4 text-left">Price</th>
+                        <th class="px-6 py-4 text-left">Discount</th>
                         <th class="px-6 py-4 text-left">Stock</th>
                         <th class="px-6 py-4 text-left">Actions</th>
                     </tr>
@@ -214,6 +220,15 @@ require_once __DIR__ . '/../includes/admin_header.php';
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-600"><?= htmlspecialchars($p['category_name']) ?></td>
                             <td class="px-6 py-4 font-bold text-gray-700 text-sm"><?= number_format($p['price']) ?> MMK</td>
+                            <td class="px-6 py-4">
+                                <?php if ($p['discount_name']): ?>
+                                    <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-700">
+                                        <?= htmlspecialchars($p['discount_name']) ?>
+                                    </span>
+                                <?php else: ?>
+                                    <span class="text-xs text-gray-400">—</span>
+                                <?php endif; ?>
+                            </td>
                             <td class="px-6 py-4">
                                 <span
                                     class="text-xs font-bold px-2.5 py-1 rounded-full <?= $p['stock'] < 10 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700' ?>">
@@ -322,6 +337,16 @@ require_once __DIR__ . '/../includes/admin_header.php';
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                 </div>
                 <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Discount</label>
+                    <select name="discount_id" id="productDiscount"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
+                        <option value="">No Discount</option>
+                        <?php foreach ($discounts as $d): ?>
+                            <option value="<?= $d['id'] ?>"><?= htmlspecialchars($d['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Stock Quantity *</label>
                     <input type="number" name="stock" id="productStock" required min="0" placeholder="50"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
@@ -396,6 +421,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         document.getElementById('productCategory').value = data ? data.category_id : '';
         document.getElementById('productPrice').value = data ? data.price : '';
         document.getElementById('productStock').value = data ? data.stock : '';
+        document.getElementById('productDiscount').value = data ? (data.discount_id || '') : '';
         document.getElementById('productDescription').value = data ? (data.description || '') : '';
         document.getElementById('productModalTitle').textContent = data ? 'Edit Product' : 'Add Product';
         document.getElementById('productModal').classList.remove('hidden');

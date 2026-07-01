@@ -5,6 +5,7 @@ require_once __DIR__ . '/../config/db.php';
 $db = getDB();
 
 $userId = (int)$_SESSION['user_id'];
+$isAdmin = ($_SESSION['role'] === 'admin');
 
 // ── Update Profile ────────────────────────────────────
 $profileMsg = $profileError = '';
@@ -59,6 +60,15 @@ $orders = $db->prepare("
 ");
 $orders->execute([$userId]);
 $orders = $orders->fetchAll();
+
+// Customize Requests
+$customizeRequests = $db->prepare("
+    SELECT * FROM customize_requests
+    WHERE user_id=?
+    ORDER BY created_at DESC
+");
+$customizeRequests->execute([$userId]);
+$customizeRequests = $customizeRequests->fetchAll();
 
 // Wishlist
 $wishlist = $db->prepare("
@@ -115,7 +125,8 @@ $statusColors = [
 
     <!-- Tabs -->
     <div class="flex gap-2 mb-6 bg-white rounded-2xl p-2 shadow-sm border border-gray-100">
-        <?php foreach (['account' => '👤 Account', 'orders' => '📋 My Orders', 'wishlist' => '❤️ Wishlist'] as $t => $label): ?>
+        <?php $tabs = $isAdmin ? ['account' => '👤 Account'] : ['account' => '👤 Account', 'orders' => '📋 My Orders', 'customize' => '🎨 Customize', 'wishlist' => '❤️ Wishlist']; ?>
+        <?php foreach ($tabs as $t => $label): ?>
         <a href="?tab=<?= $t ?>"
            class="flex-1 text-center py-3 px-4 rounded-xl text-sm font-semibold transition-colors
            <?= $activeTab === $t ? 'bg-rose-500 text-white shadow-md shadow-rose-100' : 'text-gray-500 hover:text-rose-500 hover:bg-rose-50' ?>">
@@ -245,6 +256,76 @@ $statusColors = [
         <?php endif; ?>
     </div>
 
+    <!-- Customize Requests Tab -->
+    <?php elseif ($activeTab === 'customize'): ?>
+    <div class="space-y-4">
+        <?php if (empty($customizeRequests)): ?>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-16 text-center">
+            <p class="text-5xl mb-4">🎂</p>
+            <h3 class="text-xl font-bold text-gray-700 mb-2">No customize requests yet</h3>
+            <a href="/sweetheaven/user/customize.php" class="bg-rose-500 text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-rose-600 transition-colors mt-4 inline-block">Customize a Cake</a>
+        </div>
+        <?php else: ?>
+        <?php foreach ($customizeRequests as $cr): ?>
+        <?php
+        $crStatusColors = [
+            'pending' => 'bg-amber-100 text-amber-700',
+            'approved' => 'bg-green-100 text-green-700',
+            'rejected' => 'bg-red-100 text-red-700',
+            'ordered' => 'bg-blue-100 text-blue-700',
+        ];
+        ?>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 flex items-center justify-between border-b border-gray-50">
+                <div class="flex items-center gap-4">
+                    <p class="font-bold text-gray-800">#<?= str_pad($cr['id'], 4, '0', STR_PAD_LEFT) ?></p>
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-full <?= $crStatusColors[$cr['status']] ?? 'bg-gray-100 text-gray-600' ?>">
+                        <?= ucfirst($cr['status']) ?>
+                    </span>
+                </div>
+                <p class="text-xs text-gray-400"><?= date('M j, Y', strtotime($cr['created_at'])) ?></p>
+            </div>
+            <div class="px-6 py-4">
+                <div class="grid sm:grid-cols-2 gap-4 text-sm">
+                    <div class="space-y-1">
+                        <p><span class="font-semibold text-gray-600">Size:</span> <?= htmlspecialchars($cr['size']) ?></p>
+                        <p><span class="font-semibold text-gray-600">Flavor:</span> <?= htmlspecialchars($cr['flavor']) ?></p>
+                        <?php if ($cr['color']): ?><p><span class="font-semibold text-gray-600">Color:</span> <?= htmlspecialchars($cr['color']) ?></p><?php endif; ?>
+                        <?php if ($cr['cake_message']): ?><p><span class="font-semibold text-gray-600">Message:</span> <?= htmlspecialchars($cr['cake_message']) ?></p><?php endif; ?>
+                        <p><span class="font-semibold text-gray-600">Delivery:</span> <?= date('M j, Y', strtotime($cr['delivery_date'])) ?></p>
+                    </div>
+                    <div class="space-y-1">
+                        <?php if ($cr['reference_image']): ?>
+                        <div>
+                            <span class="font-semibold text-gray-600">Reference:</span>
+                            <a href="/sweetheaven/<?= htmlspecialchars($cr['reference_image']) ?>" target="_blank" class="text-rose-500 hover:underline block mt-1">
+                                <img src="/sweetheaven/<?= htmlspecialchars($cr['reference_image']) ?>" class="w-20 h-20 object-cover rounded-lg border border-gray-200">
+                            </a>
+                        </div>
+                        <?php endif; ?>
+                        <?php if ($cr['admin_price']): ?>
+                        <p><span class="font-semibold text-gray-600">Price:</span> <span class="text-rose-500 font-bold"><?= number_format($cr['admin_price']) ?> MMK</span></p>
+                        <?php endif; ?>
+                        <?php if ($cr['admin_note']): ?>
+                        <p><span class="font-semibold text-gray-600">Note:</span> <?= htmlspecialchars($cr['admin_note']) ?></p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php if ($cr['additional_notes']): ?>
+                <p class="text-xs text-gray-400 mt-2">📝 <?= htmlspecialchars($cr['additional_notes']) ?></p>
+                <?php endif; ?>
+                <?php if ($cr['status'] === 'approved'): ?>
+                <a href="/sweetheaven/user/checkout.php?customize_id=<?= $cr['id'] ?>"
+                    class="mt-4 inline-block bg-rose-500 hover:bg-rose-600 text-white font-semibold px-6 py-3 rounded-xl transition-colors text-sm">
+                    Proceed to Order
+                </a>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endforeach; ?>
+        <?php endif; ?>
+    </div>
+
     <!-- Wishlist Tab -->
     <?php elseif ($activeTab === 'wishlist'): ?>
     <?php if (empty($wishlist)): ?>
@@ -307,6 +388,7 @@ function addToCart(productId) {
 }
 
 function removeFromWishlist(productId, btn) {
+    const grid = btn.closest('.grid');
     fetch('/sweetheaven/api/wishlist.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -316,6 +398,16 @@ function removeFromWishlist(productId, btn) {
             btn.closest('.bg-white').remove();
             showToast('Removed from wishlist');
             if (typeof updateWishlistBadge === 'function') updateWishlistBadge(data.wishlist_count);
+            if (data.wishlist_count === 0 && grid) {
+                const parent = grid.parentNode;
+                grid.remove();
+                const emptyHtml = '<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-16 text-center">' +
+                    '<p class="text-5xl mb-4">❤️</p>' +
+                    '<h3 class="text-xl font-bold text-gray-700 mb-2">Your wishlist is empty</h3>' +
+                    '<a href="/sweetheaven/user/products.php" class="bg-rose-500 text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-rose-600 transition-colors mt-4 inline-block">Explore Products</a>' +
+                    '</div>';
+                parent.insertAdjacentHTML('beforeend', emptyHtml);
+            }
         }
     });
 }

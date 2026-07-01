@@ -4,6 +4,12 @@ if (session_status() === PHP_SESSION_NONE)
 require_once __DIR__ . '/../config/db.php';
 $db = getDB();
 
+function imgUrl($url) {
+    if (!$url) return '/sweetheaven/images/maincake.jpg';
+    if (strncmp($url, '../', 3) === 0) return '/sweetheaven/' . substr($url, 3);
+    return '/sweetheaven/' . $url;
+}
+
 $productId = (int) ($_GET['id'] ?? 0);
 if (!$productId) {
     header('Location: /sweetheaven/user/products.php');
@@ -11,8 +17,11 @@ if (!$productId) {
 }
 
 $product = $db->prepare("
-    SELECT p.*, c.name AS category_name
-    FROM products p JOIN categories c ON p.category_id = c.id
+    SELECT p.*, c.name AS category_name,
+           d.name AS discount_name, d.type AS discount_type, d.value AS discount_value
+    FROM products p
+    JOIN categories c ON p.category_id = c.id
+    LEFT JOIN discounts d ON p.discount_id = d.id
     WHERE p.id = ?
 ");
 $product->execute([$productId]);
@@ -55,8 +64,11 @@ if (isset($_SESSION['user_id'])) {
 }
 
 $relatedProducts = $db->prepare("
-    SELECT p.*, (SELECT image_url FROM product_images WHERE product_id=p.id AND is_primary=1 LIMIT 1) AS primary_image
-    FROM products p WHERE p.category_id=? AND p.id!=? LIMIT 4
+    SELECT p.*, d.name AS discount_name, d.type AS discount_type, d.value AS discount_value,
+           (SELECT image_url FROM product_images WHERE product_id=p.id AND is_primary=1 LIMIT 1) AS primary_image
+    FROM products p
+    LEFT JOIN discounts d ON p.discount_id = d.id
+    WHERE p.category_id=? AND p.id!=? LIMIT 4
 ");
 $relatedProducts->execute([$product['category_id'], $productId]);
 $relatedProducts = $relatedProducts->fetchAll();
@@ -102,16 +114,16 @@ $relatedProducts = $relatedProducts->fetchAll();
                 <div>
                     <div class="rounded-2xl overflow-hidden bg-rose-50 mb-4 h-80">
                         <?php $primary = $images[0]['image_url'] ?? null; ?>
-                        <img id="mainImage" src="<?= $primary ? '../images/' . $primary : '../images/maincake.jpg' ?>"
+                        <img id="mainImage" src="<?= imgUrl($primary) ?>"
                             alt="<?= htmlspecialchars($product['name']) ?>" class="w-full h-full object-cover">
                     </div>
                     <?php if (count($images) > 1): ?>
                         <div class="flex gap-3 overflow-x-auto">
                             <?php foreach ($images as $img): ?>
                                 <button
-                                    onclick="document.getElementById('mainImage').src='<?= '/sweetheaven/' . $img['image_url'] ?>'"
+                                    onclick="document.getElementById('mainImage').src='<?= imgUrl($img['image_url']) ?>'"
                                     class="shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 border-transparent hover:border-stone-300 transition-colors">
-                                    <img src="../images/<?= htmlspecialchars($img['image_url']) ?>"
+                                    <img src="<?= imgUrl($img['image_url']) ?>"
                                         class="w-full h-full object-cover">
                                 </button>
                             <?php endforeach; ?>
@@ -121,13 +133,18 @@ $relatedProducts = $relatedProducts->fetchAll();
 
                 <!-- Product Info -->
                 <div>
-                    <div class="flex items-center gap-2 mb-3">
+                    <div class="flex items-center gap-2 mb-3 flex-wrap">
                         <span
                             class="bg-rose-50 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full"><?= htmlspecialchars($product['category_name']) ?></span>
                         <span
                             class="<?= $product['stock'] > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' ?> text-xs font-semibold px-3 py-1 rounded-full">
                             <?= $product['stock'] > 0 ? "In Stock ({$product['stock']})" : 'Out of Stock' ?>
                         </span>
+                        <?php if ($product['discount_name'] && $product['discount_value']): ?>
+                            <span class="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
+                                🏷️ <?= htmlspecialchars($product['discount_name']) ?>
+                            </span>
+                        <?php endif; ?>
                     </div>
 
                     <h1 class="text-3xl font-bold text-gray-800 mb-3"><?= htmlspecialchars($product['name']) ?></h1>
@@ -148,8 +165,18 @@ $relatedProducts = $relatedProducts->fetchAll();
                             review<?= count($reviews) !== 1 ? 's' : '' ?>)</span>
                     </div>
 
-                    <div class="text-4xl font-bold text-rose-500 mb-6"><?= number_format($product['price']) ?> <span
-                            class="text-lg font-normal text-gray-400">MMK</span></div>
+                    <div class="text-4xl font-bold text-rose-500 mb-6">
+                        <?php if ($product['discount_name'] && $product['discount_value']): ?>
+                            <?php $finalPrice = $product['discount_type'] === 'percentage'
+                                ? $product['price'] * (1 - $product['discount_value'] / 100)
+                                : max(0, $product['price'] - $product['discount_value']); ?>
+                            <span class="text-xl line-through text-gray-400 font-normal mr-2"><?= number_format($product['price']) ?></span>
+                            <?= number_format($finalPrice) ?>
+                        <?php else: ?>
+                            <?= number_format($product['price']) ?>
+                        <?php endif; ?>
+                        <span class="text-lg font-normal text-gray-400">MMK</span>
+                    </div>
 
                     <p class="text-gray-500 leading-relaxed mb-8">
                         <?= nl2br(htmlspecialchars($product['description'])) ?></p>
@@ -270,15 +297,35 @@ $relatedProducts = $relatedProducts->fetchAll();
                 <h2 class="text-2xl font-bold text-gray-800 mb-6">You May Also Like</h2>
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
                     <?php foreach ($relatedProducts as $rp): ?>
-                        <?php $imgSrc = $rp['primary_image'] ? '/sweetheaven/' . $rp['primary_image'] : '/sweetheaven/images/maincake.jpg'; ?>
+                        <?php
+                        $imgSrc = $rp['primary_image'] ? '/sweetheaven/' . $rp['primary_image'] : '/sweetheaven/images/maincake.jpg';
+                        $rpDiscount = $rp['discount_name'] && $rp['discount_value'];
+                        if ($rpDiscount) {
+                            $rpPrice = $rp['discount_type'] === 'percentage'
+                                ? $rp['price'] * (1 - $rp['discount_value'] / 100)
+                                : max(0, $rp['price'] - $rp['discount_value']);
+                        } else {
+                            $rpPrice = $rp['price'];
+                        }
+                        ?>
                         <a href="/sweetheaven/user/product_detail.php?id=<?= $rp['id'] ?>"
-                            class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-sm hover:-translate-y-0.5 transition-all duration-300">
+                            class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-sm hover:-translate-y-0.5 transition-all duration-300 relative">
+                            <?php if ($rpDiscount): ?>
+                                <div class="absolute top-2 left-2 bg-gradient-to-r from-green-400 to-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md z-10">
+                                    <?= htmlspecialchars($rp['discount_name']) ?>
+                                </div>
+                            <?php endif; ?>
                             <img src="<?= htmlspecialchars($imgSrc) ?>" class="w-full h-40 object-cover"
                                 alt="<?= htmlspecialchars($rp['name']) ?>">
                             <div class="p-4">
                                 <p class="font-semibold text-gray-700 text-sm mb-1 line-clamp-1">
                                     <?= htmlspecialchars($rp['name']) ?></p>
-                                <p class="text-rose-500 font-bold text-sm"><?= number_format($rp['price']) ?> MMK</p>
+                                <p class="text-rose-500 font-bold text-sm">
+                                    <?php if ($rpDiscount): ?>
+                                        <span class="text-xs line-through text-gray-400 font-normal mr-1"><?= number_format($rp['price']) ?></span>
+                                    <?php endif; ?>
+                                    <?= number_format($rpPrice) ?> MMK
+                                </p>
                             </div>
                         </a>
                     <?php endforeach; ?>
@@ -328,11 +375,13 @@ $relatedProducts = $relatedProducts->fetchAll();
                 body: `product_id=${productId}`
             }).then(r => r.json()).then(data => {
                 if (data.success) {
-                    const svg = btn.querySelector('svg');
-                    svg.setAttribute('fill', data.is_wishlisted ? 'currentColor' : 'none');
-                    btn.classList.toggle('border-rose-400', data.is_wishlisted);
-                    btn.classList.toggle('bg-rose-50', data.is_wishlisted);
-                    btn.classList.toggle('text-rose-500', data.is_wishlisted);
+            const svg = btn.querySelector('svg');
+            svg.setAttribute('fill', data.is_wishlisted ? 'currentColor' : 'none');
+            btn.classList.toggle('border-rose-400', data.is_wishlisted);
+            btn.classList.toggle('border-gray-200', !data.is_wishlisted);
+            btn.classList.toggle('bg-rose-50', data.is_wishlisted);
+            btn.classList.toggle('text-rose-500', data.is_wishlisted);
+            btn.classList.toggle('text-gray-400', !data.is_wishlisted);
                     showToast(data.is_wishlisted ? '❤️ ' + (data.message || 'Added to wishlist') : '💔 Removed from wishlist');
                     if (typeof updateWishlistBadge === 'function') updateWishlistBadge(data.wishlist_count);
                 } else if (data.redirect) window.location.href = '/sweetheaven/auth/login.php';

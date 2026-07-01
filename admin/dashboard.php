@@ -41,6 +41,9 @@ $recentOrders = $db->query("
     ORDER BY o.order_date DESC LIMIT 8
 ")->fetchAll();
 
+// ── Customer Reviews (max 2) ──────────────────────────
+$customerReviews = $db->query("SELECT name, message, created_at FROM customer_reviews WHERE status='approved' ORDER BY created_at DESC LIMIT 2")->fetchAll();
+
 // ── Low Stock Products ────────────────────────────────
 $lowStockProducts = $db->query("
     SELECT p.name, p.stock, c.name AS category
@@ -210,6 +213,36 @@ $statusColors = [
                 </span>
             </div>
             <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+    </div>
+    <!-- Customer Reviews -->
+    <div class="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+            <h3 class="text-lg font-bold text-gray-800">⭐ Customer Reviews</h3>
+            <a href="/sweetheaven/admin/review.php" class="text-rose-500 text-sm font-medium hover:underline">Manage →</a>
+        </div>
+        <div class="p-5 grid md:grid-cols-2 gap-5">
+            <?php if (empty($customerReviews)): ?>
+                <div class="md:col-span-2 text-center text-gray-400 py-8">
+                    <p class="text-4xl mb-3">💬</p>
+                    <p class="text-sm">No approved reviews yet.</p>
+                </div>
+            <?php else: ?>
+                <?php foreach ($customerReviews as $r): ?>
+                    <div class="border border-gray-100 rounded-xl p-5 bg-gray-50/50">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-9 h-9 bg-rose-100 rounded-full flex items-center justify-center text-rose-500 font-bold text-sm">
+                                <?= strtoupper(substr($r['name'], 0, 1)) ?>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-700 text-sm"><?= htmlspecialchars($r['name']) ?></p>
+                                <p class="text-xs text-gray-400"><?= date('M j, Y', strtotime($r['created_at'])) ?></p>
+                            </div>
+                        </div>
+                        <p class="text-gray-500 text-sm leading-relaxed">"<?= htmlspecialchars($r['message']) ?>"</p>
+                    </div>
+                <?php endforeach; ?>
             <?php endif; ?>
         </div>
     </div>

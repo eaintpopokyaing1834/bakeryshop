@@ -74,8 +74,7 @@ $whereSQL = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
 $orders = $db->prepare("
     SELECT o.*, u.name AS customer_name, u.email AS customer_email,
-           pm.payment_name, pm.acc_name, pm.acc_no, pm.qr_image,
-           p.status AS pay_status, p.screenshot
+           pm.payment_name, p.status AS pay_status, p.screenshot
     FROM orders o
     JOIN users u ON o.user_id = u.id
     LEFT JOIN payment p ON p.order_id = o.id
@@ -98,7 +97,6 @@ $statusColors = [
 ];
 ?>
 
-<!-- Filters Bar -->
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
     <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div class="flex flex-wrap gap-2">
@@ -120,7 +118,6 @@ $statusColors = [
     </div>
 </div>
 
-<!-- Orders Table -->
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
         <h3 class="font-bold text-gray-800">Orders <span class="text-gray-400 font-normal text-sm ml-2">(<?= count($orders) ?> total)</span></h3>
@@ -197,7 +194,6 @@ $statusColors = [
                     </button>
                 </td>
             </tr>
-            <!-- Expandable items row -->
             <tr id="items-<?= $order['id'] ?>" class="hidden bg-rose-50/30">
                 <td colspan="8" class="px-8 py-4">
                     <div class="order-items-content" data-order-id="<?= $order['id'] ?>">
@@ -212,26 +208,22 @@ $statusColors = [
                     <?php if ($order['request_note']): ?>
                     <p class="text-xs text-gray-500 mt-1">📝 <?= htmlspecialchars($order['request_note']) ?></p>
                     <?php endif; ?>
+                    
                     <?php if ($order['payment_name']): ?>
                     <div class="mt-3 pt-3 border-t border-stone-200">
                         <p class="text-xs font-semibold text-stone-600 mb-2">💳 Payment Details</p>
                         <p class="text-xs text-gray-500">Method: <?= htmlspecialchars($order['payment_name']) ?></p>
-                        <?php if ($order['acc_name']): ?>
-                        <p class="text-xs text-gray-500">Account: <?= htmlspecialchars($order['acc_name']) ?> — <?= htmlspecialchars($order['acc_no']) ?></p>
-                        <?php endif; ?>
-                        <?php if (!empty($order['qr_image'])): ?>
-                        <img src="/sweetheaven/<?= htmlspecialchars($order['qr_image']) ?>"
-                            class="w-16 h-16 object-contain mt-1 border border-stone-200 rounded-lg" alt="QR">
-                        <?php endif; ?>
+                        
                         <?php if (!empty($order['screenshot'])): ?>
                         <div class="mt-2">
                             <p class="text-xs text-gray-500 mb-1">Receipt screenshot:</p>
                             <a href="/sweetheaven/<?= htmlspecialchars($order['screenshot']) ?>" target="_blank">
                                 <img src="/sweetheaven/<?= htmlspecialchars($order['screenshot']) ?>"
-                                    class="w-24 h-24 object-cover rounded-lg border border-stone-200">
+                                     class="w-24 h-24 object-cover rounded-lg border border-stone-200">
                             </a>
                         </div>
                         <?php endif; ?>
+
                         <div class="mt-2 flex gap-2" id="paymentActions-<?= $order['id'] ?>">
                             <?php if ($order['pay_status'] === 'pending' && !empty($order['screenshot'])): ?>
                             <button onclick="updatePayment(<?= $order['id'] ?>, 'approve')"
