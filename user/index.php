@@ -50,7 +50,7 @@ $latestProducts = $db->query("
     LIMIT 9
 ")->fetchAll();
 
-$customerReviews = $db->query("SELECT name, message, created_at FROM customer_reviews WHERE status='approved' ORDER BY created_at DESC LIMIT 2")->fetchAll();
+$customerReviews = $db->query("SELECT name, message, created_at FROM customer_reviews WHERE status='approved' ORDER BY created_at DESC")->fetchAll();
 
 // Fetch all discounted products
 $discountedProducts = $db->query("
@@ -65,6 +65,8 @@ $discountedProducts = $db->query("
     WHERE p.discount_id IS NOT NULL
     ORDER BY d.value DESC, p.created_at DESC
 ")->fetchAll();
+
+$isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -231,6 +233,8 @@ $discountedProducts = $db->query("
         .animated-float {
             animation: floatEffect 3s infinite ease-in-out;
         }
+
+
     </style>
 </head>
 
@@ -408,6 +412,24 @@ $discountedProducts = $db->query("
             width: 24px;
             border-radius: 999px;
         }
+
+        #reviewTrack {
+            will-change: transform;
+        }
+
+        .review-card-wrapper {
+            transition: width 0.3s ease;
+        }
+
+        #reviewDots button {
+            transition: all 0.3s ease;
+        }
+
+        #reviewDots button.active {
+            background: #e8746a;
+            width: 24px;
+            border-radius: 999px;
+        }
     </style>
 
     <script>
@@ -579,7 +601,8 @@ $discountedProducts = $db->query("
             <div class="flex flex-col items-center justify-center mb-10 fade-up space-y-4">
                 <div>
                     <p class="text-md text-center font-semibold uppercase tracking-widest mb-1" style="color:#e8746a;">
-                        <?= __('bestsellers_subtitle') ?></p>
+                        <?= __('bestsellers_subtitle') ?>
+                    </p>
                     <h2 class="serif text-4xl text-gray-800"><?= __('bestsellers_title') ?></h2>
                 </div>
 
@@ -618,7 +641,8 @@ $discountedProducts = $db->query("
                             <?php elseif ($product['stock'] < 5): ?>
                                 <div
                                     class="absolute top-3 left-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
-                                    <?= __('bestsellers_low_stock') ?></div>
+                                    <?= __('bestsellers_low_stock') ?>
+                                </div>
                             <?php endif; ?>
                             <div
                                 class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
@@ -645,7 +669,7 @@ $discountedProducts = $db->query("
                                     <?php else: ?>
                                         <?= number_format($product['price']) ?>
                                     <?php endif; ?>
-                                    <span class="text-xs font-normal text-gray-400">MMK</span></span>
+                                    <span class="text-xs font-normal text-gray-400"><?= __('common_mmk') ?></span></span>
                                 <div class="flex gap-2">
                                     <a href="/sweetheaven/user/product_detail.php?id=<?= $product['id'] ?>"
                                         class="border border-stone-200 text-rose-500 px-3 py-1.5 rounded-xl text-xs font-semibold hover:bg-rose-50 transition-colors">
@@ -684,7 +708,7 @@ $discountedProducts = $db->query("
             <div class="grid md:grid-cols-2 gap-12 items-center">
                 <div class="relative">
                     <div class="rounded-3xl overflow-hidden shadow-xl">
-                        <img src="/sweetheaven/images/hero1.jpg" alt="Customize your cake"
+                        <img src="/sweetheaven/images/bow.jpg" alt="Customize your cake"
                             class="w-full h-96 object-cover">
                     </div>
                     <div class="absolute -bottom-5 -right-5 bg-white rounded-2xl shadow-lg px-6 py-4 hidden md:block">
@@ -695,7 +719,9 @@ $discountedProducts = $db->query("
                 </div>
                 <div class="space-y-6">
                     <div>
-                        <p class="text-md font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;"><?= __('customize_label') ?></p>
+                        <p class="text-md font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;">
+                            <?= __('customize_label') ?>
+                        </p>
                         <h2 class="serif text-4xl text-gray-800"><?= __('customize_title') ?></h2>
                     </div>
                     <p class="text-gray-500 leading-relaxed text-lg">
@@ -706,8 +732,8 @@ $discountedProducts = $db->query("
                             <span
                                 class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center text-rose-500 text-lg">🎂</span>
                             <div>
-                                <p class="font-semibold text-gray-700">Any Size & Flavor</p>
-                                <p class="text-gray-400 text-xs">From 1lb to tiered cakes</p>
+                                <p class="font-semibold text-gray-700"><?= __('customize_any_size') ?></p>
+                                <p class="text-gray-400 text-xs"><?= __('customize_from_1lb') ?></p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -740,6 +766,281 @@ $discountedProducts = $db->query("
         </div>
     </section>
 
+
+
+    <!-- ═════════════════════════ SPECIAL DISCOUNTS ═════════════════════════ -->
+    <section id="special-discounts" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+
+            <!-- ── Section Header ── -->
+            <div class="text-center mb-10">
+                <div class="flex items-center justify-center gap-3 mb-3">
+                    <span class="h-px w-10 bg-rose-300 inline-block"></span>
+                    <span class="text-xs font-bold uppercase tracking-[.2em]" style="color:#e8746a;">
+                        <?= __('discount_section_label') ?>
+                    </span>
+                    <span class="h-px w-10 bg-rose-300 inline-block"></span>
+                </div>
+                <h2 class="serif text-4xl md:text-5xl font-extrabold text-gray-800 mb-2">
+                    <?= __('discount_section_title') ?>
+                </h2>
+                <p class="text-gray-400 text-sm"><?= __('discount_section_desc') ?></p>
+            </div>
+
+            <!-- ── Big Pink Banner ── -->
+            <div class="relative rounded-3xl overflow-hidden mb-12 shadow-2xl"
+                style="background: linear-gradient(130deg, #ffe4ef 0%, #ffc2d9 45%, #ffaac8 100%); min-height: 320px;">
+
+
+                <!-- Confetti / decorative specks -->
+                <div class="absolute inset-0 pointer-events-none overflow-hidden">
+                    <div class="absolute top-5  left-8   w-3 h-3 rounded-full bg-yellow-400 opacity-70"></div>
+                    <div class="absolute top-14 left-24  w-2 h-2 rounded-full bg-rose-400   opacity-60"></div>
+                    <div class="absolute top-9  left-44  w-5 h-1 rounded-full bg-pink-300   opacity-80"></div>
+                    <div class="absolute bottom-10 left-20 w-2 h-2 rounded-full bg-amber-400 opacity-70"></div>
+                    <div class="absolute bottom-20 left-36 w-4 h-1 rounded-full bg-rose-300  opacity-60"></div>
+                    <div class="absolute top-5  right-8   w-3 h-3 rounded-full bg-amber-400  opacity-70"></div>
+                    <div class="absolute top-16 right-32  w-2 h-2 rounded-full bg-pink-400   opacity-60"></div>
+                    <div class="absolute bottom-12 right-20 w-5 h-1 rounded-full bg-yellow-300 opacity-80"></div>
+                    <div class="absolute bottom-24 right-44 w-3 h-3 rounded-full bg-rose-400  opacity-50"></div>
+                    <!-- ribbons -->
+                    <div class="absolute top-0 left-1/3  w-px h-24 bg-amber-300/35 rotate-12"></div>
+                    <div class="absolute top-0 right-1/3 w-px h-20 bg-rose-300/35 -rotate-12"></div>
+                    <!-- large soft circle glow right -->
+                    <div class="absolute -right-20 top-1/2 -translate-y-1/2 w-72 h-72 rounded-full opacity-10"
+                        style="background:radial-gradient(circle,#fff,transparent);"></div>
+                </div>
+
+                <!--
+                    4-column grid on desktop:
+                      col-1 (5/12) : offer text
+                      col-2 (3/12) : main cake (larger, shifted right via padding-left)
+                      col-3 (2/12) : stacked accessory images
+                      col-4 (2/12) : circle badge + button
+                -->
+                <div class="relative z-10 grid items-stretch
+                            grid-cols-1
+                            md:grid-cols-[5fr_3fr_2fr_2fr]
+                            gap-0 min-h-[320px]">
+
+                    <!-- ① Left: offer text ─────────────────────────────────── -->
+                    <div class="flex flex-col justify-center p-8 md:pl-12 md:pr-6 md:py-10">
+
+                        <!-- "Limited Time Offer" pill -->
+                        <span class="inline-flex self-start items-center gap-1.5 mb-5 px-4 py-1.5 rounded-full
+                                     text-xs font-extrabold uppercase tracking-widest text-white shadow"
+                            style="background:#e8746a;">
+                            <?= __('discount_limited_offer') ?>
+                        </span>
+
+
+                        <!-- Giant percentage -->
+                        <div class="mb-3">
+                            <span class="block text-gray-700 text-xl font-bold leading-none"><?= __('discount_up_to') ?></span>
+                            <span class="block font-black"
+                                style="font-size: clamp(4rem,8vw,6rem); color:#e8746a; line-height:1;">20%</span>
+                            <span class="block text-gray-700 font-black tracking-tight"
+                                style="font-size: clamp(1.5rem,3vw,2rem); line-height:1.1;"><?= __('discount_off') ?></span>
+                        </div>
+
+                        <p class="font-extrabold text-gray-600 uppercase tracking-widest text-xs mt-1 mb-6">
+                            <?= __('discount_on_selected') ?>
+                        </p>
+
+
+                        <!-- Feature micro-badges -->
+                        <div class="flex flex-wrap gap-2">
+                            <?php foreach ([
+                                ['🎂', __('discount_feat_quality'), __('discount_feat_quality_sub')],
+                                ['🚚', __('discount_feat_delivery'), __('discount_feat_delivery_sub')],
+                                ['✅', __('discount_feat_fresh'), __('discount_feat_fresh_sub')],
+                            ] as $feat): ?>
+                                <div
+                                    class="flex items-center gap-2 bg-white/65 backdrop-blur-sm rounded-xl px-3 py-2 shadow-sm">
+                                    <span class="text-sm"><?= $feat[0] ?></span>
+                                    <div class="leading-none">
+                                        <p class="text-[10px] font-bold text-gray-700"><?= $feat[1] ?></p>
+                                        <p class="text-[9px]  text-gray-500 mt-0.5"><?= $feat[2] ?></p>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <!-- ② Main cake image ──────────────────────────────────── -->
+                    <!-- padding-left shifts the image to the right; items-end pushes it to bottom -->
+
+                    <div class="hidden md:flex items-center justify-center pl-4 overflow-visible">
+                        <img src="/sweetheaven/images/removepink.png" alt="Featured Discount Cake"
+                            class="w-auto drop-shadow-2xl"
+                            style="max-height:500px; margin-bottom:-2px; object-fit:contain;">
+                    </div>
+
+                    <!-- ③ Stacked accessory images (plain, no card) ── -->
+                    <div class="hidden md:flex flex-col justify-center gap-2 pl-3 pr-1 py-6">
+                        <!-- <img src="/sweetheaven/images/4accessorycake.png" alt="Cake accessory"
+                            class="w-full object-contain drop-shadow-xl" style="max-height:300px;">
+                        <img src="/sweetheaven/images/gitbox.png" alt="Gift box"
+                            class="w-full object-contain drop-shadow-xl" style="max-height:300px;"> -->
+                             <img src="/sweetheaven/images/ballon3.png" alt="Featured Discount Cake"
+                            class="w-auto drop-shadow-2xl"
+                            style="max-height:500px; margin-bottom:-2px; object-fit:contain;">
+
+                    </div>
+
+
+                    <!-- ④ Right: compact circle badge + CTA ────────────────── -->
+                    <div class="flex flex-col items-center justify-center gap-5 p-6 md:pr-8">
+
+                        <!-- Circle badge -->
+                        <div class="relative flex items-center justify-center w-36 h-36 rounded-full shadow-xl flex-shrink-0"
+                            style="background:#e8746a;">
+                            <div class="absolute inset-2 rounded-full border-2 border-white/40"></div>
+                            <div class="text-center text-white px-2 z-10 space-y-0.5">
+                                <p class="text-[9px] font-bold uppercase tracking-wider leading-none"><?= __('discount_badge_week') ?>
+                                </p>
+                                <p class="text-[10px] font-semibold leading-snug"><?= __('discount_badge_save') ?></p>
+                                <p class="serif text-xl font-black leading-none"><?= __('discount_badge_cakes') ?></p>
+                                <span class="text-base">❤️</span>
+                            </div>
+                        </div>
+
+                        <!-- Shop Now -->
+                        <a href="/sweetheaven/user/products.php?discounted=1"
+                            class="inline-flex items-center gap-1.5 font-extrabold px-6 py-3 rounded-full text-xs shadow-lg
+                                  hover:-translate-y-0.5 transition-all duration-200 uppercase tracking-widest whitespace-nowrap"
+                            style="background:#e8746a; color:#fff;">
+                            <?= __('discount_shop_now') ?>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                    d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+            <!-- ── Products Sub-header ── -->
+            <div id="discounted-products" class="text-center mb-8">
+                <div class="flex items-center justify-center gap-3 mb-1">
+                    <svg class="w-4 h-4 text-rose-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
+                    </svg>
+                    <h3 class="serif text-3xl font-bold text-gray-800"><?= __('discount_shop_the_deals') ?></h3>
+                    <svg class="w-4 h-4 text-rose-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
+                    </svg>
+                </div>
+                <p class="text-gray-400 text-sm"><?= __('discount_grab_deals') ?></p>
+            </div>
+
+            <!-- ── Discounted Product Cards ── -->
+            <?php if (empty($discountedProducts)): ?>
+                <div class="text-center py-20">
+                    <div class="text-6xl mb-5">🏷️</div>
+                    <h3 class="serif text-2xl text-gray-700 mb-3"><?= __('discount_no_products') ?></h3>
+                    <p class="text-gray-400 text-sm max-w-sm mx-auto leading-relaxed">
+                        <?= __('discount_no_products_desc') ?>
+                    </p>
+                    <a href="/sweetheaven/user/products.php"
+                        class="inline-flex items-center gap-2 mt-8 text-white font-semibold px-7 py-3.5 rounded-full text-sm hover:opacity-90 transition-all duration-200 shadow-md"
+                        style="background:#e8746a;">
+                        <?= __('discount_browse_all') ?>
+                    </a>
+                </div>
+            <?php else: ?>
+                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <?php foreach ($discountedProducts as $dp):
+                        $dpImgSrc = $dp['primary_image']
+                            ? '/sweetheaven/' . $dp['primary_image']
+                            : '/sweetheaven/images/maincake.jpg';
+                        $dpFinalPrice = $dp['discount_type'] === 'percentage'
+                            ? $dp['price'] * (1 - $dp['discount_value'] / 100)
+                            : max(0, $dp['price'] - $dp['discount_value']);
+                        $dpBadgeLabel = $dp['discount_type'] === 'percentage'
+                            ? sprintf(__('discount_percent_off'), (int) $dp['discount_value'])
+                            : sprintf(__('discount_mmk_off'), number_format($dp['discount_value']));
+                        ?>
+                        <div
+                            class="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-pink-100">
+                            <!-- Image area -->
+                            <div class="relative bg-pink-50 flex items-center justify-center"
+                                style="height:180px; overflow:hidden;">
+                                <img src="<?= htmlspecialchars($dpImgSrc) ?>" alt="<?= htmlspecialchars($dp['name']) ?>"
+                                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                                <!-- Discount badge -->
+                                <div class="absolute top-0 left-0 px-3 py-1.5 text-xs font-extrabold text-white rounded-br-xl shadow"
+                                    style="background:#e8746a;">
+                                    <?= htmlspecialchars($dpBadgeLabel) ?>
+                                </div>
+                                <!-- Wishlist -->
+                                <button onclick="event.stopPropagation(); toggleWishlist(<?= $dp['id'] ?>, this)"
+                                    class="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 text-gray-400 shadow flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all duration-200"
+                                    title="Wishlist">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <!-- Card body -->
+                            <div class="p-4">
+                                <a href="/sweetheaven/user/product_detail.php?id=<?= $dp['id'] ?>">
+                                    <h3
+                                        class="font-bold text-gray-800 text-sm hover:text-rose-500 transition-colors mb-2 leading-snug">
+                                        <?= htmlspecialchars($dp['name']) ?>
+                                    </h3>
+                                </a>
+                                <div class="flex items-baseline gap-2 mb-3">
+                                    <span class="text-xs line-through text-gray-400">
+                                        <?= number_format($dp['price']) ?> <?= __('common_mmk') ?>
+                                    </span>
+                                    <span class="font-extrabold text-base" style="color:#e8746a;">
+                                        <?= number_format($dpFinalPrice) ?> <span
+                                            class="text-xs font-normal text-gray-400"><?= __('common_mmk') ?></span>
+                                    </span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <a href="/sweetheaven/user/product_detail.php?id=<?= $dp['id'] ?>"
+                                        class="flex-1 text-center border py-2 rounded-xl text-xs font-semibold hover:bg-rose-50 transition-colors"
+                                        style="border-color:#e8746a; color:#e8746a;">
+                                        <?= __('discount_view') ?>
+                                    </a>
+                                    <?php if (!$isAdmin): ?>
+                                        <button onclick="addToCart(<?= $dp['id'] ?>, '<?= addslashes($dp['name']) ?>')"
+                                            class="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-bold text-white transition-all duration-200 hover:opacity-90 shadow"
+                                            style="background:#e8746a;">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 7H19M9 21a1 1 0 100-2 1 1 0 000 2zm10 0a1 1 0 100-2 1 1 0 000 2z" />
+                                            </svg>
+                                            <?= __('discount_add_cart') ?>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- View All Offers button -->
+                <div class="flex justify-center mt-10">
+                    <a href="/sweetheaven/user/products.php?discounted=1"
+                        class="inline-flex items-center gap-2 border-2 font-bold px-8 py-3 rounded-full text-sm hover:bg-rose-50 transition-all duration-200 uppercase tracking-wide"
+                        style="border-color:#e8746a; color:#e8746a;">
+                        <?= __('discount_view_all_offers') ?>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+            <?php endif; ?>
+
+        </div>
+    </section>
+
+
+
     <!-- ═════════════════════════ WHY CHOOSE US ═════════════════════════ -->
     <section class="py-20 bg-[#fdf8f3]">
         <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
@@ -749,7 +1050,9 @@ $discountedProducts = $db->query("
             </div>
             <!-- Text -->
             <div class="fade-up fade-up-d2">
-                <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;"><?= __('story_label') ?></p>
+                <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;">
+                    <?= __('story_label') ?>
+                </p>
                 <h2 class="serif text-3xl text-gray-800 mb-5"><?= __('story_title') ?></h2>
                 <p class="text-gray-500 text-[15px] leading-7 mb-6">
                     <?= __('story_desc') ?>
@@ -803,14 +1106,12 @@ $discountedProducts = $db->query("
                         style="background:#fffbf0;">
                         <div class="p-12 flex-1">
                             <span class="text-3xl mb-3 block">🎁</span>
-                            <h3 class="font-bold text-gray-800 text-xl mb-2">Free Gift Over 50,000 MMK</h3>
-                            <p class="text-gray-500 text-sm leading-relaxed mb-5">Spend 50,000 MMK or more and we'll add
-                                a
-                                delicious free treat to your order!</p>
+                            <h3 class="font-bold text-gray-800 text-xl mb-2"><?= __('promo_free_gift_title') ?></h3>
+                            <p class="text-gray-500 text-sm leading-relaxed mb-5"><?= __('promo_free_gift_desc') ?></p>
                             <a href="/sweetheaven/user/products.php"
                                 class="inline-block text-white font-semibold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity"
                                 style="background:#f59e0b;">
-                                Shop Now →
+                                <?= __('promo_shop_now') ?>
                             </a>
                         </div>
                         <div class="hidden md:block w-40 flex-shrink-0">
@@ -820,7 +1121,7 @@ $discountedProducts = $db->query("
                     </div>
                 </div>
                 <article class="flex flex-col gap-6">
-                    <div class="text-center text-3xl font-semibold">Latest Products</div>
+                    <div class="text-center text-3xl font-semibold"><?= __('promo_latest_products') ?></div>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4" style="background:#fffbf0;">
                         <?php foreach ($latestProducts as $product): ?>
                             <?php
@@ -847,345 +1148,105 @@ $discountedProducts = $db->query("
             </div>
         </div>
     </section>
-
-
-
-    <!-- ═════════════════════════ SPECIAL DISCOUNTS ═════════════════════════ -->
-    <section id="special-discounts" class="py-16 bg-white">
+    <!-- ═════════════════════════ REVIEWS DISPLAY ═════════════════════════ -->
+    <section id="reviews-display" class="py-20 bg-[#fdf8f3]">
         <div class="max-w-7xl mx-auto px-6">
-
-            <!-- ── Section Header ── -->
-            <div class="text-center mb-10">
-                <div class="flex items-center justify-center gap-3 mb-3">
-                    <span class="h-px w-10 bg-rose-300 inline-block"></span>
-                    <span class="text-xs font-bold uppercase tracking-[.2em]" style="color:#e8746a;">
-                        Special Discounts
-                    </span>
-                    <span class="h-px w-10 bg-rose-300 inline-block"></span>
+            <div class="flex items-center justify-center mb-10 fade-up">
+                <div class="text-center">
+                    <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;"><?= __('review_display_label') ?></p>
+                    <h2 class="serif text-3xl text-gray-800"><?= __('review_display_title') ?></h2>
+                    <p class="text-gray-400 text-sm mt-2"><?= __('review_display_desc') ?></p>
                 </div>
-                <h2 class="serif text-4xl md:text-5xl font-extrabold text-gray-800 mb-2">
-                    Sweet Deals Just for You!
-                </h2>
-                <p class="text-gray-400 text-sm">Delicious cakes at special prices. Don't miss out!</p>
             </div>
 
-            <!-- ── Big Pink Banner ── -->
-            <div class="relative rounded-3xl overflow-hidden mb-12 shadow-2xl"
-                style="background: linear-gradient(130deg, #ffe4ef 0%, #ffc2d9 45%, #ffaac8 100%); min-height: 320px;">
-
-
-                <!-- Confetti / decorative specks -->
-                <div class="absolute inset-0 pointer-events-none overflow-hidden">
-                    <div class="absolute top-5  left-8   w-3 h-3 rounded-full bg-yellow-400 opacity-70"></div>
-                    <div class="absolute top-14 left-24  w-2 h-2 rounded-full bg-rose-400   opacity-60"></div>
-                    <div class="absolute top-9  left-44  w-5 h-1 rounded-full bg-pink-300   opacity-80"></div>
-                    <div class="absolute bottom-10 left-20 w-2 h-2 rounded-full bg-amber-400 opacity-70"></div>
-                    <div class="absolute bottom-20 left-36 w-4 h-1 rounded-full bg-rose-300  opacity-60"></div>
-                    <div class="absolute top-5  right-8   w-3 h-3 rounded-full bg-amber-400  opacity-70"></div>
-                    <div class="absolute top-16 right-32  w-2 h-2 rounded-full bg-pink-400   opacity-60"></div>
-                    <div class="absolute bottom-12 right-20 w-5 h-1 rounded-full bg-yellow-300 opacity-80"></div>
-                    <div class="absolute bottom-24 right-44 w-3 h-3 rounded-full bg-rose-400  opacity-50"></div>
-                    <!-- ribbons -->
-                    <div class="absolute top-0 left-1/3  w-px h-24 bg-amber-300/35 rotate-12"></div>
-                    <div class="absolute top-0 right-1/3 w-px h-20 bg-rose-300/35 -rotate-12"></div>
-                    <!-- large soft circle glow right -->
-                    <div class="absolute -right-20 top-1/2 -translate-y-1/2 w-72 h-72 rounded-full opacity-10"
-                        style="background:radial-gradient(circle,#fff,transparent);"></div>
+            <?php if (empty($customerReviews)): ?>
+                <div class="text-center text-gray-400 py-10">
+                    <p class="text-4xl mb-3">💬</p>
+                    <p class="text-sm"><?= __('review_no_reviews') ?></p>
                 </div>
-
-                <!--
-                    4-column grid on desktop:
-                      col-1 (5/12) : offer text
-                      col-2 (3/12) : main cake (larger, shifted right via padding-left)
-                      col-3 (2/12) : stacked accessory images
-                      col-4 (2/12) : circle badge + button
-                -->
-                <div class="relative z-10 grid items-stretch
-                            grid-cols-1
-                            md:grid-cols-[5fr_3fr_2fr_2fr]
-                            gap-0 min-h-[320px]">
-
-                    <!-- ① Left: offer text ─────────────────────────────────── -->
-                    <div class="flex flex-col justify-center p-8 md:pl-12 md:pr-6 md:py-10">
-
-                        <!-- "Limited Time Offer" pill -->
-                        <span class="inline-flex self-start items-center gap-1.5 mb-5 px-4 py-1.5 rounded-full
-                                     text-xs font-extrabold uppercase tracking-widest text-white shadow"
-                            style="background:#e8746a;">
-                            🏷️ Limited Time Offer
-                        </span>
-
-
-                        <!-- Giant percentage -->
-                        <div class="mb-3">
-                            <span class="block text-gray-700 text-xl font-bold leading-none">Up to</span>
-                            <span class="block font-black"
-                                style="font-size: clamp(4rem,8vw,6rem); color:#e8746a; line-height:1;">20%</span>
-                            <span class="block text-gray-700 font-black tracking-tight"
-                                style="font-size: clamp(1.5rem,3vw,2rem); line-height:1.1;">OFF</span>
-                        </div>
-
-                        <p class="font-extrabold text-gray-600 uppercase tracking-widest text-xs mt-1 mb-6">
-                            On Selected Cakes!
-                        </p>
-
-
-                        <!-- Feature micro-badges -->
-                        <div class="flex flex-wrap gap-2">
-                            <?php foreach ([
-                                ['🎂', 'Best Quality', 'Premium Ingredients'],
-                                ['🚚', 'Fast Delivery', 'On time at your door'],
-                                ['✅', '100% Fresh', 'Made with love'],
-                            ] as $feat): ?>
-                                <div
-                                    class="flex items-center gap-2 bg-white/65 backdrop-blur-sm rounded-xl px-3 py-2 shadow-sm">
-                                    <span class="text-sm"><?= $feat[0] ?></span>
-                                    <div class="leading-none">
-                                        <p class="text-[10px] font-bold text-gray-700"><?= $feat[1] ?></p>
-                                        <p class="text-[9px]  text-gray-500 mt-0.5"><?= $feat[2] ?></p>
+            <?php else: ?>
+                <div class="relative">
+                    <div class="overflow-hidden rounded-2xl">
+                        <div class="flex transition-transform duration-500 ease-in-out" id="reviewTrack">
+                            <?php foreach ($customerReviews as $r): ?>
+                                <div class="review-card-wrapper flex-shrink-0 px-2">
+                                    <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm h-full text-left">
+                                        <div class="flex items-center gap-3 mb-4">
+                                            <div
+                                                class="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-500 font-bold text-sm flex-shrink-0">
+                                                <?= strtoupper(substr($r['name'], 0, 1)) ?>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <p class="font-semibold text-gray-700 text-sm truncate"><?= htmlspecialchars($r['name']) ?></p>
+                                                <p class="text-xs text-gray-400"><?= date('M j, Y', strtotime($r['created_at'])) ?></p>
+                                            </div>
+                                        </div>
+                                        <p class="text-gray-500 text-sm leading-7">"<?= htmlspecialchars($r['message']) ?>"</p>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
                         </div>
                     </div>
 
-                    <!-- ② Main cake image ──────────────────────────────────── -->
-                    <!-- padding-left shifts the image to the right; items-end pushes it to bottom -->
-                     
-                    <div class="hidden md:flex items-center justify-center pl-4 overflow-visible">
-                        <img src="/sweetheaven/images/removepink.png" alt="Featured Discount Cake"
-                            class="w-auto drop-shadow-2xl"
-                            style="max-height:500px; margin-bottom:-2px; object-fit:contain;">
-                    </div>
-
-                    <!-- ③ Stacked accessory images (plain, no card) ── -->
-                    <div class="hidden md:flex flex-col justify-center gap-2 pl-3 pr-1 py-6">
-                        <img src="/sweetheaven/images/4accessorycake.png" alt="Cake accessory"
-                            class="w-full object-contain drop-shadow-xl" style="max-height:300px;">
-                        <img src="/sweetheaven/images/gitbox.png" alt="Gift box"
-                            class="w-full object-contain drop-shadow-xl" style="max-height:300px;">
-                    </div>
-
-
-                    <!-- ④ Right: compact circle badge + CTA ────────────────── -->
-                    <div class="flex flex-col items-center justify-center gap-5 p-6 md:pr-8">
-
-                        <!-- Circle badge -->
-                        <div class="relative flex items-center justify-center w-36 h-36 rounded-full shadow-xl flex-shrink-0"
-                            style="background:#e8746a;">
-                            <div class="absolute inset-2 rounded-full border-2 border-white/40"></div>
-                            <div class="text-center text-white px-2 z-10 space-y-0.5">
-                                <p class="text-[9px] font-bold uppercase tracking-wider leading-none">This Week Only!
-                                </p>
-                                <p class="text-[10px] font-semibold leading-snug">Save Big on<br>Your Favorite</p>
-                                <p class="serif text-xl font-black leading-none">Cakes!</p>
-                                <span class="text-base">❤️</span>
-                            </div>
-                        </div>
-
-                        <!-- Shop Now -->
-                        <a href="#discounted-products"
-                            class="inline-flex items-center gap-1.5 font-extrabold px-6 py-3 rounded-full text-xs shadow-lg
-                                  hover:-translate-y-0.5 transition-all duration-200 uppercase tracking-widest whitespace-nowrap"
-                            style="background:#e8746a; color:#fff;">
-                            Shop Now
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                    d="M9 5l7 7-7 7" />
-                            </svg>
-                        </a>
-                    </div>
-
-                </div>
-            </div>
-            <!-- ── Products Sub-header ── -->
-            <div id="discounted-products" class="text-center mb-8">
-                <div class="flex items-center justify-center gap-3 mb-1">
-                    <svg class="w-4 h-4 text-rose-400" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
-                    </svg>
-                    <h3 class="serif text-3xl font-bold text-gray-800">Shop The Deals</h3>
-                    <svg class="w-4 h-4 text-rose-400" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
-                    </svg>
-                </div>
-                <p class="text-gray-400 text-sm">Grab your favorite cakes at discounted prices!</p>
-            </div>
-
-            <!-- ── Discounted Product Cards ── -->
-            <?php if (empty($discountedProducts)): ?>
-                <div class="text-center py-20">
-                    <div class="text-6xl mb-5">🏷️</div>
-                    <h3 class="serif text-2xl text-gray-700 mb-3">No Discounted Products Right Now</h3>
-                    <p class="text-gray-400 text-sm max-w-sm mx-auto leading-relaxed">
-                        There are no discounted products available at the moment. Please check back later — great deals are
-                        on their way!
-                    </p>
-                    <a href="/sweetheaven/user/products.php"
-                        class="inline-flex items-center gap-2 mt-8 text-white font-semibold px-7 py-3.5 rounded-full text-sm hover:opacity-90 transition-all duration-200 shadow-md"
-                        style="background:#e8746a;">
-                        Browse All Products
-                    </a>
-                </div>
-            <?php else: ?>
-                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                    <?php foreach ($discountedProducts as $dp):
-                        $dpImgSrc = $dp['primary_image']
-                            ? '/sweetheaven/' . $dp['primary_image']
-                            : '/sweetheaven/images/maincake.jpg';
-                        $dpFinalPrice = $dp['discount_type'] === 'percentage'
-                            ? $dp['price'] * (1 - $dp['discount_value'] / 100)
-                            : max(0, $dp['price'] - $dp['discount_value']);
-                        $dpBadgeLabel = $dp['discount_type'] === 'percentage'
-                            ? (int) $dp['discount_value'] . '% OFF'
-                            : number_format($dp['discount_value']) . ' MMK OFF';
-                        ?>
-                        <div
-                            class="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-pink-100">
-                            <!-- Image area -->
-                            <div class="relative bg-pink-50 flex items-center justify-center"
-                                style="height:180px; overflow:hidden;">
-                                <img src="<?= htmlspecialchars($dpImgSrc) ?>" alt="<?= htmlspecialchars($dp['name']) ?>"
-                                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                                <!-- Discount badge -->
-                                <div class="absolute top-0 left-0 px-3 py-1.5 text-xs font-extrabold text-white rounded-br-xl shadow"
-                                    style="background:#e8746a;">
-                                    <?= htmlspecialchars($dpBadgeLabel) ?>
-                                </div>
-                                <!-- Wishlist -->
-                                <button onclick="event.stopPropagation(); toggleWishlist(<?= $dp['id'] ?>, this)"
-                                    class="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 text-gray-400 shadow flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all duration-200"
-                                    title="Wishlist">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                    </svg>
-                                </button>
-                            </div>
-                            <!-- Card body -->
-                            <div class="p-4">
-                                <a href="/sweetheaven/user/product_detail.php?id=<?= $dp['id'] ?>">
-                                    <h3
-                                        class="font-bold text-gray-800 text-sm hover:text-rose-500 transition-colors mb-2 leading-snug">
-                                        <?= htmlspecialchars($dp['name']) ?>
-                                    </h3>
-                                </a>
-                                <div class="flex items-baseline gap-2 mb-3">
-                                    <span class="text-xs line-through text-gray-400">
-                                        <?= number_format($dp['price']) ?> MMK
-                                    </span>
-                                    <span class="font-extrabold text-base" style="color:#e8746a;">
-                                        <?= number_format($dpFinalPrice) ?> <span
-                                            class="text-xs font-normal text-gray-400">MMK</span>
-                                    </span>
-                                </div>
-                                <div class="flex gap-2">
-                                    <a href="/sweetheaven/user/product_detail.php?id=<?= $dp['id'] ?>"
-                                        class="flex-1 text-center border py-2 rounded-xl text-xs font-semibold hover:bg-rose-50 transition-colors"
-                                        style="border-color:#e8746a; color:#e8746a;">
-                                        View
-                                    </a>
-                                    <?php if (!$isAdmin): ?>
-                                        <button onclick="addToCart(<?= $dp['id'] ?>, '<?= addslashes($dp['name']) ?>')"
-                                            class="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-bold text-white transition-all duration-200 hover:opacity-90 shadow"
-                                            style="background:#e8746a;">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 7H19M9 21a1 1 0 100-2 1 1 0 000 2zm10 0a1 1 0 100-2 1 1 0 000 2z" />
-                                            </svg>
-                                            Add to Cart
-                                        </button>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-
-                <!-- View All Offers button -->
-                <div class="flex justify-center mt-10">
-                    <a href="/sweetheaven/user/products.php"
-                        class="inline-flex items-center gap-2 border-2 font-bold px-8 py-3 rounded-full text-sm hover:bg-rose-50 transition-all duration-200 uppercase tracking-wide"
-                        style="border-color:#e8746a; color:#e8746a;">
-                        View All Offers
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                    <button id="reviewPrev"
+                        class="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center text-stone-600 hover:bg-white hover:text-rose-500 transition-all z-10 opacity-0 md:opacity-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
-                    </a>
-                </div>
-            <?php endif; ?>
-
-        </div>
-    </section>
-    <!-- ═════════════════════════ CUSTOMER REVIEWS ═════════════════════════ -->
-    <section id="customerReviews" class="py-20 bg-[#fdf8f3]">
-        <div class="max-w-2xl mx-auto px-6">
-            <div class="text-center mb-12 fade-up">
-                <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;">Reviews</p>
-                <h2 class="serif text-3xl text-gray-800">Loved by Our Customers</h2>
-                <p class="text-gray-400 text-sm mt-2">Here's what our sweet community has to say</p>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-5 mb-12" id="reviewsList">
-                <?php if (empty($customerReviews)): ?>
-                    <div class="md:col-span-2 text-center text-gray-400 py-10">
-                        <p class="text-4xl mb-3">💬</p>
-                        <p class="text-sm">No reviews yet. Be the first to share your experience!</p>
-                    </div>
-                <?php else: ?>
-                    <?php foreach ($customerReviews as $r): ?>
-                        <div class="review-card bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-                            <div class="flex items-center gap-3 mb-4">
-                                <div
-                                    class="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-500 font-bold text-sm">
-                                    <?= strtoupper(substr($r['name'], 0, 1)) ?>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-gray-700 text-sm"><?= htmlspecialchars($r['name']) ?></p>
-                                    <p class="text-xs text-gray-400"><?= date('M j, Y', strtotime($r['created_at'])) ?></p>
-                                </div>
-                            </div>
-                            <p class="text-gray-500 text-sm leading-7">"<?= htmlspecialchars($r['message']) ?>"</p>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-
-            <!-- Review Form -->
-            <div class="max-w-2xl mx-auto bg-white border border-gray-100 rounded-2xl p-8 shadow-sm">
-                <h3 class="font-bold text-gray-800 text-lg mb-2">Share Your Experience</h3>
-                <p class="text-gray-400 text-sm mb-6">We'd love to hear your thoughts about our products and service.
-                </p>
-                <form id="reviewForm" class="space-y-4">
-                    <div class="grid sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
-                            <input type="text" id="reviewName" required
-                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm"
-                                placeholder="Your name">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Email Address *</label>
-                            <input type="email" id="reviewEmail" required
-                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm"
-                                placeholder="you@example.com">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Your Review *</label>
-                        <textarea id="reviewMessage" rows="4" required
-                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"
-                            placeholder="Tell us about your experience..."></textarea>
-                    </div>
-                    <button type="submit"
-                        class="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-white font-semibold px-8 py-3 rounded-xl transition-colors text-sm">
-                        Submit Review
                     </button>
-                </form>
-                <div id="reviewFormMsg" class="mt-4 hidden"></div>
+                    <button id="reviewNext"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center text-stone-600 hover:bg-white hover:text-rose-500 transition-all z-10 opacity-0 md:opacity-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="flex justify-center gap-2 mt-6" id="reviewDots"></div>
+            <?php endif; ?>
+        </div>
+    </section>
+
+    <!-- ═════════════════════════ REVIEW FORM ═════════════════════════ -->
+    <?php if (isset($_SESSION['user_id']) && $_SESSION['role'] !== 'admin'): ?>
+    <section id="review-form" class="pb-20 bg-[#fdf8f3]">
+        <div class="max-w-2xl mx-auto px-6">
+            <div class="border-t border-gray-200 pt-16">
+                <div class="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm">
+                    <h3 class="font-bold text-gray-800 text-lg mb-2"><?= __('review_form_title') ?></h3>
+                    <p class="text-gray-400 text-sm mb-6"><?= __('review_form_desc') ?></p>
+                    <form id="reviewForm" class="space-y-4">
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('review_form_name_label') ?></label>
+                                <input type="text" id="reviewName" required
+                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm"
+                                    placeholder="<?= __('review_form_name_ph') ?>">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('review_form_email_label') ?></label>
+                                <input type="email" id="reviewEmail" required
+                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm"
+                                    placeholder="<?= __('review_form_email_ph') ?>">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('review_form_message_label') ?></label>
+                            <textarea id="reviewMessage" rows="4" required
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"
+                                placeholder="<?= __('review_form_message_ph') ?>"></textarea>
+                        </div>
+                        <button type="submit"
+                            class="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-white font-semibold px-8 py-3 rounded-xl transition-colors text-sm">
+                            <?= __('review_form_submit') ?>
+                        </button>
+                    </form>
+                    <div id="reviewFormMsg" class="mt-4 hidden"></div>
+                </div>
             </div>
         </div>
     </section>
+    <?php endif; ?>
 
     <script>
         document.getElementById('reviewForm')?.addEventListener('submit', function (e) {
@@ -1193,7 +1254,7 @@ $discountedProducts = $db->query("
             const btn = this.querySelector('button[type="submit"]');
             const msgBox = document.getElementById('reviewFormMsg');
             btn.disabled = true;
-            btn.textContent = 'Submitting...';
+            btn.textContent = '<?= __('review_form_submitting') ?>';
 
             fetch('/sweetheaven/api/customer_review.php', {
                 method: 'POST',
@@ -1216,16 +1277,173 @@ $discountedProducts = $db->query("
                         msgBox.textContent = data.message;
                     }
                     btn.disabled = false;
-                    btn.textContent = 'Submit Review';
+                    btn.textContent = '<?= __('review_form_submit') ?>';
                 })
                 .catch(() => {
                     msgBox.classList.remove('hidden');
                     msgBox.className = 'mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm';
-                    msgBox.textContent = 'Something went wrong. Please try again.';
+                    msgBox.textContent = '<?= __('review_form_error') ?>';
                     btn.disabled = false;
-                    btn.textContent = 'Submit Review';
+                    btn.textContent = '<?= __('review_form_submit') ?>';
                 });
         });
+    </script>
+
+    <script>
+        (function () {
+            const track = document.getElementById('reviewTrack');
+            const prevBtn = document.getElementById('reviewPrev');
+            const nextBtn = document.getElementById('reviewNext');
+            const dotsContainer = document.getElementById('reviewDots');
+            if (!track || !prevBtn || !nextBtn || !dotsContainer) return;
+            const originalItems = Array.from(track.children);
+            const realCount = originalItems.length;
+
+            function getItemsPerView() {
+                if (window.innerWidth < 640) return 1;
+                if (window.innerWidth < 1024) return 2;
+                return 4;
+            }
+
+            const cloneCount = realCount;
+            originalItems.forEach(item => {
+                const clone = item.cloneNode(true);
+                track.appendChild(clone);
+            });
+            for (let i = realCount - 1; i >= 0; i--) {
+                const clone = originalItems[i].cloneNode(true);
+                track.insertBefore(clone, track.firstChild);
+            }
+
+            const allItems = Array.from(track.children);
+            const totalItems = allItems.length;
+            const startIndex = realCount;
+
+            let currentIndex = startIndex;
+            let autoPlayTimer = null;
+            const autoPlayDelay = 3500;
+
+            function getTotalRealPages() {
+                return Math.ceil(realCount / getItemsPerView());
+            }
+
+            function getCurrentPage() {
+                const ipv = getItemsPerView();
+                const rawPage = Math.floor(currentIndex / ipv);
+                const totalRealPages = getTotalRealPages();
+                const leadingPages = Math.floor(realCount / ipv);
+                return ((rawPage - leadingPages) % totalRealPages + totalRealPages) % totalRealPages;
+            }
+
+            function render() {
+                const ipv = getItemsPerView();
+                const itemWidth = 100 / ipv;
+                allItems.forEach(item => item.style.width = itemWidth + '%');
+                updatePosition(false);
+            }
+
+            function updatePosition(animate = true) {
+                const ipv = getItemsPerView();
+                const offset = -(currentIndex / ipv) * 100;
+                if (!animate) track.style.transition = 'none';
+                track.style.transform = `translateX(${offset}%)`;
+                if (!animate) {
+                    track.offsetHeight;
+                    track.style.transition = '';
+                }
+                updateDots();
+            }
+
+            function goTo(index, animate = true) {
+                const maxIndex = totalItems - getItemsPerView();
+                index = Math.max(0, Math.min(index, maxIndex));
+                currentIndex = index;
+                updatePosition(animate);
+            }
+
+            function next() {
+                const ipv = getItemsPerView();
+                const nextIndex = currentIndex + ipv;
+                const maxRealIndex = startIndex + realCount - ipv;
+                if (nextIndex >= startIndex + realCount) {
+                    goTo(nextIndex, true);
+                    setTimeout(() => goTo(startIndex, false), 550);
+                } else {
+                    goTo(nextIndex);
+                }
+            }
+
+            function prev() {
+                const ipv = getItemsPerView();
+                const prevIndex = currentIndex - ipv;
+                if (prevIndex < startIndex) {
+                    goTo(prevIndex, true);
+                    setTimeout(() => goTo(startIndex + realCount - ipv, false), 550);
+                } else {
+                    goTo(prevIndex);
+                }
+            }
+
+            function updateDots() {
+                const ipv = getItemsPerView();
+                const totalPages = getTotalRealPages();
+                const currentPage = getCurrentPage();
+
+                dotsContainer.innerHTML = '';
+                for (let i = 0; i < totalPages; i++) {
+                    const dot = document.createElement('button');
+                    dot.className = 'w-2.5 h-2.5 rounded-full bg-stone-300 hover:bg-rose-300';
+                    if (i === currentPage) dot.classList.add('active');
+                    dot.setAttribute('aria-label', `Go to page ${i + 1}`);
+                    dot.addEventListener('click', () => {
+                        const targetIndex = startIndex + i * ipv;
+                        goTo(targetIndex);
+                        resetAutoPlay();
+                    });
+                    dotsContainer.appendChild(dot);
+                }
+            }
+
+            function startAutoPlay() {
+                stopAutoPlay();
+                autoPlayTimer = setInterval(next, autoPlayDelay);
+            }
+
+            function stopAutoPlay() {
+                if (autoPlayTimer) {
+                    clearInterval(autoPlayTimer);
+                    autoPlayTimer = null;
+                }
+            }
+
+            function resetAutoPlay() {
+                startAutoPlay();
+            }
+
+            prevBtn.addEventListener('click', () => { prev(); resetAutoPlay(); });
+            nextBtn.addEventListener('click', () => { next(); resetAutoPlay(); });
+
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    const ipv = getItemsPerView();
+                    const itemWidth = 100 / ipv;
+                    allItems.forEach(item => item.style.width = itemWidth + '%');
+                    const maxIndex = totalItems - ipv;
+                    if (currentIndex > maxIndex) currentIndex = maxIndex;
+                    updatePosition(false);
+                    updateDots();
+                }, 200);
+            });
+
+            track.addEventListener('mouseenter', stopAutoPlay);
+            track.addEventListener('mouseleave', startAutoPlay);
+
+            render();
+            startAutoPlay();
+            updateDots();
+        })();
     </script>
 
     <!-- Toast -->
@@ -1235,7 +1453,7 @@ $discountedProducts = $db->query("
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
         </svg>
-        <span id="toastMsg">Added to cart!</span>
+        <span id="toastMsg"><?= __('toast_added_cart') ?></span>
     </div>
 
     <?php require_once __DIR__ . '/../includes/footer.php'; ?>
@@ -1250,7 +1468,7 @@ $discountedProducts = $db->query("
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {
-                        showToast(`${productName} added to cart!`);
+                        showToast(`<?= __('toast_added_cart_js') ?>`.replace('%s', productName));
                         const badge = document.getElementById('cartBadge');
                         if (badge) { badge.textContent = data.cart_count; badge.classList.remove('hidden'); }
                     } else if (data.redirect) {
@@ -1274,7 +1492,7 @@ $discountedProducts = $db->query("
                         btn.classList.toggle('text-white', data.is_wishlisted);
                         btn.classList.toggle('text-gray-400', !data.is_wishlisted);
                         svg.setAttribute('fill', data.is_wishlisted ? 'currentColor' : 'none');
-                        showToast(data.is_wishlisted ? '❤️ ' + (data.message || 'Added to wishlist!') : '💔 Removed from wishlist');
+                        showToast(data.is_wishlisted ? '❤️ ' + (data.message || '<?= __('toast_added_wishlist') ?>') : '💔 <?= __('toast_removed_wishlist') ?>');
                         if (typeof updateWishlistBadge === 'function') updateWishlistBadge(data.wishlist_count);
                     } else if (data.redirect) window.location.href = '/sweetheaven/auth/login.php';
                 });

@@ -222,7 +222,7 @@ $statusColors = [
                     </span>
                 </div>
                 <div class="text-right">
-                    <p class="font-bold text-rose-500"><?= number_format($order['total_amount']) ?> MMK</p>
+                    <p class="font-bold text-rose-500"><?= number_format($order['total_amount']) ?> <?= __('common_mmk') ?></p>
                     <p class="text-xs text-gray-400"><?= date('M j, Y', strtotime($order['order_date'])) ?></p>
                 </div>
             </div>
@@ -231,7 +231,7 @@ $statusColors = [
                     <?php foreach ($orderItems as $item): ?>
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-600"><?= htmlspecialchars($item['name']) ?> × <?= $item['quantity'] ?></span>
-                        <span class="font-semibold text-gray-700"><?= number_format($item['price'] * $item['quantity']) ?> MMK</span>
+                        <span class="font-semibold text-gray-700"><?= number_format($item['price'] * $item['quantity']) ?> <?= __('common_mmk') ?></span>
                     </div>
                     <?php endforeach; ?>
                 </div>
@@ -305,7 +305,7 @@ $statusColors = [
                         </div>
                         <?php endif; ?>
                         <?php if ($cr['admin_price']): ?>
-                        <p><span class="font-semibold text-gray-600">Price:</span> <span class="text-rose-500 font-bold"><?= number_format($cr['admin_price']) ?> MMK</span></p>
+                        <p><span class="font-semibold text-gray-600">Price:</span> <span class="text-rose-500 font-bold"><?= number_format($cr['admin_price']) ?> <?= __('common_mmk') ?></span></p>
                         <?php endif; ?>
                         <?php if ($cr['admin_note']): ?>
                         <p><span class="font-semibold text-gray-600">Note:</span> <?= htmlspecialchars($cr['admin_note']) ?></p>
@@ -343,7 +343,7 @@ $statusColors = [
             <img src="<?= htmlspecialchars($imgSrc) ?>" class="w-full h-40 object-cover" alt="">
             <div class="p-4">
                 <p class="font-bold text-gray-700 text-sm mb-1 line-clamp-1"><?= htmlspecialchars($item['name']) ?></p>
-                <p class="text-rose-500 font-bold text-sm mb-3"><?= number_format($item['price']) ?> MMK</p>
+                <p class="text-rose-500 font-bold text-sm mb-3"><?= number_format($item['price']) ?> <?= __('common_mmk') ?></p>
                 <div class="flex gap-2">
                     <button onclick="addToCart(<?= $item['id'] ?>)" class="flex-1 bg-rose-500 text-white text-xs font-semibold py-2 rounded-xl hover:bg-rose-600 transition-colors">Add to Cart</button>
                     <button onclick="removeFromWishlist(<?= $item['id'] ?>, this)" class="p-2 text-gray-300 hover:text-red-500 transition-colors">

@@ -68,7 +68,7 @@ if (!empty($cart)) {
 
                 <div class="flex-1 min-w-0">
                     <h3 class="font-bold text-gray-800 mb-1 line-clamp-1"><?= htmlspecialchars($item['name']) ?></h3>
-                    <p class="text-rose-500 font-semibold text-sm"><?= number_format($item['price']) ?> MMK <?= __('cart_each') ?></p>
+                    <p class="text-rose-500 font-semibold text-sm"><?= number_format($item['price']) ?> <?= __('common_mmk') ?> <?= __('cart_each') ?></p>
                 </div>
 
                 <div class="flex items-center gap-2">
@@ -81,7 +81,7 @@ if (!empty($cart)) {
 
                 <div class="text-right min-w-[100px]">
                     <p class="font-bold text-gray-800" id="subtotal-<?= $item['id'] ?>"><?= number_format($item['item_total']) ?></p>
-                    <p class="text-xs text-gray-400">MMK</p>
+                    <p class="text-xs text-gray-400"><?= __('common_mmk') ?></p>
                 </div>
 
                 <button onclick="removeItem(<?= $item['id'] ?>)"
@@ -100,7 +100,7 @@ if (!empty($cart)) {
                 <div class="space-y-3 text-sm mb-6">
                     <div class="flex justify-between text-gray-600">
                         <span><?= __('cart_subtotal') ?></span>
-                        <span id="totalDisplay"><?= number_format($subtotal) ?> MMK</span>
+                        <span id="totalDisplay"><?= number_format($subtotal) ?> <?= __('common_mmk') ?></span>
                     </div>
                     <div class="flex justify-between text-gray-600">
                         <span><?= __('cart_shipping') ?></span>
@@ -108,7 +108,7 @@ if (!empty($cart)) {
                     </div>
                     <div class="border-t border-gray-100 pt-3 flex justify-between font-bold text-gray-800 text-base">
                         <span><?= __('cart_total') ?></span>
-                        <span id="grandTotal"><?= number_format($subtotal) ?> MMK</span>
+                        <span id="grandTotal"><?= number_format($subtotal) ?> <?= __('common_mmk') ?></span>
                     </div>
                 </div>
 
@@ -152,8 +152,8 @@ function updateQty(productId, newQty) {
             if (qtyEl) qtyEl.textContent = newQty;
             if (subEl) subEl.textContent = Number(data.subtotal).toLocaleString('en');
         }
-        document.getElementById('totalDisplay').textContent = Number(data.total).toLocaleString('en') + ' MMK';
-        document.getElementById('grandTotal').textContent   = Number(data.total).toLocaleString('en') + ' MMK';
+        document.getElementById('totalDisplay').textContent = Number(data.total).toLocaleString('en') + ' <?= __('common_mmk') ?>';
+        document.getElementById('grandTotal').textContent   = Number(data.total).toLocaleString('en') + ' <?= __('common_mmk') ?>';
         const badge = document.getElementById('cartBadge');
         if (badge) { badge.textContent = data.cart_count; if(data.cart_count===0)badge.classList.add('hidden'); }
     });

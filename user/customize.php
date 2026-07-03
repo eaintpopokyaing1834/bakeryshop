@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $additionalNotes = trim($_POST['additional_notes'] ?? '');
 
     if (!$size || !$flavor || !$deliveryDate) {
-        $error = 'Please fill in all required fields.';
+        $error = __('customize_err_fields');
     } else {
         $referenceImage = null;
         if (!empty($_FILES['reference_image']['tmp_name'])) {
@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
             $allowed = ['jpg', 'jpeg', 'png', 'webp'];
             if (!in_array($ext, $allowed)) {
-                $error = 'Only JPG, JPEG, PNG & WEBP files are allowed.';
+                $error = __('customize_err_filetype');
             } else {
                 $uploadDir = __DIR__ . '/../uploads/customize/';
                 if (!is_dir($uploadDir))
@@ -45,11 +45,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Notify admin
             $db->prepare("INSERT INTO notifications (type, title, message) VALUES ('customize_request', ?, ?)")
                 ->execute([
-                    'New Customize Cake Request',
-                    "Customer " . htmlspecialchars($_SESSION['name']) . " submitted a cake customization request."
+                    __('customize_notif_title'),
+                    sprintf(__('customize_notif_body'), htmlspecialchars($_SESSION['name']))
                 ]);
 
-            $success = 'Your cake customization request has been submitted successfully! We will review it and get back to you soon.';
+            $success = __('customize_success_msg');
         }
     }
 }
@@ -72,7 +72,7 @@ $reqStatusColors = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customize Your Cake — Sweet Heaven Bakery</title>
+    <title><?= __('customize_title_tag') ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght=300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -94,8 +94,8 @@ $reqStatusColors = [
                 </svg>
             </div>
             <div>
-                <h1 class="text-3xl font-bold text-gray-800">Customize Your Cake</h1>
-                <p class="text-gray-400 text-sm">Tell us your dream cake and we'll make it real!</p>
+                <h1 class="text-3xl font-bold text-gray-800"><?= __('customize_page_head') ?></h1>
+                <p class="text-gray-400 text-sm"><?= __('customize_subtitle') ?></p>
             </div>
         </div>
 
@@ -115,53 +115,52 @@ $reqStatusColors = [
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
                         <div class="grid sm:grid-cols-2 gap-5">
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Cake Size *</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_size_label') ?></label>
                                 <select name="size" required
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
-                                    <option value="">Select size</option>
-                                    <option value="1 lb (6 inch)">1 lb (6 inch)</option>
-                                    <option value="2 lb (8 inch)">2 lb (8 inch)</option>
-                                    <option value="3 lb (10 inch)">3 lb (10 inch)</option>
-                                    <option value="5 lb (12 inch)">5 lb (12 inch)</option>
-                                    <option value="Tier 2 (6+8 inch)">Tier 2 (6+8 inch)</option>
-                                    <option value="Tier 3 (6+8+10 inch)">Tier 3 (6+8+10 inch)</option>
+                                    <option value=""><?= __('customize_size_default') ?></option>
+                                    <option value="1 lb (6 inch)"><?= __('customize_size_1lb') ?></option>
+                                    <option value="2 lb (8 inch)"><?= __('customize_size_2lb') ?></option>
+                                    <option value="3 lb (10 inch)"><?= __('customize_size_3lb') ?></option>
+                                    <option value="5 lb (12 inch)"><?= __('customize_size_5lb') ?></option>
+                                    <option value="Tier 2 (6+8 inch)"><?= __('customize_size_tier2') ?></option>
+                                    <option value="Tier 3 (6+8+10 inch)"><?= __('customize_size_tier3') ?></option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Cake Flavor *</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_flavor_label') ?></label>
                                 <select name="flavor" required
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
-                                    <option value="">Select flavor</option>
-                                    <option value="Chocolate">Chocolate</option>
-                                    <option value="Vanilla">Vanilla</option>
-                                    <option value="Red Velvet">Red Velvet</option>
-                                    <option value="Lemon">Lemon</option>
-                                    <option value="Strawberry">Strawberry</option>
-                                    <option value="Coffee">Coffee</option>
-                                    <option value="Matcha">Matcha</option>
-                                    <option value="Pandan">Pandan</option>
-                                    <option value="Mango">Mango</option>
-                                    <option value="Black Forest">Black Forest</option>
-                                    <option value="Custom">Custom (specify in notes)</option>
+                                    <option value=""><?= __('customize_flavor_default') ?></option>
+                                    <option value="Chocolate"><?= __('customize_flavor_chocolate') ?></option>
+                                    <option value="Vanilla"><?= __('customize_flavor_vanilla') ?></option>
+                                    <option value="Red Velvet"><?= __('customize_flavor_red_velvet') ?></option>
+                                    <option value="Lemon"><?= __('customize_flavor_lemon') ?></option>
+                                    <option value="Strawberry"><?= __('customize_flavor_strawberry') ?></option>
+                                    <option value="Coffee"><?= __('customize_flavor_coffee') ?></option>
+                                    <option value="Matcha"><?= __('customize_flavor_matcha') ?></option>
+                                    <option value="Pandan"><?= __('customize_flavor_pandan') ?></option>
+                                    <option value="Mango"><?= __('customize_flavor_mango') ?></option>
+                                    <option value="Black Forest"><?= __('customize_flavor_black_forest') ?></option>
+                                    <option value="Custom"><?= __('customize_flavor_custom') ?></option>
                                 </select>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Cake Color / Theme</label>
-                            <input type="text" name="color" placeholder="e.g. Pink & White, Rainbow, Blue..."
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_color_label') ?></label>
+                            <input type="text" name="color" placeholder="<?= __('customize_color_ph') ?>"
                                 class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Message on the Cake</label>
-                            <textarea name="cake_message" rows="2" placeholder="e.g. Happy Birthday Mom!"
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_msg_label') ?></label>
+                            <textarea name="cake_message" rows="2" placeholder="<?= __('customize_msg_ph') ?>"
                                 class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"></textarea>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Reference Cake Image
-                                (optional)</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_image_label') ?></label>
                             <div class="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center hover:border-rose-300 transition-colors cursor-pointer"
                                 id="uploadDropzone">
                                 <input type="file" name="reference_image" id="referenceImage"
@@ -172,8 +171,8 @@ $reqStatusColors = [
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
-                                    <p class="text-sm text-gray-400">Click to upload a reference image</p>
-                                    <p class="text-xs text-gray-300 mt-1">JPG, JPEG, PNG, WEBP</p>
+                                    <p class="text-sm text-gray-400"><?= __('customize_image_upload') ?></p>
+                                    <p class="text-xs text-gray-300 mt-1"><?= __('customize_image_formats') ?></p>
                                 </div>
                                 <div id="uploadPreview" class="hidden relative">
                                     <img id="previewImage" class="max-h-48 mx-auto rounded-xl shadow-sm">
@@ -184,24 +183,22 @@ $reqStatusColors = [
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Preferred Delivery/Pickup Date
-                                *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_date_label') ?></label>
                             <input type="date" name="delivery_date" required
                                 class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Additional Notes <span
-                                    class="text-gray-400 font-normal">(optional)</span></label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_notes_label') ?> <span class="text-gray-400 font-normal"><?= __('customize_notes_optional') ?></span></label>
                             <textarea name="additional_notes" rows="3"
-                                placeholder="Any special requests, dietary restrictions, or additional details..."
+                                placeholder="<?= __('customize_notes_ph') ?>"
                                 class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"></textarea>
                         </div>
                     </div>
 
                     <button type="submit"
                         class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 rounded-2xl transition-colors shadow-sm shadow-rose-100 text-base">
-                        Submit Customization Request
+                        <?= __('customize_submit_btn') ?>
                     </button>
                 </form>
             </div>
@@ -216,8 +213,8 @@ $reqStatusColors = [
                             </svg>
                         </div>
                         <div>
-                            <h2 class="text-xl font-bold text-gray-800">My Requests</h2>
-                            <p class="text-sm text-gray-400">Track your cake customization requests</p>
+                            <h2 class="text-xl font-bold text-gray-800"><?= __('customize_my_requests') ?></h2>
+                            <p class="text-sm text-gray-400"><?= __('customize_my_requests_sub') ?></p>
                         </div>
                     </div>
 
@@ -239,23 +236,23 @@ $reqStatusColors = [
                                 <div class="px-6 py-4">
                                     <div class="grid sm:grid-cols-2 gap-4 text-sm">
                                         <div class="space-y-1">
-                                            <p><span class="font-semibold text-gray-600">Size:</span>
+                                            <p><span class="font-semibold text-gray-600"><?= __('customize_req_size') ?></span>
                                                 <?= htmlspecialchars($req['size']) ?></p>
-                                            <p><span class="font-semibold text-gray-600">Flavor:</span>
+                                            <p><span class="font-semibold text-gray-600"><?= __('customize_req_flavor') ?></span>
                                                 <?= htmlspecialchars($req['flavor']) ?></p>
                                             <?php if ($req['color']): ?>
-                                                <p><span class="font-semibold text-gray-600">Color:</span>
+                                                <p><span class="font-semibold text-gray-600"><?= __('customize_req_color') ?></span>
                                                     <?= htmlspecialchars($req['color']) ?></p><?php endif; ?>
                                             <?php if ($req['cake_message']): ?>
-                                                <p><span class="font-semibold text-gray-600">Message:</span>
+                                                <p><span class="font-semibold text-gray-600"><?= __('customize_req_message') ?></span>
                                                     <?= htmlspecialchars($req['cake_message']) ?></p><?php endif; ?>
-                                            <p><span class="font-semibold text-gray-600">Delivery:</span>
+                                            <p><span class="font-semibold text-gray-600"><?= __('customize_req_delivery') ?></span>
                                                 <?= date('M j, Y', strtotime($req['delivery_date'])) ?></p>
                                         </div>
                                         <div class="space-y-1">
                                             <?php if ($req['reference_image']): ?>
                                                 <div>
-                                                    <span class="font-semibold text-gray-600">Reference:</span>
+                                                    <span class="font-semibold text-gray-600"><?= __('customize_req_reference') ?></span>
                                                     <a href="/sweetheaven/<?= htmlspecialchars($req['reference_image']) ?>"
                                                         target="_blank" class="block mt-1">
                                                         <img src="/sweetheaven/<?= htmlspecialchars($req['reference_image']) ?>"
@@ -264,12 +261,12 @@ $reqStatusColors = [
                                                 </div>
                                             <?php endif; ?>
                                             <?php if ($req['status'] === 'approved' && $req['admin_price']): ?>
-                                                <p class="mt-2"><span class="font-semibold text-gray-600">Price:</span> <span
+                                                <p class="mt-2"><span class="font-semibold text-gray-600"><?= __('customize_req_price') ?></span> <span
                                                         class="text-rose-500 font-bold text-base"><?= number_format($req['admin_price']) ?>
-                                                        MMK</span></p>
+                                                        <?= __('common_mmk') ?></span></p>
                                             <?php endif; ?>
                                             <?php if ($req['admin_note']): ?>
-                                                <p><span class="font-semibold text-gray-600">Admin Note:</span>
+                                                <p><span class="font-semibold text-gray-600"><?= __('customize_req_admin_note') ?></span>
                                                     <?= htmlspecialchars($req['admin_note']) ?></p>
                                             <?php endif; ?>
                                         </div>
@@ -287,7 +284,7 @@ $reqStatusColors = [
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                                 </svg>
-                                                Order Customized Cake
+                                                <?= __('customize_req_order') ?>
                                             </a>
                                         <?php elseif ($req['status'] === 'pending'): ?>
                                             <span
@@ -296,7 +293,7 @@ $reqStatusColors = [
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
-                                                Awaiting Review
+                                                <?= __('customize_status_pending') ?>
                                             </span>
                                         <?php elseif ($req['status'] === 'rejected'): ?>
                                             <span
@@ -305,7 +302,7 @@ $reqStatusColors = [
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M6 18L18 6M6 6l12 12" />
                                                 </svg>
-                                                Not Accepted
+                                                <?= __('customize_status_rejected') ?>
                                             </span>
                                         <?php elseif ($req['status'] === 'ordered'): ?>
                                             <span
@@ -314,7 +311,7 @@ $reqStatusColors = [
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M5 13l4 4L19 7" />
                                                 </svg>
-                                                Ordered
+                                                <?= __('customize_status_ordered') ?>
                                             </span>
                                         <?php endif; ?>
                                     </div>
@@ -325,8 +322,8 @@ $reqStatusColors = [
                 <?php else: ?>
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
                         <p class="text-4xl mb-3">🎂</p>
-                        <h3 class="text-lg font-bold text-gray-700 mb-1">No requests yet</h3>
-                        <p class="text-sm text-gray-400">Submit a customization request and it will appear here.</p>
+                        <h3 class="text-lg font-bold text-gray-700 mb-1"><?= __('customize_no_requests_title') ?></h3>
+                        <p class="text-sm text-gray-400"><?= __('customize_no_requests_sub') ?></p>
                     </div>
                 <?php endif; ?>
             </div>

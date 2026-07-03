@@ -238,7 +238,7 @@ if ($isLoggedIn && !$isAdmin) {
                                 <?php else: ?>
                                     <?= number_format($product['price']) ?>
                                 <?php endif; ?>
-                                <span class="text-xs font-normal text-gray-400">MMK</span>
+                                <span class="text-xs font-normal text-gray-400"><?= __('common_mmk') ?></span>
                             </span>
                             <div class="flex gap-2">
                                 <a href="/sweetheaven/user/product_detail.php?id=<?= $product['id'] ?>"

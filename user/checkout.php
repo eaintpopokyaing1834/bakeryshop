@@ -39,15 +39,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $customizeId = (int)($_POST['customize_id'] ?? 0);
 
     if (!$name || !$phone || !$address || !$paymentMethodId) {
-        $error = 'Please fill in all required fields.';
+        $error = __('checkout_err_fields_fill');
     } elseif (empty($_FILES['payment_screenshot']) || $_FILES['payment_screenshot']['error'] !== UPLOAD_ERR_OK) {
-        $error = 'Please upload your payment screenshot.';
+        $error = __('checkout_err_upload');
     } else {
         $file = $_FILES['payment_screenshot'];
         $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
         $allowed = ['jpg', 'jpeg', 'png', 'webp'];
         if (!in_array($ext, $allowed)) {
-            $error = 'Only JPG, JPEG, PNG & WEBP files are allowed.';
+            $error = __('checkout_err_filetype');
         } else {
             $shippingFee = $shippingMethod === 'express' ? 5000 : 2000;
 
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $crStmt->execute([$customizeId, $_SESSION['user_id']]);
                 $cr = $crStmt->fetch();
                 if (!$cr) {
-                    $error = 'Invalid customize request.';
+                    $error = __('checkout_err_invalid_cr');
                 } else {
                     $subtotal = (float)$cr['admin_price'];
                     $totalAmount = $subtotal + $shippingFee;
@@ -135,11 +135,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ->execute([$orderId, $paymentMethodId, $screenshotPath]);
 
                     // Admin notification
-                    $orderLabel = $customizeId ? 'Custom Cake Order' : 'New Order Received';
+                    $orderLabel = $customizeId ? __('checkout_notif_title') : __('checkout_notif_title');
                     $db->prepare("INSERT INTO notifications (type, title, message) VALUES ('new_order', ?, ?)")
                         ->execute([
                             $orderLabel,
-                            "Customer " . htmlspecialchars($name) . " placed order #$orderId for " . number_format($totalAmount) . " MMK"
+                            sprintf(__('checkout_notif_body'), htmlspecialchars($name), $orderId, number_format($totalAmount))
                         ]);
 
                     // Customer notification
@@ -148,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ->execute([
                             $_SESSION['user_id'],
                             $orderId,
-                            "Your order $orderNo has been placed successfully! Total: " . number_format($totalAmount) . " MMK. We'll notify you when it's processed. 🎉"
+                            sprintf(__('checkout_success_msg'), $orderNo, number_format($totalAmount))
                         ]);
 
                     $db->commit();
@@ -157,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     exit;
                 } catch (Exception $e) {
                     $db->rollBack();
-                    $error = 'Database Error: ' . $e->getMessage();
+                    $error = sprintf(__('checkout_db_error'), $e->getMessage());
                 }
             }
         }
@@ -178,7 +178,7 @@ $totalSavings = 0;
 if ($customizeRequest) {
     $cartDetails[] = [
         'id' => 0,
-        'name' => 'Custom ' . $customizeRequest['size'] . ' ' . $customizeRequest['flavor'] . ' Cake',
+        'name' => sprintf(__('checkout_custom_cake'), $customizeRequest['size'], $customizeRequest['flavor']),
         'price' => (float)$customizeRequest['admin_price'],
         'qty' => 1,
         'item_total' => (float)$customizeRequest['admin_price'],
@@ -228,7 +228,7 @@ if ($customizeRequest) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout — Sweet Heaven Bakery</title>
+    <title><?= __('checkout_title_tag') ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght=300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -243,7 +243,7 @@ if ($customizeRequest) {
     <?php require_once __DIR__ . '/../includes/header.php'; ?>
 
     <div class="max-w-6xl mx-auto px-6 py-10">
-        <h1 class="text-3xl font-bold text-gray-800 mb-8">Checkout</h1>
+        <h1 class="text-3xl font-bold text-gray-800 mb-8"><?= __('checkout_heading_title') ?></h1>
 
         <?php if ($error): ?>
             <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">⚠️
@@ -265,35 +265,34 @@ if ($customizeRequest) {
                         <h2 class="font-bold text-gray-800 text-lg mb-5 flex items-center gap-2">
                             <span
                                 class="w-7 h-7 bg-rose-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
-                            Delivery Information
+                            <?= __('checkout_delivery_info') ?>
                         </h2>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="col-span-2">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_full_name') ?></label>
                                 <input type="text" name="full_name" required
                                     value="<?= htmlspecialchars($user['name'] ?? '') ?>"
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Phone Number *</label>
-                                <input type="tel" name="phone" required placeholder="09 XXXX XXXXX"
+                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_phone') ?></label>
+                                <input type="tel" name="phone" required placeholder="<?= __('checkout_phone_ph') ?>"
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_email') ?></label>
                                 <input type="email" value="<?= htmlspecialchars($user['email'] ?? '') ?>" disabled
                                     class="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 text-gray-400 text-sm">
                             </div>
                             <div class="col-span-2">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Shipping Address *</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_address') ?></label>
                                 <textarea name="shipping_address" required rows="3"
-                                    placeholder="Street, Township, City..."
+                                    placeholder="<?= __('checkout_address_ph') ?>"
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"></textarea>
                             </div>
                             <div class="col-span-2">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Special Request /
-                                    Note</label>
-                                <input type="text" name="request_note" placeholder="Any special instructions..."
+                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_request_note') ?></label>
+                                <input type="text" name="request_note" placeholder="<?= __('checkout_request_note_ph') ?>"
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                             </div>
                         </div>
@@ -304,7 +303,7 @@ if ($customizeRequest) {
                         <h2 class="font-bold text-gray-800 text-lg mb-5 flex items-center gap-2">
                             <span
                                 class="w-7 h-7 bg-rose-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
-                            Shipping Method
+                            <?= __('checkout_shipping_method') ?>
                         </h2>
                         <div class="grid sm:grid-cols-2 gap-4">
                             <label class="cursor-pointer">
@@ -313,10 +312,10 @@ if ($customizeRequest) {
                                 <div
                                     class="border-2 border-gray-200 peer-checked:border-rose-400 peer-checked:bg-rose-50 rounded-2xl p-5 transition-all">
                                     <div class="flex items-center justify-between mb-2">
-                                        <span class="font-bold text-gray-700">Standard</span>
-                                        <span class="text-rose-500 font-bold">2,000 MMK</span>
+                                        <span class="font-bold text-gray-700"><?= __('checkout_standard') ?></span>
+                                        <span class="text-rose-500 font-bold"><?= __('checkout_standard_fee') ?></span>
                                     </div>
-                                    <p class="text-xs text-gray-400">Delivered in 3–5 business days</p>
+                                    <p class="text-xs text-gray-400"><?= __('checkout_standard_desc') ?></p>
                                 </div>
                             </label>
                             <label class="cursor-pointer">
@@ -324,10 +323,10 @@ if ($customizeRequest) {
                                 <div
                                     class="border-2 border-gray-200 peer-checked:border-rose-400 peer-checked:bg-rose-50 rounded-2xl p-5 transition-all">
                                     <div class="flex items-center justify-between mb-2">
-                                        <span class="font-bold text-gray-700">Express</span>
-                                        <span class="text-rose-500 font-bold">5,000 MMK</span>
+                                        <span class="font-bold text-gray-700"><?= __('checkout_express') ?></span>
+                                        <span class="text-rose-500 font-bold"><?= __('checkout_express_fee') ?></span>
                                     </div>
-                                    <p class="text-xs text-gray-400">Same day or next day delivery</p>
+                                    <p class="text-xs text-gray-400"><?= __('checkout_express_desc') ?></p>
                                 </div>
                             </label>
                         </div>
@@ -338,7 +337,7 @@ if ($customizeRequest) {
                         <h2 class="font-bold text-gray-800 text-lg mb-5 flex items-center gap-2">
                             <span
                                 class="w-7 h-7 bg-rose-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
-                            Payment Method
+                            <?= __('checkout_payment_method') ?>
                         </h2>
                         <!-- <div class="grid sm:grid-cols-2 gap-4 mb-5">
                             <?php foreach ($paymentMethods as $index => $pm): ?>
@@ -381,15 +380,14 @@ if ($customizeRequest) {
                         <!-- Payment Details (dynamic) -->
                         <div id="paymentDetails"
                             class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-5">
-                            <p class="font-bold text-amber-800 mb-3">💳 Transfer to:</p>
+                            <p class="font-bold text-amber-800 mb-3"><?= __('checkout_transfer_to') ?></p>
                             <div id="paymentDetailsContent"></div>
                         </div>
 
                         <!-- Screenshot Upload -->
                         <div id="screenshotUploadSection" class="hidden">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Payment Screenshot *</label>
-                            <p class="text-xs text-gray-400 mb-3">Please transfer the exact total amount and upload the
-                                screenshot below.</p>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_payment_ss') ?></label>
+                            <p class="text-xs text-gray-400 mb-3"><?= __('checkout_payment_ss_desc') ?></p>
                             <div class="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center hover:border-rose-300 transition-colors cursor-pointer"
                                 id="uploadDropzone">
                                 <input type="file" name="payment_screenshot" id="paymentScreenshot"
@@ -400,8 +398,8 @@ if ($customizeRequest) {
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
-                                    <p class="text-sm text-gray-400">Click to upload payment screenshot</p>
-                                    <p class="text-xs text-gray-300 mt-1">JPG, JPEG, PNG, WEBP</p>
+                                    <p class="text-sm text-gray-400"><?= __('checkout_upload_ss') ?></p>
+                                    <p class="text-xs text-gray-300 mt-1"><?= __('checkout_upload_formats') ?></p>
                                 </div>
                                 <div id="uploadPreview" class="hidden relative">
                                     <img id="previewImage" class="max-h-48 mx-auto rounded-xl shadow-sm">
@@ -416,7 +414,7 @@ if ($customizeRequest) {
                 <!-- Right: Order Summary -->
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
-                        <h3 class="font-bold text-gray-800 text-lg mb-5">Order Summary</h3>
+                        <h3 class="font-bold text-gray-800 text-lg mb-5"><?= __('checkout_order_summary') ?></h3>
 
                         <div class="space-y-4 mb-5 max-h-72 overflow-y-auto pr-1">
                             <?php foreach ($cartDetails as $item): ?>
@@ -447,35 +445,35 @@ if ($customizeRequest) {
 
                         <div class="border-t border-gray-100 pt-4 space-y-2 text-sm">
                             <div class="flex justify-between text-gray-500">
-                                <span>Subtotal</span>
-                                <span><?= number_format($subtotal) ?> MMK</span>
+                                <span><?= __('checkout_subtotal') ?></span>
+                                <span><?= number_format($subtotal) ?> <?= __('common_mmk') ?></span>
                             </div>
                             <?php if ($totalSavings > 0): ?>
                             <div class="flex justify-between text-green-600 font-medium">
-                                <span>🤑 Product Discounts</span>
-                                <span>-<?= number_format($totalSavings) ?> MMK</span>
+                                <span><?= __('checkout_product_discounts') ?></span>
+                                <span>-<?= number_format($totalSavings) ?> <?= __('common_mmk') ?></span>
                             </div>
                             <?php endif; ?>
                             <?php if ($firstOrderDiscount > 0): ?>
                             <div class="flex justify-between text-blue-600 font-medium">
-                                <span>🎉 First Order Discount (10%)</span>
-                                <span>-<?= number_format($firstOrderDiscount) ?> MMK</span>
+                                <span><?= __('checkout_first_order_discount') ?></span>
+                                <span>-<?= number_format($firstOrderDiscount) ?> <?= __('common_mmk') ?></span>
                             </div>
                             <?php endif; ?>
                             <div class="flex justify-between text-gray-500">
-                                <span>Shipping</span>
-                                <span id="shippingDisplay">2,000 MMK</span>
+                                <span><?= __('checkout_shipping') ?></span>
+                                <span id="shippingDisplay"><?= __('checkout_standard_fee') ?></span>
                             </div>
                             <div
                                 class="flex justify-between font-bold text-gray-800 text-base border-t border-gray-100 pt-2">
-                                <span>Total</span>
-                                <span id="totalDisplay"><?= number_format($subtotal - $firstOrderDiscount + 2000) ?> MMK</span>
+                                <span><?= __('checkout_total') ?></span>
+                                <span id="totalDisplay"><?= number_format($subtotal - $firstOrderDiscount + 2000) ?> <?= __('common_mmk') ?></span>
                             </div>
                         </div>
 
                         <button type="submit"
                             class="mt-6 w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 rounded-2xl transition-colors shadow-sm shadow-rose-100 text-base">
-                            Place Order
+                            <?= __('checkout_place_order') ?>
                         </button>
                     </div>
                 </div>
@@ -496,8 +494,8 @@ if ($customizeRequest) {
             radio.addEventListener('change', () => {
                 const fee = shippingFees[radio.value] || 2000;
                 const total = subtotal - firstOrderDiscount + fee;
-                document.getElementById('shippingDisplay').textContent = fee.toLocaleString('en') + ' MMK';
-                document.getElementById('totalDisplay').textContent = total.toLocaleString('en') + ' MMK';
+                document.getElementById('shippingDisplay').textContent = fee.toLocaleString('en') + ' <?= __('common_mmk') ?>';
+                document.getElementById('totalDisplay').textContent = total.toLocaleString('en') + ' <?= __('common_mmk') ?>';
             });
         });
 
@@ -510,12 +508,12 @@ if ($customizeRequest) {
             if (!pm) { details.classList.add('hidden'); uploadSection.classList.add('hidden'); return; }
             let html = `
                 <p class="text-sm font-bold text-amber-800">${pm.payment_name}</p>
-                <p class="text-sm text-amber-700 mt-1">Account Name: <strong>${pm.acc_name || 'N/A'}</strong></p>
-                <p class="text-sm text-amber-700">Phone Number: <strong>${pm.acc_no || 'N/A'}</strong></p>
+                <p class="text-sm text-amber-700 mt-1"><?= __('checkout_account_name') ?> <strong>${pm.acc_name || '<?= __('checkout_na') ?>'}</strong></p>
+                <p class="text-sm text-amber-700"><?= __('checkout_phone_number') ?> <strong>${pm.acc_no || '<?= __('checkout_na') ?>'}</strong></p>
             `;
             if (pm.qr_image) {
                 html += `<div class="mt-3 flex justify-center">
-                    <img src="/sweetheaven/${pm.qr_image}" class="w-36 h-36 object-contain border border-amber-200 rounded-xl bg-white" alt="${pm.payment_name} QR">
+                    <img src="/sweetheaven/${pm.qr_image}" class="w-36 h-36 object-contain border border-amber-200 rounded-xl bg-white" alt="${pm.payment_name} <?= __('checkout_qr_alt') ?>">
                 </div>`;
             }
             content.innerHTML = html;

@@ -151,7 +151,7 @@ $payStatusColors = [
                             </span>
                         </span>
                         <span class="font-semibold text-gray-800">
-                            <?= number_format($item['price'] * $item['quantity']) ?> MMK
+                            <?= number_format($item['price'] * $item['quantity']) ?> <?= __('common_mmk') ?>
                         </span>
                     </div>
                 <?php endforeach; ?>
@@ -160,7 +160,7 @@ $payStatusColors = [
             <div class="flex justify-between items-center font-bold text-gray-800">
                 <span>Total Amount</span>
                 <span class="text-xl text-rose-500">
-                    <?= number_format($order['total_amount']) ?> MMK
+                    <?= number_format($order['total_amount']) ?> <?= __('common_mmk') ?>
                 </span>
             </div>
 
@@ -169,7 +169,7 @@ $payStatusColors = [
             <div class="mt-6 pt-6 border-t border-gray-100 bg-amber-50 rounded-2xl p-5">
                 <p class="font-bold text-amber-800 mb-2">📱 Payment Instructions</p>
                 <p class="text-sm text-amber-700">Please transfer <strong>
-                        <?= number_format($order['total_amount']) ?> MMK
+                        <?= number_format($order['total_amount']) ?> <?= __('common_mmk') ?>
                     </strong> to:</p>
                 <p class="text-sm font-bold text-amber-800 mt-1">
                     <?= htmlspecialchars($order['payment_name']) ?>
