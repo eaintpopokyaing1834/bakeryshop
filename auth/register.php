@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/../includes/lang.php';
 if (isset($_SESSION['user_id'])) {
     header('Location: /sweetheaven/user/index.php');
     exit;
@@ -16,25 +17,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $confirm  = $_POST['confirm_password'] ?? '';
 
     if (empty($name) || empty($email) || empty($password) || empty($confirm)) {
-        $error = 'Please fill in all fields.';
+        $error = __('register_err_empty');
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Please enter a valid email address.';
+        $error = __('register_err_email');
     } elseif (strlen($password) < 6) {
-        $error = 'Password must be at least 6 characters.';
+        $error = __('register_err_short');
     } elseif ($password !== $confirm) {
-        $error = 'Passwords do not match.';
+        $error = __('register_err_match');
     } else {
         $db = getDB();
         $check = $db->prepare("SELECT id FROM users WHERE email = ?");
         $check->execute([$email]);
         if ($check->fetch()) {
-            $error = 'An account with this email already exists.';
+            $error = __('register_err_exists');
         } else {
             $hashed = password_hash($password, PASSWORD_BCRYPT);
             $stmt   = $db->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'customer')");
             $stmt->execute([$name, $email, $hashed]);
 
-            $success = 'Account created! You can now sign in.';
+            $success = __('register_success');
         }
     }
 }
@@ -44,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register — Sweet Heaven Bakery</title>
+    <title><?= __('register_title') ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>body { font-family: 'Poppins', sans-serif; }</style>
@@ -58,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <img src="/sweetheaven/images/shoplogo.png" class="h-12 w-auto" alt="Logo">
                 <span class="text-3xl font-bold text-stone-800">Sweet Heaven</span>
             </a>
-            <p class="text-gray-500 mt-2 text-sm">Create your account</p>
+            <p class="text-gray-500 mt-2 text-sm"><?= __('register_subtitle') ?></p>
         </div>
 
         <!-- Card -->
@@ -75,21 +76,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="mb-5 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
                 <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                 <?= htmlspecialchars($success) ?>
-                <a href="/sweetheaven/auth/login.php" class="underline font-semibold ml-1">Login now</a>
+                <a href="/sweetheaven/auth/login.php" class="underline font-semibold ml-1"><?= __('register_login_now') ?></a>
             </div>
             <?php endif; ?>
 
             <form method="POST" action="" class="space-y-5">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('register_name_label') ?></label>
                     <input type="text" name="name" required
                         value="<?= htmlspecialchars($_POST['name'] ?? '') ?>"
-                        placeholder="Your full name"
+                        placeholder="<?= __('register_name_ph') ?>"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent transition text-sm bg-gray-50 focus:bg-white">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('register_email_label') ?></label>
                     <input type="email" name="email" required
                         value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
                         placeholder="you@example.com"
@@ -97,34 +98,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('register_pass_label') ?></label>
                     <input type="password" name="password" required
-                        placeholder="Min 6 characters"
+                        placeholder="<?= __('register_pass_ph') ?>"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent transition text-sm bg-gray-50 focus:bg-white">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Confirm Password</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('register_confirm_label') ?></label>
                     <input type="password" name="confirm_password" required
-                        placeholder="Re-enter password"
+                        placeholder="<?= __('register_confirm_ph') ?>"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent transition text-sm bg-gray-50 focus:bg-white">
                 </div>
 
                 <button type="submit"
                     class="w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold py-3.5 rounded-xl transition-all duration-200 shadow-sm shadow-rose-100 hover:shadow-rose-100 active:scale-[0.98]">
-                    Create Account
+                    <?= __('register_btn') ?>
                 </button>
             </form>
 
             <div class="mt-6 pt-6 border-t border-gray-100 text-center">
                 <p class="text-sm text-gray-500">
-                    Already have an account?
-                    <a href="/sweetheaven/auth/login.php" class="text-rose-500 font-semibold hover:text-rose-600 hover:underline ml-1">Sign in</a>
+                    <?= __('register_have_account') ?>
+                    <a href="/sweetheaven/auth/login.php" class="text-rose-500 font-semibold hover:text-rose-600 hover:underline ml-1"><?= __('register_signin_link') ?></a>
                 </p>
             </div>
         </div>
 
-        <p class="text-center text-xs text-gray-400 mt-6">© <?= date('Y') ?> Sweet Heaven Bakery. All rights reserved.</p>
+        <p class="text-center text-xs text-gray-400 mt-6"><?= sprintf(__('footer_copyright'), date('Y')) ?></p>
     </div>
 </body>
 </html>

@@ -1,7 +1,9 @@
 <?php
 if (session_status() === PHP_SESSION_NONE)
     session_start();
+require_once __DIR__ . '/../includes/lang.php';
 require_once __DIR__ . '/../config/db.php';
+
 
 $db = getDB();
 $categoryId = (int) ($_GET['category_id'] ?? 0);
@@ -252,22 +254,21 @@ $discountedProducts = $db->query("
             <div class="fade-up">
                 <span class="pill mb-6">
                     <span class="pill-dot"></span>
-                    Freshly Baked Every Morning
+                    <?= __('hero_pill') ?>
                 </span>
 
                 <h1 class="serif text-5xl md:text-[3.8rem] leading-[1.1] text-gray-800 mt-5 mb-5">
-                    A Taste of Heaven<br> in Every Bite
+                    <?= __('hero_title') ?>
                 </h1>
 
                 <p class="text-gray-500 text-[15px] leading-7 mb-8 max-w-md">
-                    Handcrafted with love and the finest ingredients. From celebration cakes to everyday treats — our
-                    bakery brings joy to every table.
+                    <?= __('hero_desc') ?>
                 </p>
 
                 <div class="flex flex-wrap gap-3 mb-10">
                     <a href="/sweetheaven/user/products.php" style="background:#e8746a;"
                         class="inline-flex items-center gap-2 text-white px-7 py-3.5 rounded-full font-semibold text-sm hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200 shadow-md shadow-rose-200">
-                        Shop Now
+                        <?= __('hero_shop_now') ?>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -275,7 +276,7 @@ $discountedProducts = $db->query("
                     </a>
                     <a href="#categories"
                         class="inline-flex items-center gap-2 border border-rose-200 text-rose-500 bg-white px-7 py-3.5 rounded-full font-semibold text-sm hover:bg-rose-50 hover:-translate-y-0.5 transition-all duration-200">
-                        Browse Categories
+                        <?= __('hero_browse_cat') ?>
                     </a>
                 </div>
 
@@ -308,10 +309,10 @@ $discountedProducts = $db->query("
     <section class="bg-white border-y border-gray-100 py-7">
         <div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6">
             <?php foreach ([
-                ['🌿', 'Natural Ingredients', 'Premium organic quality'],
-                ['🔥', 'Baked Fresh Daily', 'Made every morning'],
-                ['🚚', 'Fast Delivery', 'Same-day available'],
-                ['💝', 'Made with Love', 'Passion in every bite'],
+                ['🌿', __('feature_natural'), __('feature_natural_sub')],
+                ['🔥', __('feature_fresh'), __('feature_fresh_sub')],
+                ['🚚', __('feature_delivery'), __('feature_delivery_sub')],
+                ['💝', __('feature_love'), __('feature_love_sub')],
             ] as $f): ?>
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
@@ -333,9 +334,9 @@ $discountedProducts = $db->query("
             <div class="flex  items-center justify-center mb-10 fade-up">
                 <div class="text-center">
                     <p class="text-md font-semibold uppercase tracking-widest mb-1" style="color:#e8746a;">
-                        What We Offer
+                        <?= __('cat_what_we_offer') ?>
                     </p>
-                    <h2 class="serif text-4xl text-gray-800">Our Categories</h2>
+                    <h2 class="serif text-4xl text-gray-800"><?= __('cat_our_categories') ?></h2>
                 </div>
 
             </div>
@@ -578,9 +579,8 @@ $discountedProducts = $db->query("
             <div class="flex flex-col items-center justify-center mb-10 fade-up space-y-4">
                 <div>
                     <p class="text-md text-center font-semibold uppercase tracking-widest mb-1" style="color:#e8746a;">
-                        Customers
-                        Love</p>
-                    <h2 class="serif text-4xl text-gray-800">Best Sellers</h2>
+                        <?= __('bestsellers_subtitle') ?></p>
+                    <h2 class="serif text-4xl text-gray-800"><?= __('bestsellers_title') ?></h2>
                 </div>
 
             </div>
@@ -618,7 +618,7 @@ $discountedProducts = $db->query("
                             <?php elseif ($product['stock'] < 5): ?>
                                 <div
                                     class="absolute top-3 left-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
-                                    Low Stock</div>
+                                    <?= __('bestsellers_low_stock') ?></div>
                             <?php endif; ?>
                             <div
                                 class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
@@ -649,13 +649,13 @@ $discountedProducts = $db->query("
                                 <div class="flex gap-2">
                                     <a href="/sweetheaven/user/product_detail.php?id=<?= $product['id'] ?>"
                                         class="border border-stone-200 text-rose-500 px-3 py-1.5 rounded-xl text-xs font-semibold hover:bg-rose-50 transition-colors">
-                                        View
+                                        <?= __('common_view') ?>
                                     </a>
                                     <?php if (!$isAdmin): ?>
                                         <button
                                             onclick="addToCart(<?= $product['id'] ?>, '<?= addslashes($product['name']) ?>')"
                                             class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shadow-sm shadow-rose-200">
-                                            + Cart
+                                            <?= __('common_add_cart') ?>
                                         </button>
                                     <?php endif; ?>
                                 </div>
@@ -669,7 +669,7 @@ $discountedProducts = $db->query("
         <div class="flex items-center justify-center mt-6">
             <a href="/sweetheaven/user/products.php"
                 class="hidden sm:inline-flex items-center justify-center gap-1.5 text-center text-sm font-semibold text-rose-500 hover:text-rose-600 transition-colors bg-pink-200 rounded-xl px-4 py-2">
-                See All Products
+                <?= __('bestsellers_see_all') ?>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -689,19 +689,17 @@ $discountedProducts = $db->query("
                     </div>
                     <div class="absolute -bottom-5 -right-5 bg-white rounded-2xl shadow-lg px-6 py-4 hidden md:block">
                         <p class="text-3xl font-bold text-rose-500">🎨</p>
-                        <p class="text-sm font-semibold text-gray-700">Your Design</p>
-                        <p class="text-xs text-gray-400">We'll Bake It</p>
+                        <p class="text-sm font-semibold text-gray-700"><?= __('customize_your_design') ?></p>
+                        <p class="text-xs text-gray-400"><?= __('customize_well_bake') ?></p>
                     </div>
                 </div>
                 <div class="space-y-6">
                     <div>
-                        <p class="text-md font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;">Make It
-                            Yours</p>
-                        <h2 class="serif text-4xl text-gray-800">Customize Your Cake</h2>
+                        <p class="text-md font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;"><?= __('customize_label') ?></p>
+                        <h2 class="serif text-4xl text-gray-800"><?= __('customize_title') ?></h2>
                     </div>
                     <p class="text-gray-500 leading-relaxed text-lg">
-                        Can't find what you're looking for? Tell us your dream cake and we'll bring it to life.
-                        Choose your size, flavor, color, and message — add a reference image and we'll handle the rest.
+                        <?= __('customize_desc') ?>
                     </p>
                     <div class="flex flex-wrap gap-6 text-sm">
                         <div class="flex items-center gap-3">
@@ -716,16 +714,16 @@ $discountedProducts = $db->query("
                             <span
                                 class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center text-rose-500 text-lg">✏️</span>
                             <div>
-                                <p class="font-semibold text-gray-700">Personalized Message</p>
-                                <p class="text-gray-400 text-xs">Write anything you want</p>
+                                <p class="font-semibold text-gray-700"><?= __('customize_message') ?></p>
+                                <p class="text-gray-400 text-xs"><?= __('customize_message_sub') ?></p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
                             <span
                                 class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center text-rose-500 text-lg">🖼️</span>
                             <div>
-                                <p class="font-semibold text-gray-700">Reference Image</p>
-                                <p class="text-gray-400 text-xs">Show us your inspiration</p>
+                                <p class="font-semibold text-gray-700"><?= __('customize_image') ?></p>
+                                <p class="text-gray-400 text-xs"><?= __('customize_image_sub') ?></p>
                             </div>
                         </div>
                     </div>
@@ -735,7 +733,7 @@ $discountedProducts = $db->query("
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
-                        Order Customize Cake
+                        <?= __('customize_btn') ?>
                     </a>
                 </div>
             </div>
@@ -751,17 +749,16 @@ $discountedProducts = $db->query("
             </div>
             <!-- Text -->
             <div class="fade-up fade-up-d2">
-                <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;">Our Story</p>
-                <h2 class="serif text-3xl text-gray-800 mb-5">Baked with Passion,<br>Served with Love</h2>
+                <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;"><?= __('story_label') ?></p>
+                <h2 class="serif text-3xl text-gray-800 mb-5"><?= __('story_title') ?></h2>
                 <p class="text-gray-500 text-[15px] leading-7 mb-6">
-                    Every item on our menu starts with a simple promise — to use only the finest, freshest ingredients.
-                    Our bakers arrive before dawn so you always have something warm and wonderful waiting.
+                    <?= __('story_desc') ?>
                 </p>
                 <div class="space-y-3">
                     <?php foreach ([
-                        ['🌾', 'Locally sourced flour and dairy'],
-                        ['🥚', 'Free-range eggs, always fresh'],
-                        ['🍓', 'Real fruit fillings, no artificial flavors'],
+                        ['🌾', __('story_flour')],
+                        ['🥚', __('story_eggs')],
+                        ['🍓', __('story_fruit')],
                     ] as $pt): ?>
                         <div class="flex items-center gap-3 text-sm text-gray-600">
                             <span class="text-lg"><?= $pt[0] ?></span>
@@ -782,18 +779,17 @@ $discountedProducts = $db->query("
                 <!-- Promo 1 -->
 
                 <div class="flex flex-col gap-6">
-                    <div class="text-3xl font-semibold text-center">Special Promotion</div>
+                    <div class="text-3xl font-semibold text-center"><?= __('promo_special') ?></div>
                     <div class="promo-card rounded-2xl overflow-hidden flex flex-col md:flex-row border border-rose-100"
                         style="background:var(--rose-light);">
                         <div class="p-12 flex-1">
                             <span class="text-3xl mb-3 block">🎉</span>
-                            <h3 class="font-bold text-gray-800 text-xl mb-2">10% Off Your First Order!</h3>
-                            <p class="text-gray-500 text-sm leading-relaxed mb-5">Sign up and get an instant discount on
-                                your very first purchase. No code needed!</p>
+                            <h3 class="font-bold text-gray-800 text-xl mb-2"><?= __('promo_first_order') ?></h3>
+                            <p class="text-gray-500 text-sm leading-relaxed mb-5"><?= __('promo_first_desc') ?></p>
                             <a href="/sweetheaven/auth/register.php"
                                 class="inline-block text-white font-semibold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity"
                                 style="background:#e8746a;">
-                                Claim Discount →
+                                <?= __('promo_claim') ?>
                             </a>
                         </div>
                         <div class="hidden md:block w-40 flex-shrink-0">
@@ -955,6 +951,7 @@ $discountedProducts = $db->query("
 
                     <!-- ② Main cake image ──────────────────────────────────── -->
                     <!-- padding-left shifts the image to the right; items-end pushes it to bottom -->
+                     
                     <div class="hidden md:flex items-center justify-center pl-4 overflow-visible">
                         <img src="/sweetheaven/images/removepink.png" alt="Featured Discount Cake"
                             class="w-auto drop-shadow-2xl"

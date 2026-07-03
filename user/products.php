@@ -1,5 +1,6 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../includes/lang.php';
 require_once __DIR__ . '/../config/db.php';
 
 $db = getDB();
@@ -66,7 +67,7 @@ if ($isLoggedIn && !$isAdmin) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products — Sweet Heaven Bakery</title>
+    <title><?= __('products_page_title') ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>* { font-family: 'Poppins', sans-serif; }</style>
@@ -83,13 +84,13 @@ if ($isLoggedIn && !$isAdmin) {
 
                 <!-- Categories & Filters -->
                 <div>
-                    <h4 class="font-bold text-gray-700 mb-4 text-sm uppercase tracking-wider">Categories</h4>
+                    <h4 class="font-bold text-gray-700 mb-4 text-sm uppercase tracking-wider"><?= __('products_categories') ?></h4>
                     <ul class="space-y-1">
                         <li>
                             <a href="/sweetheaven/user/products.php?search=<?= urlencode($search) ?>&sort=<?= $sort ?>"
                                class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-colors
                                <?= $categoryId === 0 && !$discounted ? 'bg-rose-500 text-white font-semibold' : 'text-gray-600 hover:bg-rose-50 hover:text-rose-500' ?>">
-                               <span>All Products</span>
+                               <span><?= __('products_all') ?></span>
                             </a>
                         </li>
                         <?php foreach ($categories as $cat): ?>
@@ -105,7 +106,7 @@ if ($isLoggedIn && !$isAdmin) {
                             <a href="/sweetheaven/user/products.php?discounted=1&search=<?= urlencode($search) ?>&sort=<?= $sort ?>"
                                class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-colors
                                <?= $discounted ? 'bg-rose-500 text-white font-semibold' : 'text-gray-600 hover:bg-rose-50 hover:text-rose-500' ?>">
-                               <span>🏷️ Discount Products</span>
+                               <span><?= __('products_discounted') ?></span>
                             </a>
                         </li>
                     </ul>
@@ -113,7 +114,7 @@ if ($isLoggedIn && !$isAdmin) {
 
                 <!-- Price Filter -->
                 <div>
-                    <h4 class="font-bold text-gray-700 mb-4 text-sm uppercase tracking-wider">Price Range</h4>
+                    <h4 class="font-bold text-gray-700 mb-4 text-sm uppercase tracking-wider"><?= __('products_price_range') ?></h4>
                     <form method="GET" id="priceForm">
                         <input type="hidden" name="category_id" value="<?= $categoryId ?>">
                         <input type="hidden" name="search" value="<?= htmlspecialchars($search) ?>">
@@ -121,23 +122,23 @@ if ($isLoggedIn && !$isAdmin) {
                         <?php if ($discounted): ?><input type="hidden" name="discounted" value="1"><?php endif; ?>
                         <div class="space-y-3">
                             <div>
-                                <label class="text-xs text-gray-500 mb-1 block">Min Price (MMK)</label>
+                                <label class="text-xs text-gray-500 mb-1 block"><?= __('products_min_price') ?></label>
                                 <input type="number" name="min_price" value="<?= $minPrice ?>" step="500" min="0"
                                     class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
                             </div>
                             <div>
-                                <label class="text-xs text-gray-500 mb-1 block">Max Price (MMK)</label>
+                                <label class="text-xs text-gray-500 mb-1 block"><?= __('products_max_price') ?></label>
                                 <input type="number" name="max_price" value="<?= $maxPrice < 999999 ? $maxPrice : '' ?>" step="500" min="0"
                                     class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
                             </div>
-                            <button type="submit" class="w-full bg-rose-500 text-white py-2 rounded-xl text-sm font-semibold hover:bg-rose-600 transition-colors">Apply Filter</button>
+                            <button type="submit" class="w-full bg-rose-500 text-white py-2 rounded-xl text-sm font-semibold hover:bg-rose-600 transition-colors"><?= __('products_apply') ?></button>
                         </div>
                     </form>
                 </div>
 
                 <!-- Clear Filters -->
                 <?php if ($categoryId || $search || $minPrice || $maxPrice < 999999 || $discounted): ?>
-                <a href="/sweetheaven/user/products.php" class="block text-center text-sm text-red-500 hover:text-red-700 font-medium">✕ Clear Filters</a>
+                <a href="/sweetheaven/user/products.php" class="block text-center text-sm text-red-500 hover:text-red-700 font-medium"><?= __('products_clear') ?></a>
                 <?php endif; ?>
             </div>
         </aside>
@@ -150,7 +151,7 @@ if ($isLoggedIn && !$isAdmin) {
                     <h1 class="font-bold text-gray-800 text-lg">
                         <?= $currentCategory ? htmlspecialchars($currentCategory) : ($search ? "Search: \"$search\"" : 'All Products') ?>
                     </h1>
-                    <p class="text-sm text-gray-400"><?= count($products) ?> product<?= count($products) !== 1 ? 's' : '' ?> found</p>
+                    <p class="text-sm text-gray-400"><?= count($products) ?> <?= currentLang() === 'my' ? 'ထုတ်ကုန် ' . count($products) . ' ခု တွေ့ရှိသည်' : count($products) . ' product' . (count($products) !== 1 ? 's' : '') . ' found' ?></p>
                 </div>
                 <div class="flex items-center gap-3">
                     <!-- Search -->
@@ -158,7 +159,7 @@ if ($isLoggedIn && !$isAdmin) {
                         <input type="hidden" name="category_id" value="<?= $categoryId ?>">
                         <input type="hidden" name="sort" value="<?= $sort ?>">
                         <?php if ($discounted): ?><input type="hidden" name="discounted" value="1"><?php endif; ?>
-                        <input type="search" name="search" placeholder="🔍 Search products..."
+                        <input type="search" name="search" placeholder="<?= __('products_search_ph') ?>"
                             value="<?= htmlspecialchars($search) ?>"
                             class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 w-48">
                     </form>
@@ -169,10 +170,10 @@ if ($isLoggedIn && !$isAdmin) {
                         <?php if ($discounted): ?><input type="hidden" name="discounted" value="1"><?php endif; ?>
                         <select name="sort" onchange="this.form.submit()"
                             class="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
-                            <option value="newest" <?= $sort==='newest'?'selected':'' ?>>Newest</option>
-                            <option value="popular" <?= $sort==='popular'?'selected':'' ?>>Most Popular</option>
-                            <option value="price_asc" <?= $sort==='price_asc'?'selected':'' ?>>Price: Low to High</option>
-                            <option value="price_desc" <?= $sort==='price_desc'?'selected':'' ?>>Price: High to Low</option>
+                            <option value="newest" <?= $sort==='newest'?'selected':'' ?>><?= __('products_sort_newest') ?></option>
+                            <option value="popular" <?= $sort==='popular'?'selected':'' ?>><?= __('products_sort_popular') ?></option>
+                            <option value="price_asc" <?= $sort==='price_asc'?'selected':'' ?>><?= __('products_sort_asc') ?></option>
+                            <option value="price_desc" <?= $sort==='price_desc'?'selected':'' ?>><?= __('products_sort_desc') ?></option>
                         </select>
                     </form>
                 </div>
@@ -182,9 +183,9 @@ if ($isLoggedIn && !$isAdmin) {
             <?php if (empty($products)): ?>
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-16 text-center">
                 <p class="text-5xl mb-4">🔍</p>
-                <h3 class="text-xl font-bold text-gray-700 mb-2">No products found</h3>
-                <p class="text-gray-400 text-sm mb-6">Try adjusting your filters or search terms.</p>
-                <a href="/sweetheaven/user/products.php" class="bg-rose-500 text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-rose-600 transition-colors">Clear Filters</a>
+                <h3 class="text-xl font-bold text-gray-700 mb-2"><?= __('products_not_found') ?></h3>
+                <p class="text-gray-400 text-sm mb-6"><?= __('products_adjust') ?></p>
+                <a href="/sweetheaven/user/products.php" class="bg-rose-500 text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-rose-600 transition-colors"><?= __('products_clear') ?></a>
             </div>
             <?php else: ?>
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -214,7 +215,7 @@ if ($isLoggedIn && !$isAdmin) {
                         <?php endif; ?>
                         <?php if ($product['stock'] === 0): ?>
                         <div class="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm">
-                            <span class="bg-red-600 text-white text-sm font-bold px-5 py-2 rounded-full shadow-lg">Out of Stock</span>
+                            <span class="bg-red-600 text-white text-sm font-bold px-5 py-2 rounded-full shadow-lg"><?= __('products_out_of_stock') ?></span>
                         </div>
                         <?php elseif ($product['stock'] < 10 && !$hasDiscount): ?>
                         <div class="absolute top-3 left-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">Only <?= $product['stock'] ?> left</div>
@@ -243,12 +244,12 @@ if ($isLoggedIn && !$isAdmin) {
                                 <a href="/sweetheaven/user/product_detail.php?id=<?= $product['id'] ?>"
                                    onclick="event.stopPropagation()"
                                    class="border border-stone-200 text-rose-500 px-3 py-2 rounded-xl text-xs font-semibold hover:bg-rose-50 transition-colors">
-                                    View
+                                    <?= __('products_view') ?>
                                 </a>
                                 <?php if ($product['stock'] > 0 && !$isAdmin): ?>
                                 <button onclick="event.stopPropagation(); addToCart(<?= $product['id'] ?>, '<?= addslashes($product['name']) ?>')"
                                     class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-2 rounded-xl text-xs font-semibold transition-colors shadow-sm shadow-rose-200">
-                                    + Cart
+                                    <?= __('products_add_cart') ?>
                                 </button>
                                 <?php endif; ?>
                             </div>

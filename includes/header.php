@@ -2,6 +2,10 @@
 // includes/header.php — Pure nav partial (no <html>/<body> wrapper)
 if (session_status() === PHP_SESSION_NONE)
     session_start();
+
+// Language loader (must come first)
+require_once __DIR__ . '/lang.php';
+
 $cartCount = 0;
 if (isset($_SESSION['cart'])) {
     foreach ($_SESSION['cart'] as $item)
@@ -23,6 +27,7 @@ if ($isLoggedIn && !$isAdmin) {
     $wstmt->execute([$userId]);
     $wishlistCount = (int) $wstmt->fetchColumn();
 }
+$_currentLang = currentLang();
 ?>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet">
@@ -49,6 +54,38 @@ if ($isLoggedIn && !$isAdmin) {
     .nav-link:hover::after {
         width: 100%;
     }
+
+    /* Language selector */
+    .lang-selector {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(255,255,255,0.7);
+        border: 1px solid rgba(244,63,94,0.2);
+        border-radius: 8px;
+        padding: 4px 8px;
+        transition: all 0.2s;
+    }
+    .lang-selector:hover {
+        background: rgba(255,255,255,0.95);
+        border-color: rgba(244,63,94,0.4);
+    }
+    .lang-selector select {
+        background: transparent;
+        border: none;
+        outline: none;
+        font-size: 12px;
+        font-weight: 600;
+        color: #57534e;
+        cursor: pointer;
+        padding: 0;
+        appearance: none;
+        -webkit-appearance: none;
+    }
+    .lang-selector select:focus {
+        outline: none;
+        box-shadow: none;
+    }
 </style>
 
 <nav class="bg-pink-200 backdrop-blur-md border-b border-stone-100 sticky top-0 z-50">
@@ -64,21 +101,35 @@ if ($isLoggedIn && !$isAdmin) {
             <!-- Desktop Nav -->
             <ul class="hidden md:flex items-center gap-6 text-stone-600 font-medium text-sm">
                 <li><a href="/sweetheaven/user/index.php"
-                        class="nav-link hover:text-rose-500 transition-colors">Home</a></li>
+                        class="nav-link hover:text-rose-500 transition-colors"><?= __('nav_home') ?></a></li>
                 <li><a href="/sweetheaven/user/products.php"
-                        class="nav-link hover:text-rose-500 transition-colors">Products</a></li>
+                        class="nav-link hover:text-rose-500 transition-colors"><?= __('nav_products') ?></a></li>
                 <li><a href="/sweetheaven/user/customize.php"
-                        class="nav-link hover:text-rose-500 transition-colors">Customize Cake</a></li>
+                        class="nav-link hover:text-rose-500 transition-colors"><?= __('nav_customize') ?></a></li>
 
                 <?php if ($isAdmin): ?>
                     <li><a href="/sweetheaven/admin/dashboard.php"
-                            class="bg-rose-50 text-rose-600 px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-rose-100 transition-colors">Admin
-                            Panel</a></li>
+                            class="bg-rose-50 text-rose-600 px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-rose-100 transition-colors"><?= __('nav_admin_panel') ?></a></li>
                 <?php endif; ?>
             </ul>
 
             <!-- Right Actions -->
             <div class="flex flex-row items-center gap-3">
+
+                <!-- Language Selector -->
+                <form method="POST" action="" class="lang-selector" id="langForm">
+                    <input type="hidden" name="redirect" value="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>">
+                    <!-- Globe Icon -->
+                    <svg class="w-4 h-4 text-stone-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                    </svg>
+                    <select name="set_lang" onchange="this.form.submit()" aria-label="Language">
+                        <option value="en" <?= $_currentLang === 'en' ? 'selected' : '' ?>>ENG</option>
+                        <option value="my" <?= $_currentLang === 'my' ? 'selected' : '' ?>>မြန်မာ</option>
+                    </select>
+                </form>
+
                 <?php if ($isLoggedIn): ?>
                     <?php if (!$isAdmin): ?>
                         <!-- notification bell -->
@@ -101,34 +152,19 @@ if ($isLoggedIn && !$isAdmin) {
                             <div id="notifDropdown"
                                 class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-stone-100 z-50 overflow-hidden">
                                 <div class="flex items-center justify-between px-4 py-3 border-b border-stone-100">
-                                    <h4 class="font-bold text-stone-800 text-sm">Notifications</h4>
+                                    <h4 class="font-bold text-stone-800 text-sm"><?= __('nav_notifications') ?></h4>
                                     <button onclick="markAllSeen()"
-                                        class="text-xs text-rose-500 hover:text-rose-600 font-semibold">Mark all read</button>
+                                        class="text-xs text-rose-500 hover:text-rose-600 font-semibold"><?= __('nav_mark_all_read') ?></button>
                                 </div>
                                 <div id="notifList" class="max-h-80 overflow-y-auto">
-                                    <p class="text-center text-stone-400 text-sm py-6">Loading...</p>
+                                    <p class="text-center text-stone-400 text-sm py-6"><?= __('nav_notif_loading') ?></p>
                                 </div>
                             </div>
                         </div><!-- /notifWrapper -->
 
                         <!-- Wishlist -->
-                        <!-- <a href="/sweetheaven/user/wishlist.php"
-                            class="relative p-2 text-stone-400 hover:text-rose-500 transition-colors" title="Wishlist">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
-                            <?php if ($wishlistCount > 0): ?>
-                                <span id="wishlistBadge"
-                                    class="absolute -top-2 -right-2 bg-rose-500 text-white text-xs rounded-full min-w-[1.25rem] h-5 px-1 flex items-center justify-center font-bold leading-none"><?= $wishlistCount ?></span>
-                            <?php else: ?>
-                                <span id="wishlistBadge"
-                                    class="absolute -top-2 -right-2 bg-rose-500 text-white text-xs rounded-full min-w-[1.25rem] h-5 px-1 <?= $wishlistCount > 0 ? 'flex' : 'hidden' ?> items-center justify-center font-bold leading-none"><?= $wishlistCount ?></span>
-                            <?php endif; ?>
-                        </a> -->
-                        <!-- Wishlist -->
                         <a href="/sweetheaven/user/wishlist.php"
-                            class="relative p-2 text-stone-400 hover:text-rose-500 transition-colors" title="Wishlist">
+                            class="relative p-2 text-stone-400 hover:text-rose-500 transition-colors" title="<?= __('nav_wishlist') ?>">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                     d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -148,7 +184,7 @@ if ($isLoggedIn && !$isAdmin) {
 
                         <!-- Cart -->
                         <a href="/sweetheaven/user/cart.php"
-                            class="relative p-2 text-stone-400 hover:text-rose-500 transition-colors" title="Cart">
+                            class="relative p-2 text-stone-400 hover:text-rose-500 transition-colors" title="<?= __('nav_cart') ?>">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                     d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -184,7 +220,7 @@ if ($isLoggedIn && !$isAdmin) {
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
-                                My Profile
+                                <?= __('nav_my_profile') ?>
                             </a>
                             <?php if (!$isAdmin): ?>
                                 <a href="/sweetheaven/user/wishlist.php"
@@ -193,7 +229,7 @@ if ($isLoggedIn && !$isAdmin) {
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                             d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                     </svg>
-                                    Wishlist
+                                    <?= __('nav_wishlist') ?>
                                 </a>
                                 <a href="/sweetheaven/user/profile.php?tab=orders"
                                     class="flex items-center gap-2 px-4 py-3 text-sm text-stone-600 hover:bg-stone-50 hover:text-rose-500 transition-colors">
@@ -201,7 +237,7 @@ if ($isLoggedIn && !$isAdmin) {
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                                     </svg>
-                                    My Orders
+                                    <?= __('nav_my_orders') ?>
                                 </a>
                             <?php endif; ?>
 
@@ -212,7 +248,7 @@ if ($isLoggedIn && !$isAdmin) {
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                             d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
                                     </svg>
-                                    Admin Panel
+                                    <?= __('nav_admin_panel') ?>
                                 </a>
                             <?php endif; ?>
                             <div class="border-t border-stone-100">
@@ -222,7 +258,7 @@ if ($isLoggedIn && !$isAdmin) {
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                     </svg>
-                                    Logout
+                                    <?= __('nav_logout') ?>
                                 </a>
                             </div>
                         </div>
@@ -230,10 +266,9 @@ if ($isLoggedIn && !$isAdmin) {
 
                 <?php else: ?>
                     <a href="/sweetheaven/auth/login.php"
-                        class="text-stone-600 hover:text-rose-500 font-medium text-sm transition-colors">Login</a>
+                        class="text-stone-600 hover:text-rose-500 font-medium text-sm transition-colors"><?= __('nav_login') ?></a>
                     <a href="/sweetheaven/auth/register.php"
-                        class="bg-rose-500 hover:bg-rose-600 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors">Sign
-                        Up</a>
+                        class="bg-rose-500 hover:bg-rose-600 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors"><?= __('nav_signup') ?></a>
                 <?php endif; ?>
 
                 <!-- Mobile Menu Button -->
@@ -250,33 +285,32 @@ if ($isLoggedIn && !$isAdmin) {
         <div id="mobileMenu" class="hidden md:hidden pb-4 border-t border-stone-100 mt-2">
             <ul class="space-y-1 pt-3">
                 <li><a href="/sweetheaven/user/index.php"
-                        class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm">Home</a>
+                        class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm"><?= __('nav_home') ?></a>
                 </li>
                 <li><a href="/sweetheaven/user/products.php"
-                        class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm">Products</a>
+                        class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm"><?= __('nav_products') ?></a>
                 </li>
                 <li><a href="/sweetheaven/user/customize.php"
-                        class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm">Customize Cake</a>
+                        class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm"><?= __('nav_customize') ?></a>
                 </li>
                 <?php if (!$isAdmin): ?>
                     <li><a href="/sweetheaven/user/cart.php"
-                            class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm">Cart
+                            class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm"><?= __('nav_cart') ?>
                             (<?= $cartCount ?>)</a></li>
                 <?php endif; ?>
                 <?php if ($isLoggedIn): ?>
                     <li><a href="/sweetheaven/user/profile.php"
-                            class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm">Profile</a>
+                            class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm"><?= __('nav_profile') ?></a>
                     </li>
                     <li><a href="/sweetheaven/auth/logout.php"
-                            class="block px-4 py-2.5 text-stone-500 font-medium rounded-lg hover:bg-rose-50 hover:text-rose-500 text-sm">Logout</a>
+                            class="block px-4 py-2.5 text-stone-500 font-medium rounded-lg hover:bg-rose-50 hover:text-rose-500 text-sm"><?= __('nav_logout') ?></a>
                     </li>
                 <?php else: ?>
                     <li><a href="/sweetheaven/auth/login.php"
-                            class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm">Login</a>
+                            class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm"><?= __('nav_login') ?></a>
                     </li>
                     <li><a href="/sweetheaven/auth/register.php"
-                            class="block px-4 py-2.5 text-rose-500 font-semibold rounded-lg hover:bg-rose-50 text-sm">Sign
-                            Up</a></li>
+                            class="block px-4 py-2.5 text-rose-500 font-semibold rounded-lg hover:bg-rose-50 text-sm"><?= __('nav_signup') ?></a></li>
                 <?php endif; ?>
             </ul>
         </div>
@@ -321,7 +355,7 @@ if ($isLoggedIn && !$isAdmin) {
                 if (!Array.isArray(data) || data.length === 0) {
                     list.innerHTML = `<div class="flex flex-col items-center py-10 text-stone-400">
                         <svg class="w-10 h-10 mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                        <p class="text-sm font-medium">No notifications yet</p>
+                        <p class="text-sm font-medium"><?= __('nav_no_notifications') ?></p>
                     </div>`;
                     return;
                 }
@@ -347,7 +381,7 @@ if ($isLoggedIn && !$isAdmin) {
             })
             .catch(() => {
                 const list = document.getElementById('notifList');
-                if (list) list.innerHTML = '<p class="text-center text-stone-400 text-sm py-6">Could not load notifications.</p>';
+                if (list) list.innerHTML = '<p class="text-center text-stone-400 text-sm py-6"><?= __('nav_notif_error') ?></p>';
             });
     }
 

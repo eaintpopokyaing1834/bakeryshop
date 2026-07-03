@@ -1,5 +1,6 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../includes/lang.php';
 require_once __DIR__ . '/../middleware/customer_check.php';
 require_once __DIR__ . '/../config/db.php';
 $db = getDB();
@@ -29,7 +30,7 @@ if (!empty($cart)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Cart — Sweet Heaven Bakery</title>
+    <title><?= __('cart_title') ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>* { font-family: 'Poppins', sans-serif; }</style>
@@ -39,17 +40,17 @@ if (!empty($cart)) {
 
 <div class="max-w-6xl mx-auto px-6 py-10">
     <div class="flex items-center gap-3 mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">My Cart</h1>
-        <span id="cartCountText" class="bg-rose-50 text-rose-600 text-sm font-semibold px-3 py-1 rounded-full"><?= count($cartProducts) ?> item<?= count($cartProducts) !== 1 ? 's' : '' ?></span>
+        <h1 class="text-3xl font-bold text-gray-800"><?= __('cart_heading') ?></h1>
+        <span id="cartCountText" class="bg-rose-50 text-rose-600 text-sm font-semibold px-3 py-1 rounded-full"><?= sprintf(__('cart_items'), count($cartProducts), count($cartProducts) !== 1 ? 's' : '') ?></span>
     </div>
 
     <?php if (empty($cartProducts)): ?>
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-20 text-center">
         <p class="text-6xl mb-6">🛒</p>
-        <h2 class="text-2xl font-bold text-gray-700 mb-3">Your cart is empty</h2>
-        <p class="text-gray-400 mb-8">Looks like you haven't added anything yet. Let's fix that!</p>
+        <h2 class="text-2xl font-bold text-gray-700 mb-3"><?= __('cart_empty_title') ?></h2>
+        <p class="text-gray-400 mb-8"><?= __('cart_empty_desc') ?></p>
         <a href="/sweetheaven/user/products.php" class="bg-rose-500 hover:bg-rose-600 text-white px-8 py-4 rounded-2xl font-semibold transition-colors shadow-sm shadow-rose-100">
-            Start Shopping
+            <?= __('cart_start_shopping') ?>
         </a>
     </div>
 
@@ -67,7 +68,7 @@ if (!empty($cart)) {
 
                 <div class="flex-1 min-w-0">
                     <h3 class="font-bold text-gray-800 mb-1 line-clamp-1"><?= htmlspecialchars($item['name']) ?></h3>
-                    <p class="text-rose-500 font-semibold text-sm"><?= number_format($item['price']) ?> MMK / each</p>
+                    <p class="text-rose-500 font-semibold text-sm"><?= number_format($item['price']) ?> MMK <?= __('cart_each') ?></p>
                 </div>
 
                 <div class="flex items-center gap-2">
@@ -94,19 +95,19 @@ if (!empty($cart)) {
         <!-- Order Summary -->
         <div class="lg:col-span-1">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
-                <h3 class="font-bold text-gray-800 text-lg mb-6">Order Summary</h3>
+                <h3 class="font-bold text-gray-800 text-lg mb-6"><?= __('cart_order_summary') ?></h3>
 
                 <div class="space-y-3 text-sm mb-6">
                     <div class="flex justify-between text-gray-600">
-                        <span>Subtotal</span>
+                        <span><?= __('cart_subtotal') ?></span>
                         <span id="totalDisplay"><?= number_format($subtotal) ?> MMK</span>
                     </div>
                     <div class="flex justify-between text-gray-600">
-                        <span>Shipping</span>
-                        <span class="text-green-600 font-medium">Calculated at checkout</span>
+                        <span><?= __('cart_shipping') ?></span>
+                        <span class="text-green-600 font-medium"><?= __('cart_shipping_calc') ?></span>
                     </div>
                     <div class="border-t border-gray-100 pt-3 flex justify-between font-bold text-gray-800 text-base">
-                        <span>Total</span>
+                        <span><?= __('cart_total') ?></span>
                         <span id="grandTotal"><?= number_format($subtotal) ?> MMK</span>
                     </div>
                 </div>
@@ -114,17 +115,17 @@ if (!empty($cart)) {
                 <?php if (isset($_SESSION['user_id'])): ?>
                 <a href="/sweetheaven/user/checkout.php"
                    class="block w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 rounded-2xl text-center transition-colors shadow-sm shadow-rose-100">
-                    Proceed to Checkout →
+                    <?= __('cart_checkout_btn') ?>
                 </a>
                 <?php else: ?>
                 <a href="/sweetheaven/auth/login.php"
                    class="block w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 rounded-2xl text-center transition-colors">
-                    Login to Checkout
+                    <?= __('cart_login_checkout') ?>
                 </a>
                 <?php endif; ?>
 
                 <a href="/sweetheaven/user/products.php" class="block text-center text-sm text-gray-400 hover:text-rose-500 mt-4 transition-colors">
-                    ← Continue Shopping
+                    <?= __('cart_continue') ?>
                 </a>
             </div>
         </div>

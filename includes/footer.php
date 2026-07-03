@@ -1,4 +1,9 @@
-<?php // includes/footer.php — Pure footer partial ?>
+<?php
+// includes/footer.php — Pure footer partial
+if (!function_exists('__')) {
+    require_once __DIR__ . '/lang.php';
+}
+?>
 <footer class="bg-pink-200 border-t border-stone-200/60 pt-16 pb-8 mt-16">
     <div class="max-w-7xl mx-auto px-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
@@ -10,8 +15,7 @@
                     <span class="text-2xl font-bold text-stone-800">Sweet Heaven</span>
                 </div>
                 <p class="text-stone-500 leading-relaxed text-sm mb-6">
-                    Crafting delectable memories one bite at a time. Freshly baked with love, premium ingredients, and a
-                    sprinkle of magic every single day.
+                    <?= __('footer_tagline') ?>
                 </p>
                 <div class="flex gap-3">
                     <a href="#"
@@ -40,24 +44,22 @@
 
             <!-- Quick Links -->
             <div>
-                <h4 class="text-sm font-semibold text-stone-800 uppercase tracking-wider mb-5">Quick Links</h4>
+                <h4 class="text-sm font-semibold text-stone-800 uppercase tracking-wider mb-5"><?= __('footer_quick_links') ?></h4>
                 <ul class="space-y-3 text-stone-500 text-sm">
-                    <li><a href="/sweetheaven/user/index.php" class="hover:text-rose-500 transition-colors">Home</a>
+                    <li><a href="/sweetheaven/user/index.php" class="hover:text-rose-500 transition-colors"><?= __('nav_home') ?></a>
                     </li>
                     <li><a href="/sweetheaven/user/products.php"
-                            class="hover:text-rose-500 transition-colors">Products</a></li>
-                    <li><a href="/sweetheaven/user/cart.php" class="hover:text-rose-500 transition-colors">My Cart</a>
+                            class="hover:text-rose-500 transition-colors"><?= __('nav_products') ?></a></li>
+                    <li><a href="/sweetheaven/user/cart.php" class="hover:text-rose-500 transition-colors"><?= __('footer_my_cart') ?></a>
                     </li>
-                    <li><a href="/sweetheaven/user/profile.php" class="hover:text-rose-500 transition-colors">My
-                            Account</a></li>
-                    <li><a href="/sweetheaven/auth/register.php" class="hover:text-rose-500 transition-colors">Sign
-                            Up</a></li>
+                    <li><a href="/sweetheaven/user/profile.php" class="hover:text-rose-500 transition-colors"><?= __('footer_my_account') ?></a></li>
+                    <li><a href="/sweetheaven/auth/register.php" class="hover:text-rose-500 transition-colors"><?= __('nav_signup') ?></a></li>
                 </ul>
             </div>
 
             <!-- Contact -->
             <div>
-                <h4 class="text-sm font-semibold text-stone-800 uppercase tracking-wider mb-5">Contact Us</h4>
+                <h4 class="text-sm font-semibold text-stone-800 uppercase tracking-wider mb-5"><?= __('footer_contact_us') ?></h4>
                 <ul class="space-y-3 text-stone-500 text-sm">
                     <li class="flex items-start gap-2">
                         <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,7 +89,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        Mon-Sun: 7:00 AM – 8:00 PM
+                        <?= __('footer_hours') ?>
                     </li>
                 </ul>
             </div>
@@ -95,10 +97,10 @@
 
         <div
             class="border-t border-stone-200 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-stone-400">
-            <p>© <?= date('Y') ?> Sweet Heaven Bakery. All rights reserved.</p>
+            <p><?= sprintf(__('footer_copyright'), date('Y')) ?></p>
             <div class="flex gap-6">
-                <a href="#" class="hover:text-stone-600 transition-colors">Privacy Policy</a>
-                <a href="#" class="hover:text-stone-600 transition-colors">Terms of Service</a>
+                <a href="#" class="hover:text-stone-600 transition-colors"><?= __('footer_privacy') ?></a>
+                <a href="#" class="hover:text-stone-600 transition-colors"><?= __('footer_terms') ?></a>
             </div>
         </div>
     </div>
