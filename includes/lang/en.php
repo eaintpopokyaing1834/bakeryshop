@@ -527,4 +527,11 @@ return [
     // ── Toast JS ──────────────────────────────────────────
     'toast_added_cart'          => 'Added to cart!',
     'toast_added_cart_js'       => '%s added to cart!',
+
+    // ── About Us (Index) ──────────────────────────────────
+    'about_label'               => 'About Us',
+    'about_title'               => 'Sweet Heaven Bakery',
+    'about_desc'                => 'At Sweet Heaven, we believe every celebration deserves a touch of sweetness. From custom cakes for birthdays and special occasions to everyday treats, we craft each creation with premium ingredients, artistic passion, and heartfelt love. Every slice brings joy to your table.',
+    'about_exp'                 => '5+ Years Experience',
+    'about_love'                => 'Made with Love',
 ];

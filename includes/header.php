@@ -60,16 +60,18 @@ $_currentLang = currentLang();
         display: flex;
         align-items: center;
         gap: 4px;
-        background: rgba(255,255,255,0.7);
-        border: 1px solid rgba(244,63,94,0.2);
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(244, 63, 94, 0.2);
         border-radius: 8px;
         padding: 4px 8px;
         transition: all 0.2s;
     }
+
     .lang-selector:hover {
-        background: rgba(255,255,255,0.95);
-        border-color: rgba(244,63,94,0.4);
+        background: rgba(255, 255, 255, 0.95);
+        border-color: rgba(244, 63, 94, 0.4);
     }
+
     .lang-selector select {
         background: transparent;
         border: none;
@@ -82,6 +84,7 @@ $_currentLang = currentLang();
         appearance: none;
         -webkit-appearance: none;
     }
+
     .lang-selector select:focus {
         outline: none;
         box-shadow: none;
@@ -104,12 +107,14 @@ $_currentLang = currentLang();
                         class="nav-link hover:text-rose-500 transition-colors"><?= __('nav_home') ?></a></li>
                 <li><a href="/sweetheaven/user/products.php"
                         class="nav-link hover:text-rose-500 transition-colors"><?= __('nav_products') ?></a></li>
-                <li><a href="/sweetheaven/user/customize.php"
-                        class="nav-link hover:text-rose-500 transition-colors"><?= __('nav_customize') ?></a></li>
-
+                <?php if (!$isAdmin): ?>
+                    <li><a href="/sweetheaven/user/customize.php"
+                            class="nav-link hover:text-rose-500 transition-colors"><?= __('nav_customize') ?></a></li>
+                <?php endif; ?>
                 <?php if ($isAdmin): ?>
                     <li><a href="/sweetheaven/admin/dashboard.php"
-                            class="bg-rose-50 text-rose-600 px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-rose-100 transition-colors"><?= __('nav_admin_panel') ?></a></li>
+                            class="bg-rose-50 text-rose-600 px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-rose-100 transition-colors"><?= __('nav_admin_panel') ?></a>
+                    </li>
                 <?php endif; ?>
             </ul>
 
@@ -122,7 +127,7 @@ $_currentLang = currentLang();
                     <!-- Globe Icon -->
                     <svg class="w-4 h-4 text-stone-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                            d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                     </svg>
                     <select name="set_lang" onchange="this.form.submit()" aria-label="Language">
                         <option value="en" <?= $_currentLang === 'en' ? 'selected' : '' ?>>ENG</option>
@@ -164,7 +169,8 @@ $_currentLang = currentLang();
 
                         <!-- Wishlist -->
                         <a href="/sweetheaven/user/wishlist.php"
-                            class="relative p-2 text-stone-400 hover:text-rose-500 transition-colors" title="<?= __('nav_wishlist') ?>">
+                            class="relative p-2 text-stone-400 hover:text-rose-500 transition-colors"
+                            title="<?= __('nav_wishlist') ?>">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                     d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -184,7 +190,8 @@ $_currentLang = currentLang();
 
                         <!-- Cart -->
                         <a href="/sweetheaven/user/cart.php"
-                            class="relative p-2 text-stone-400 hover:text-rose-500 transition-colors" title="<?= __('nav_cart') ?>">
+                            class="relative p-2 text-stone-400 hover:text-rose-500 transition-colors"
+                            title="<?= __('nav_cart') ?>">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                     d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -310,7 +317,8 @@ $_currentLang = currentLang();
                             class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm"><?= __('nav_login') ?></a>
                     </li>
                     <li><a href="/sweetheaven/auth/register.php"
-                            class="block px-4 py-2.5 text-rose-500 font-semibold rounded-lg hover:bg-rose-50 text-sm"><?= __('nav_signup') ?></a></li>
+                            class="block px-4 py-2.5 text-rose-500 font-semibold rounded-lg hover:bg-rose-50 text-sm"><?= __('nav_signup') ?></a>
+                    </li>
                 <?php endif; ?>
             </ul>
         </div>
@@ -359,16 +367,16 @@ $_currentLang = currentLang();
                     </div>`;
                     return;
                 }
-            const statusIcons = {
-                'order_status': '📦',
-                'new_order': '🛒',
-            };
-            list.innerHTML = data.map(n => {
-                const icon = statusIcons[n.type] || '🔔';
-                const time = timeAgo(n.created_at);
-                const unread = n.is_seen == 0 ? 'bg-rose-50 border-l-4 border-rose-400' : '';
-                let link = '#';
-                if (n.order_id) link = `/sweetheaven/user/profile.php?tab=orders`;
+                const statusIcons = {
+                    'order_status': '📦',
+                    'new_order': '🛒',
+                };
+                list.innerHTML = data.map(n => {
+                    const icon = statusIcons[n.type] || '🔔';
+                    const time = timeAgo(n.created_at);
+                    const unread = n.is_seen == 0 ? 'bg-rose-50 border-l-4 border-rose-400' : '';
+                    let link = '#';
+                    if (n.order_id) link = `/sweetheaven/user/profile.php?tab=orders`;
                     return `<a href="${link}" onclick="markAllSeen()" class="flex items-start gap-3 px-4 py-3 hover:bg-stone-50 transition-colors ${unread} cursor-pointer">
                         <span class="text-xl mt-0.5">${icon}</span>
                         <div class="flex-1 min-w-0">

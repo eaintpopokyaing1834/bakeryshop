@@ -233,8 +233,6 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
         .animated-float {
             animation: floatEffect 3s infinite ease-in-out;
         }
-
-
     </style>
 </head>
 
@@ -766,6 +764,82 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
         </div>
     </section>
 
+<!-- ═════════════════════════ PROMOTIONS ═════════════════════════ -->
+     <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+
+            <div class="grid lg:grid-cols-2  gap-6">
+
+                <!-- Promo 1 -->
+
+                <div class="flex flex-col gap-6">
+                    <div class="text-3xl font-semibold text-center"><?= __('promo_special') ?></div>
+                    <div class="promo-card rounded-2xl overflow-hidden flex flex-col md:flex-row border border-rose-100"
+                        style="background:var(--rose-light);">
+                        <div class="p-12 flex-1">
+                            <span class="text-3xl mb-3 block">🎉</span>
+                            <h3 class="font-bold text-gray-800 text-xl mb-2"><?= __('promo_first_order') ?></h3>
+                            <p class="text-gray-500 text-sm leading-relaxed mb-5"><?= __('promo_first_desc') ?></p>
+                            <a href="/sweetheaven/auth/register.php"
+                                class="inline-block text-white font-semibold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity"
+                                style="background:#e8746a;">
+                                <?= __('promo_claim') ?>
+                            </a>
+                        </div>
+                        <div class="hidden md:block w-40 flex-shrink-0">
+                            <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=300&q=80&auto=format&fit=crop"
+                                alt="Cake slice" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+
+                    <!-- Promo 2 -->
+                    <div class="promo-card rounded-2xl overflow-hidden flex flex-col md:flex-row border border-amber-100"
+                        style="background:#fffbf0;">
+                        <div class="p-12 flex-1">
+                            <span class="text-3xl mb-3 block">🎁</span>
+                            <h3 class="font-bold text-gray-800 text-xl mb-2"><?= __('promo_free_gift_title') ?></h3>
+                            <p class="text-gray-500 text-sm leading-relaxed mb-5"><?= __('promo_free_gift_desc') ?></p>
+                            <a href="/sweetheaven/user/products.php"
+                                class="inline-block text-white font-semibold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity"
+                                style="background:#f59e0b;">
+                                <?= __('promo_shop_now') ?>
+                            </a>
+                        </div>
+                        <div class="hidden md:block w-40 flex-shrink-0">
+                            <img src="https://images.unsplash.com/photo-1551024601-bec78aea704b?w=300&q=80&auto=format&fit=crop"
+                                alt="Donuts" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                </div>
+                <article class="flex flex-col gap-6">
+                    <div class="text-center text-3xl font-semibold"><?= __('promo_latest_products') ?></div>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4" style="background:#fffbf0;">
+                        <?php foreach ($latestProducts as $product): ?>
+                            <?php
+                            $imgSrc = $product['primary_image']
+                                ? '/sweetheaven/' . $product['primary_image']
+                                : '/sweetheaven/images/maincake.jpg';
+                            ?>
+                            <div class="group relative overflow-hidden rounded-2xl bg-white border border-rose-200/50 shadow-sm hover:shadow-lg transition-all duration-500 aspect-square cursor-pointer"
+                                onclick="this.classList.toggle('active')">
+                                <img src="<?= htmlspecialchars($imgSrc) ?>" alt="<?= htmlspecialchars($product['name']) ?>"
+                                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                                <div
+                                    class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 group-[.active]:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                                    <span
+                                        class="text-white font-semibold text-sm text-center w-full translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-[.active]:translate-y-0 group-[.active]:opacity-100 transition-all duration-300 ease-out">
+                                        <?= htmlspecialchars($product['name']) ?>
+                                    </span>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </article>
+
+            </div>
+        </div>
+    </section>
+
 
 
     <!-- ═════════════════════════ SPECIAL DISCOUNTS ═════════════════════════ -->
@@ -836,7 +910,8 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
 
                         <!-- Giant percentage -->
                         <div class="mb-3">
-                            <span class="block text-gray-700 text-xl font-bold leading-none"><?= __('discount_up_to') ?></span>
+                            <span
+                                class="block text-gray-700 text-xl font-bold leading-none"><?= __('discount_up_to') ?></span>
                             <span class="block font-black"
                                 style="font-size: clamp(4rem,8vw,6rem); color:#e8746a; line-height:1;">20%</span>
                             <span class="block text-gray-700 font-black tracking-tight"
@@ -882,7 +957,7 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                             class="w-full object-contain drop-shadow-xl" style="max-height:300px;">
                         <img src="/sweetheaven/images/gitbox.png" alt="Gift box"
                             class="w-full object-contain drop-shadow-xl" style="max-height:300px;"> -->
-                             <img src="/sweetheaven/images/ballon3.png" alt="Featured Discount Cake"
+                        <img src="/sweetheaven/images/ballon3.png" alt="Featured Discount Cake"
                             class="w-auto drop-shadow-2xl"
                             style="max-height:500px; margin-bottom:-2px; object-fit:contain;">
 
@@ -897,7 +972,8 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                             style="background:#e8746a;">
                             <div class="absolute inset-2 rounded-full border-2 border-white/40"></div>
                             <div class="text-center text-white px-2 z-10 space-y-0.5">
-                                <p class="text-[9px] font-bold uppercase tracking-wider leading-none"><?= __('discount_badge_week') ?>
+                                <p class="text-[9px] font-bold uppercase tracking-wider leading-none">
+                                    <?= __('discount_badge_week') ?>
                                 </p>
                                 <p class="text-[10px] font-semibold leading-snug"><?= __('discount_badge_save') ?></p>
                                 <p class="serif text-xl font-black leading-none"><?= __('discount_badge_cakes') ?></p>
@@ -993,7 +1069,7 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                                 </a>
                                 <div class="flex items-baseline gap-2 mb-3">
                                     <span class="text-xs line-through text-gray-400">
-                                        <?= number_format($dp['price']) ?> <?= __('common_mmk') ?>
+                                        <?= number_format($dp['price']) ?>         <?= __('common_mmk') ?>
                                     </span>
                                     <span class="font-extrabold text-base" style="color:#e8746a;">
                                         <?= number_format($dpFinalPrice) ?> <span
@@ -1073,87 +1149,13 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
         </div>
     </section>
 
-    <!-- ═════════════════════════ PROMOTIONS ═════════════════════════ -->
-    <section class="py-16 bg-white">
-        <div class="max-w-7xl mx-auto px-6">
-
-            <div class="grid lg:grid-cols-2  gap-6">
-
-                <!-- Promo 1 -->
-
-                <div class="flex flex-col gap-6">
-                    <div class="text-3xl font-semibold text-center"><?= __('promo_special') ?></div>
-                    <div class="promo-card rounded-2xl overflow-hidden flex flex-col md:flex-row border border-rose-100"
-                        style="background:var(--rose-light);">
-                        <div class="p-12 flex-1">
-                            <span class="text-3xl mb-3 block">🎉</span>
-                            <h3 class="font-bold text-gray-800 text-xl mb-2"><?= __('promo_first_order') ?></h3>
-                            <p class="text-gray-500 text-sm leading-relaxed mb-5"><?= __('promo_first_desc') ?></p>
-                            <a href="/sweetheaven/auth/register.php"
-                                class="inline-block text-white font-semibold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity"
-                                style="background:#e8746a;">
-                                <?= __('promo_claim') ?>
-                            </a>
-                        </div>
-                        <div class="hidden md:block w-40 flex-shrink-0">
-                            <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=300&q=80&auto=format&fit=crop"
-                                alt="Cake slice" class="w-full h-full object-cover">
-                        </div>
-                    </div>
-
-                    <!-- Promo 2 -->
-                    <div class="promo-card rounded-2xl overflow-hidden flex flex-col md:flex-row border border-amber-100"
-                        style="background:#fffbf0;">
-                        <div class="p-12 flex-1">
-                            <span class="text-3xl mb-3 block">🎁</span>
-                            <h3 class="font-bold text-gray-800 text-xl mb-2"><?= __('promo_free_gift_title') ?></h3>
-                            <p class="text-gray-500 text-sm leading-relaxed mb-5"><?= __('promo_free_gift_desc') ?></p>
-                            <a href="/sweetheaven/user/products.php"
-                                class="inline-block text-white font-semibold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity"
-                                style="background:#f59e0b;">
-                                <?= __('promo_shop_now') ?>
-                            </a>
-                        </div>
-                        <div class="hidden md:block w-40 flex-shrink-0">
-                            <img src="https://images.unsplash.com/photo-1551024601-bec78aea704b?w=300&q=80&auto=format&fit=crop"
-                                alt="Donuts" class="w-full h-full object-cover">
-                        </div>
-                    </div>
-                </div>
-                <article class="flex flex-col gap-6">
-                    <div class="text-center text-3xl font-semibold"><?= __('promo_latest_products') ?></div>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4" style="background:#fffbf0;">
-                        <?php foreach ($latestProducts as $product): ?>
-                            <?php
-                            $imgSrc = $product['primary_image']
-                                ? '/sweetheaven/' . $product['primary_image']
-                                : '/sweetheaven/images/maincake.jpg';
-                            ?>
-                            <div class="group relative overflow-hidden rounded-2xl bg-white border border-rose-200/50 shadow-sm hover:shadow-lg transition-all duration-500 aspect-square cursor-pointer"
-                                onclick="this.classList.toggle('active')">
-                                <img src="<?= htmlspecialchars($imgSrc) ?>" alt="<?= htmlspecialchars($product['name']) ?>"
-                                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                                <div
-                                    class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 group-[.active]:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                                    <span
-                                        class="text-white font-semibold text-sm text-center w-full translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-[.active]:translate-y-0 group-[.active]:opacity-100 transition-all duration-300 ease-out">
-                                        <?= htmlspecialchars($product['name']) ?>
-                                    </span>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </article>
-
-            </div>
-        </div>
-    </section>
     <!-- ═════════════════════════ REVIEWS DISPLAY ═════════════════════════ -->
     <section id="reviews-display" class="py-20 bg-[#fdf8f3]">
         <div class="max-w-7xl mx-auto px-6">
             <div class="flex items-center justify-center mb-10 fade-up">
                 <div class="text-center">
-                    <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;"><?= __('review_display_label') ?></p>
+                    <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;">
+                        <?= __('review_display_label') ?></p>
                     <h2 class="serif text-3xl text-gray-800"><?= __('review_display_title') ?></h2>
                     <p class="text-gray-400 text-sm mt-2"><?= __('review_display_desc') ?></p>
                 </div>
@@ -1177,8 +1179,10 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                                                 <?= strtoupper(substr($r['name'], 0, 1)) ?>
                                             </div>
                                             <div class="min-w-0">
-                                                <p class="font-semibold text-gray-700 text-sm truncate"><?= htmlspecialchars($r['name']) ?></p>
-                                                <p class="text-xs text-gray-400"><?= date('M j, Y', strtotime($r['created_at'])) ?></p>
+                                                <p class="font-semibold text-gray-700 text-sm truncate">
+                                                    <?= htmlspecialchars($r['name']) ?></p>
+                                                <p class="text-xs text-gray-400">
+                                                    <?= date('M j, Y', strtotime($r['created_at'])) ?></p>
                                             </div>
                                         </div>
                                         <p class="text-gray-500 text-sm leading-7">"<?= htmlspecialchars($r['message']) ?>"</p>
@@ -1209,44 +1213,79 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
 
     <!-- ═════════════════════════ REVIEW FORM ═════════════════════════ -->
     <?php if (isset($_SESSION['user_id']) && $_SESSION['role'] !== 'admin'): ?>
-    <section id="review-form" class="pb-20 bg-[#fdf8f3]">
-        <div class="max-w-2xl mx-auto px-6">
-            <div class="border-t border-gray-200 pt-16">
-                <div class="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm">
-                    <h3 class="font-bold text-gray-800 text-lg mb-2"><?= __('review_form_title') ?></h3>
-                    <p class="text-gray-400 text-sm mb-6"><?= __('review_form_desc') ?></p>
-                    <form id="reviewForm" class="space-y-4">
-                        <div class="grid sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('review_form_name_label') ?></label>
-                                <input type="text" id="reviewName" required
-                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm"
-                                    placeholder="<?= __('review_form_name_ph') ?>">
+        <section id="review-form" class="pb-20 bg-[#fdf8f3]">
+            <div class="max-w-2xl mx-auto px-6">
+                <div class="border-t border-gray-200 pt-16">
+                    <div class="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm">
+                        <h3 class="font-bold text-gray-800 text-lg mb-2"><?= __('review_form_title') ?></h3>
+                        <p class="text-gray-400 text-sm mb-6"><?= __('review_form_desc') ?></p>
+                        <form id="reviewForm" class="space-y-4">
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label
+                                        class="block text-sm font-semibold text-gray-700 mb-2"><?= __('review_form_name_label') ?></label>
+                                    <input type="text" id="reviewName" required
+                                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm"
+                                        placeholder="<?= __('review_form_name_ph') ?>">
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-semibold text-gray-700 mb-2"><?= __('review_form_email_label') ?></label>
+                                    <input type="email" id="reviewEmail" required
+                                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm"
+                                        placeholder="<?= __('review_form_email_ph') ?>">
+                                </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('review_form_email_label') ?></label>
-                                <input type="email" id="reviewEmail" required
-                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm"
-                                    placeholder="<?= __('review_form_email_ph') ?>">
+                                <label
+                                    class="block text-sm font-semibold text-gray-700 mb-2"><?= __('review_form_message_label') ?></label>
+                                <textarea id="reviewMessage" rows="4" required
+                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"
+                                    placeholder="<?= __('review_form_message_ph') ?>"></textarea>
                             </div>
+                            <button type="submit"
+                                class="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-white font-semibold px-8 py-3 rounded-xl transition-colors text-sm">
+                                <?= __('review_form_submit') ?>
+                            </button>
+                        </form>
+                        <div id="reviewFormMsg" class="mt-4 hidden"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <!-- ═════════════════════════ ABOUT US ═════════════════════════ -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="rounded-3xl overflow-hidden shadow-lg fade-up">
+                    <img src="../images/about.jpg" alt="About Sweet Heaven Bakery" class="w-full h-96 object-cover">
+                </div>
+                <div class="fade-up fade-up-d2">
+                    <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;">
+                        <?= __('about_label') ?>
+                    </p>
+                    <h2 class="serif text-4xl text-gray-800 mb-6"><?= __('about_title') ?></h2>
+                    <p class="text-gray-500 text-[15px] leading-7 mb-6">
+                        <?= __('about_desc') ?>
+                    </p>
+                    <div class="flex items-center gap-4 text-sm">
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center text-rose-500">🎂</span>
+                            <span class="font-semibold text-gray-700"><?= __('about_exp') ?></span>
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('review_form_message_label') ?></label>
-                            <textarea id="reviewMessage" rows="4" required
-                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"
-                                placeholder="<?= __('review_form_message_ph') ?>"></textarea>
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center text-rose-500">❤️</span>
+                            <span class="font-semibold text-gray-700"><?= __('about_love') ?></span>
                         </div>
-                        <button type="submit"
-                            class="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-white font-semibold px-8 py-3 rounded-xl transition-colors text-sm">
-                            <?= __('review_form_submit') ?>
-                        </button>
-                    </form>
-                    <div id="reviewFormMsg" class="mt-4 hidden"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
-    <?php endif; ?>
 
     <script>
         document.getElementById('reviewForm')?.addEventListener('submit', function (e) {
