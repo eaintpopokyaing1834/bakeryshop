@@ -97,7 +97,7 @@ $_currentLang = currentLang();
 
             <!-- Logo -->
             <a href="/sweetheaven/user/index.php" class="flex items-center gap-2 shrink-0">
-                <img src="/sweetheaven/images/shoplogo.png" class="h-10 w-auto" alt="Sweet Heaven">
+                <img src="/sweetheaven/images/9102671.png" class="h-10 w-auto" alt="Sweet Heaven">
                 <span class="text-2xl font-bold text-stone-800 hidden sm:block">Sweet Heaven</span>
             </a>
 
@@ -116,10 +116,17 @@ $_currentLang = currentLang();
                             class="bg-rose-50 text-rose-600 px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-rose-100 transition-colors"><?= __('nav_admin_panel') ?></a>
                     </li>
                 <?php endif; ?>
+                <form method="GET" class="flex gap-2 items-center justify-center py-6">
+                    <input type="hidden" name="category_id" value="<?= $categoryId ?>">
+                    <input type="hidden" name="sort" value="<?= $sort ?>">
+                    <input type="search" name="search" placeholder="🔍 Search products..."
+                        value="<?= htmlspecialchars($search) ?>"
+                        class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 w-48">
+                </form>
             </ul>
 
             <!-- Right Actions -->
-            <div class="flex flex-row items-center gap-3">
+            <div class="flex flex-row items-center gap-6">
 
                 <!-- Language Selector -->
                 <form method="POST" action="" class="lang-selector" id="langForm">

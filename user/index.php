@@ -619,12 +619,12 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                     }
                     ?>
                     <div
-                        class="product-card group bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2">
+                        class="product-card group bg-white rounded-2xl border border-gray-100 overflow-hidden rouned-2xl shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-2">
                         <div class="relative overflow-hidden bg-gradient-to-br from-rose-50 to-amber-50 aspect-[4/3]">
                             <img src="<?= htmlspecialchars($imgSrc) ?>" alt="<?= htmlspecialchars($product['name']) ?>"
                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
                             <button onclick="event.stopPropagation(); toggleWishlist(<?= $product['id'] ?>, this)"
-                                class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 text-gray-400 shadow-md flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all duration-200 backdrop-blur-sm"
+                                class="absolute top-2 right-2 w-9 h-9 rounded-full bg-white/90 text-gray-400 shadow-md flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all duration-200 backdrop-blur-sm"
                                 title="Wishlist">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -633,12 +633,12 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                             </button>
                             <?php if ($hasDiscount): ?>
                                 <div
-                                    class="absolute top-3 left-3 bg-gradient-to-r from-green-400 to-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                                    class="absolute top-0 left-0 bg-rose-500 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md" viewBox="0 0 24 24">
                                     <?= htmlspecialchars($product['discount_name']) ?>
                                 </div>
                             <?php elseif ($product['stock'] < 5): ?>
                                 <div
-                                    class="absolute top-3 left-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                                    class="absolute top-0 left-0 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
                                     <?= __('bestsellers_low_stock') ?>
                                 </div>
                             <?php endif; ?>
@@ -658,7 +658,7 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                                 </h3>
                             </a>
 
-                            <div class="flex items-center justify-between pt-3 mt-1 border-t border-gray-50">
+                            <div class="flex flex-col gap-3  border-t border-gray-50">
                                 <span class="font-bold text-[15px] text-rose-500">
                                     <?php if ($hasDiscount): ?>
                                         <span
@@ -668,15 +668,19 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                                         <?= number_format($product['price']) ?>
                                     <?php endif; ?>
                                     <span class="text-xs font-normal text-gray-400"><?= __('common_mmk') ?></span></span>
+
+                               
                                 <div class="flex gap-2">
                                     <a href="/sweetheaven/user/product_detail.php?id=<?= $product['id'] ?>"
-                                        class="border border-stone-200 text-rose-500 px-3 py-1.5 rounded-xl text-xs font-semibold hover:bg-rose-50 transition-colors">
+                                        class="flex-1 text-center border py-2 rounded-xl text-xs font-semibold hover:bg-rose-50 transition-colors"
+                                        style="border-color:#e8746a; color:#e8746a;">
                                         <?= __('common_view') ?>
                                     </a>
                                     <?php if (!$isAdmin): ?>
-                                        <button
-                                            onclick="addToCart(<?= $product['id'] ?>, '<?= addslashes($product['name']) ?>')"
-                                            class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shadow-sm shadow-rose-200">
+                                        <button onclick="addToCart(<?= $product['id'] ?>, '<?= addslashes($product['name']) ?>')"
+                                            class="bg-rose-400 flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-bold text-white transition-all duration-200 hover:opacity-90 shadow">
+                                           
+                                            <img src="../images/cart2.png" class="w-5 h-5">
                                             <?= __('common_add_cart') ?>
                                         </button>
                                     <?php endif; ?>
@@ -690,7 +694,7 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
 
         <div class="flex items-center justify-center mt-6">
             <a href="/sweetheaven/user/products.php"
-                class="hidden sm:inline-flex items-center justify-center gap-1.5 text-center text-sm font-semibold text-rose-500 hover:text-rose-600 transition-colors bg-pink-200 rounded-xl px-4 py-2">
+                class="hidden sm:inline-flex items-center justify-center gap-1.5 text-center text-sm font-semibold text-rose-500 hover:text-rose-600 transition-colors bg-pink-200 rounded-2xl px-4 py-4">
                 <?= __('bestsellers_see_all') ?>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1270,7 +1274,7 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                     <p class="text-gray-500 text-[15px] leading-7 mb-6">
                         <?= __('about_desc') ?>
                     </p>
-                    <div class="flex items-center gap-4 text-sm">
+                    <!-- <div class="flex items-center gap-4 text-sm">
                         <div class="flex items-center gap-2">
                             <span
                                 class="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center text-rose-500">🎂</span>
@@ -1281,7 +1285,7 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                                 class="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center text-rose-500">❤️</span>
                             <span class="font-semibold text-gray-700"><?= __('about_love') ?></span>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>

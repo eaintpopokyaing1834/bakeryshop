@@ -338,7 +338,7 @@ return [
     'common_out_of_stock'  => 'Out of Stock',
     'common_only_left'     => 'Only %d left',
     'common_low_stock'     => 'Low Stock',
-    'common_add_cart'      => '+ Cart',
+    'common_add_cart'      => ' Add to Cart',
 
     // ── Discount Section (Index) ─────────────────────────
     'discount_section_label'    => 'Special Discounts',

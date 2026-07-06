@@ -11,7 +11,7 @@ if (!function_exists('__')) {
             <!-- Brand -->
             <div class="col-span-1 md:col-span-2">
                 <div class="flex items-center gap-3 mb-4">
-                    <img src="/sweetheaven/images/shoplogo.png" class="h-10 w-auto" alt="Sweet Heaven">
+                    <img src="/sweetheaven/images/9102671.png" class="h-10 w-auto" alt="Sweet Heaven">
                     <span class="text-2xl font-bold text-stone-800">Sweet Heaven</span>
                 </div>
                 <p class="text-stone-500 leading-relaxed text-sm mb-6">
