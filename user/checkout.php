@@ -49,7 +49,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!in_array($ext, $allowed)) {
             $error = __('checkout_err_filetype');
         } else {
-            $shippingFee = $shippingMethod === 'express' ? 5000 : 2000;
+            $shippingCostMap = [
+                'free_delivery' => 0,
+                'pickup'        => 0,
+                'express'       => 2000,
+            ];
+            $shippingFee = $shippingCostMap[$shippingMethod] ?? 0;
 
             if ($customizeId) {
                 $crStmt = $db->prepare("SELECT * FROM customize_requests WHERE id=? AND user_id=? AND status='approved'");
@@ -80,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $orderCount = $db->prepare("SELECT COUNT(*) FROM orders WHERE user_id=?");
                 $orderCount->execute([$_SESSION['user_id']]);
                 $isFirstOrder = $orderCount->fetchColumn() == 0;
-                $firstOrderDiscount = $isFirstOrder ? $subtotal * 0.10 : 0;
+                $firstOrderDiscount = $isFirstOrder ? $subtotal * 0.05 : 0;
                 $totalAmount = $subtotal - $firstOrderDiscount + $shippingFee;
             }
 
@@ -218,7 +223,7 @@ if ($customizeRequest) {
     $orderCount = $db->prepare("SELECT COUNT(*) FROM orders WHERE user_id=?");
     $orderCount->execute([$_SESSION['user_id']]);
     $isFirstOrder = $orderCount->fetchColumn() == 0;
-    $firstOrderDiscount = $isFirstOrder ? $subtotal * 0.10 : 0;
+    $firstOrderDiscount = $isFirstOrder ? $subtotal * 0.05 : 0;
     $totalSavings = $subtotal ? array_sum(array_map(fn($i) => ($i['price'] * $i['qty']) - $i['item_total'], $cartDetails)) : 0;
 }
 ?>
@@ -305,23 +310,39 @@ if ($customizeRequest) {
                                 class="w-7 h-7 bg-rose-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
                             <?= __('checkout_shipping_method') ?>
                         </h2>
-                        <div class="grid sm:grid-cols-2 gap-4">
+                        <div class="grid sm:grid-cols-3 gap-4">
                             <label class="cursor-pointer">
-                                <input type="radio" name="shipping_method" value="standard" checked
+                                <input type="radio" name="shipping_method" value="free_delivery" checked
+                                    data-cost="0" data-label="<?= __('checkout_free_delivery') ?>"
                                     class="sr-only peer">
                                 <div
-                                    class="border-2 border-gray-200 peer-checked:border-rose-400 peer-checked:bg-rose-50 rounded-2xl p-5 transition-all">
+                                    class="border-2 border-gray-200 peer-checked:border-rose-400 peer-checked:bg-rose-50 rounded-2xl p-5 transition-all h-full">
                                     <div class="flex items-center justify-between mb-2">
-                                        <span class="font-bold text-gray-700"><?= __('checkout_standard') ?></span>
-                                        <span class="text-rose-500 font-bold"><?= __('checkout_standard_fee') ?></span>
+                                        <span class="font-bold text-gray-700"><?= __('checkout_free_delivery') ?></span>
+                                        <span class="text-green-600 font-bold"><?= __('checkout_free_delivery_fee') ?></span>
                                     </div>
-                                    <p class="text-xs text-gray-400"><?= __('checkout_standard_desc') ?></p>
+                                    <p class="text-xs text-gray-400"><?= __('checkout_free_delivery_desc') ?></p>
                                 </div>
                             </label>
                             <label class="cursor-pointer">
-                                <input type="radio" name="shipping_method" value="express" class="sr-only peer">
+                                <input type="radio" name="shipping_method" value="pickup"
+                                    data-cost="0" data-label="<?= __('checkout_pickup') ?>"
+                                    class="sr-only peer">
                                 <div
-                                    class="border-2 border-gray-200 peer-checked:border-rose-400 peer-checked:bg-rose-50 rounded-2xl p-5 transition-all">
+                                    class="border-2 border-gray-200 peer-checked:border-rose-400 peer-checked:bg-rose-50 rounded-2xl p-5 transition-all h-full">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="font-bold text-gray-700"><?= __('checkout_pickup') ?></span>
+                                        <span class="text-green-600 font-bold"><?= __('checkout_pickup_fee') ?></span>
+                                    </div>
+                                    <p class="text-xs text-gray-400"><?= __('checkout_pickup_desc') ?></p>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="shipping_method" value="express"
+                                    data-cost="2000" data-label="2,000 <?= __('common_mmk') ?>"
+                                    class="sr-only peer">
+                                <div
+                                    class="border-2 border-gray-200 peer-checked:border-rose-400 peer-checked:bg-rose-50 rounded-2xl p-5 transition-all h-full">
                                     <div class="flex items-center justify-between mb-2">
                                         <span class="font-bold text-gray-700"><?= __('checkout_express') ?></span>
                                         <span class="text-rose-500 font-bold"><?= __('checkout_express_fee') ?></span>
@@ -462,12 +483,12 @@ if ($customizeRequest) {
                             <?php endif; ?>
                             <div class="flex justify-between text-gray-500">
                                 <span><?= __('checkout_shipping') ?></span>
-                                <span id="shippingDisplay"><?= __('checkout_standard_fee') ?></span>
+                                <span id="shippingDisplay"><?= __('checkout_free_delivery') ?></span>
                             </div>
                             <div
                                 class="flex justify-between font-bold text-gray-800 text-base border-t border-gray-100 pt-2">
                                 <span><?= __('checkout_total') ?></span>
-                                <span id="totalDisplay"><?= number_format($subtotal - $firstOrderDiscount + 2000) ?> <?= __('common_mmk') ?></span>
+                                <span id="totalDisplay"><?= number_format($subtotal - $firstOrderDiscount) ?> <?= __('common_mmk') ?></span>
                             </div>
                         </div>
 
@@ -486,18 +507,25 @@ if ($customizeRequest) {
     <script>
         const subtotal = <?= $subtotal ?>;
         const firstOrderDiscount = <?= $firstOrderDiscount ?>;
-        const shippingFees = { standard: 2000, express: 5000 };
         const paymentMethods = <?= json_encode($paymentMethods) ?>;
 
         // ── Shipping method toggle ────────────────────────
+        function updateShipping(radio) {
+            const cost = parseInt(radio.dataset.cost, 10) || 0;
+            const label = radio.dataset.label || '';
+            const total = subtotal - firstOrderDiscount + cost;
+            const shippingEl = document.getElementById('shippingDisplay');
+            const totalEl    = document.getElementById('totalDisplay');
+            shippingEl.textContent = cost === 0 ? label : cost.toLocaleString('en') + ' <?= __('common_mmk') ?>';
+            totalEl.textContent    = total > 0 ? total.toLocaleString('en') + ' <?= __('common_mmk') ?>' : '0 <?= __('common_mmk') ?>';
+        }
+
         document.querySelectorAll('input[name="shipping_method"]').forEach(radio => {
-            radio.addEventListener('change', () => {
-                const fee = shippingFees[radio.value] || 2000;
-                const total = subtotal - firstOrderDiscount + fee;
-                document.getElementById('shippingDisplay').textContent = fee.toLocaleString('en') + ' <?= __('common_mmk') ?>';
-                document.getElementById('totalDisplay').textContent = total.toLocaleString('en') + ' <?= __('common_mmk') ?>';
-            });
+            radio.addEventListener('change', () => updateShipping(radio));
         });
+        // initialise with the default checked option
+        const defaultShipping = document.querySelector('input[name="shipping_method"]:checked');
+        if (defaultShipping) updateShipping(defaultShipping);
 
         // ── Payment method toggle ─────────────────────────
         function showPaymentDetails(methodId) {

@@ -21,35 +21,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$size || !$flavor || !$deliveryDate) {
         $error = __('customize_err_fields');
     } else {
-        $referenceImage = null;
-        if (!empty($_FILES['reference_image']['tmp_name'])) {
-            $file = $_FILES['reference_image'];
-            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-            if (!in_array($ext, $allowed)) {
-                $error = __('customize_err_filetype');
-            } else {
-                $uploadDir = __DIR__ . '/../uploads/customize/';
-                if (!is_dir($uploadDir))
-                    mkdir($uploadDir, 0777, true);
-                $filename = 'customize_' . $_SESSION['user_id'] . '_' . time() . '.' . $ext;
-                move_uploaded_file($file['tmp_name'], $uploadDir . $filename);
-                $referenceImage = 'uploads/customize/' . $filename;
+        // ── Server-side guard: block duplicate submissions ──────────────
+        $activeCheck = $db->prepare("SELECT id FROM customize_requests WHERE user_id=? AND status IN ('pending','approved') LIMIT 1");
+        $activeCheck->execute([$_SESSION['user_id']]);
+        if ($activeCheck->fetch()) {
+            $error = 'You already have an active customize request. Please wait for it to be processed before submitting a new one.';
+        } else {
+            $referenceImage = null;
+            if (!empty($_FILES['reference_image']['tmp_name'])) {
+                $file = $_FILES['reference_image'];
+                $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+                $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+                if (!in_array($ext, $allowed)) {
+                    $error = __('customize_err_filetype');
+                } else {
+                    $uploadDir = __DIR__ . '/../uploads/customize/';
+                    if (!is_dir($uploadDir))
+                        mkdir($uploadDir, 0777, true);
+                    $filename = 'customize_' . $_SESSION['user_id'] . '_' . time() . '.' . $ext;
+                    move_uploaded_file($file['tmp_name'], $uploadDir . $filename);
+                    $referenceImage = 'uploads/customize/' . $filename;
+                }
             }
-        }
 
-        if (!$error) {
-            $db->prepare("INSERT INTO customize_requests (user_id, size, flavor, color, cake_message, reference_image, delivery_date, additional_notes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')")
-                ->execute([$_SESSION['user_id'], $size, $flavor, $color ?: null, $cakeMessage ?: null, $referenceImage, $deliveryDate, $additionalNotes ?: null]);
+            if (!$error) {
+                $db->prepare("INSERT INTO customize_requests (user_id, size, flavor, color, cake_message, reference_image, delivery_date, additional_notes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')")
+                    ->execute([$_SESSION['user_id'], $size, $flavor, $color ?: null, $cakeMessage ?: null, $referenceImage, $deliveryDate, $additionalNotes ?: null]);
 
-            // Notify admin
-            $db->prepare("INSERT INTO notifications (type, title, message) VALUES ('customize_request', ?, ?)")
-                ->execute([
-                    __('customize_notif_title'),
-                    sprintf(__('customize_notif_body'), htmlspecialchars($_SESSION['name']))
-                ]);
+                // Notify admin
+                $db->prepare("INSERT INTO notifications (type, title, message) VALUES ('customize_request', ?, ?)")
+                    ->execute([
+                        __('customize_notif_title'),
+                        sprintf(__('customize_notif_body'), htmlspecialchars($_SESSION['name']))
+                    ]);
 
-            $success = __('customize_success_msg');
+                // Post-Redirect-Get: prevents duplicate submission on browser refresh/back
+                header('Location: /sweetheaven/user/customize.php?submitted=1');
+                exit;
+            }
         }
     }
 }
@@ -58,6 +67,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $myRequests = $db->prepare("SELECT * FROM customize_requests WHERE user_id=? ORDER BY created_at DESC");
 $myRequests->execute([$_SESSION['user_id']]);
 $myRequests = $myRequests->fetchAll();
+
+// Check if user already has an active (pending/approved) request — block new submissions
+$hasActiveRequest = false;
+foreach ($myRequests as $r) {
+    if (in_array($r['status'], ['pending', 'approved'])) {
+        $hasActiveRequest = true;
+        break;
+    }
+}
+
+// Show success message after redirect
+if (isset($_GET['submitted'])) {
+    $success = __('customize_success_msg');
+}
 
 $reqStatusColors = [
     'pending' => 'bg-amber-100 text-amber-700',
@@ -110,7 +133,26 @@ $reqStatusColors = [
         <?php endif; ?>
 
         <div class="grid lg:grid-cols-2 gap-8 items-start">
-            <div>
+            <?php if ($hasActiveRequest): ?>
+                <!-- Blocked: user already has a pending/approved request -->
+                <div class="bg-white rounded-2xl shadow-sm border border-amber-200 p-8 text-center">
+                    <div class="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">You have an active request</h3>
+                    <p class="text-sm text-gray-500 mb-5">
+                        You already have a <strong>pending</strong> or <strong>approved</strong> customize request.
+                        Please wait for it to be processed, or place your order if it has been approved.
+                        Once it is ordered or rejected, you can submit a new request.
+                    </p>
+                    <a href="#my-requests" class="inline-flex items-center gap-2 text-sm font-semibold text-rose-500 hover:text-rose-600 transition-colors">
+                        View my requests ↓
+                    </a>
+                </div>
+            <?php else: ?>
                 <form method="POST" enctype="multipart/form-data" class="space-y-6">
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
                         <div class="grid sm:grid-cols-2 gap-5">
@@ -201,9 +243,10 @@ $reqStatusColors = [
                         <?= __('customize_submit_btn') ?>
                     </button>
                 </form>
+            <?php endif; ?>
             </div>
 
-            <div>
+            <div id="my-requests">
                 <?php if (!empty($myRequests)): ?>
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center">

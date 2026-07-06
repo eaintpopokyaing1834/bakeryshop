@@ -913,7 +913,7 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                             <span
                                 class="block text-gray-700 text-xl font-bold leading-none"><?= __('discount_up_to') ?></span>
                             <span class="block font-black"
-                                style="font-size: clamp(4rem,8vw,6rem); color:#e8746a; line-height:1;">20%</span>
+                                style="font-size: clamp(4rem,8vw,6rem); color:#e8746a; line-height:1;">15%</span>
                             <span class="block text-gray-700 font-black tracking-tight"
                                 style="font-size: clamp(1.5rem,3vw,2rem); line-height:1.1;"><?= __('discount_off') ?></span>
                         </div>
