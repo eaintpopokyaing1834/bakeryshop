@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (session_status() === PHP_SESSION_NONE)
     session_start();
 require_once __DIR__ . '/../includes/lang.php';
@@ -67,6 +67,7 @@ $discountedProducts = $db->query("
 ")->fetchAll();
 
 $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -253,7 +254,13 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
 
 
             <!-- Left: Text -->
-            <div class="fade-up">
+            <div class="fade-up z-10 fade-up-d2  relative hidden md:block">
+                <div><img src="../images/spot2.png" class="absolute -top-28 -left-36 w-80 h-80 opacity-80">
+                    </div>
+
+                    <div class="absolute z-[-1] top-1/2 -left-20 -translate-x-1/2  w-80 h-80 opacity-20 rounded-full "
+                    style="background:var(--rose);"></div>
+
                 <span class="pill mb-6">
                     <span class="pill-dot"></span>
                     <?= __('hero_pill') ?>
@@ -293,6 +300,12 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                 <!-- Decorative circle -->
                 <div class="absolute -top-8 -right-8 w-72 h-72 rounded-full"
                     style="background:var(--rose-light);z-index:0;"></div>
+                    <div><img src="../images/balloon.png" class="absolute -top-14 -left-36 w-72 h-70 opacity-50">
+                    </div>
+
+                    <div><img src="../images/ribbon.png" class="absolute -bottom-20 -left-40 w-60 h-60 opacity-70">
+                    </div>
+
                 <div class="relative z-10 grid grid-cols-2 gap-4">
                     <img src="../images/heropincake.jpg" alt="Beautiful cake"
                         class="animated-pulse collage-img w-full h-52 shadow-md">
@@ -632,8 +645,8 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                                 </svg>
                             </button>
                             <?php if ($hasDiscount): ?>
-                                <div
-                                    class="absolute top-0 left-0 bg-rose-500 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md" viewBox="0 0 24 24">
+                                <div class="absolute top-0 left-0 bg-rose-500 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md"
+                                    viewBox="0 0 24 24">
                                     <?= htmlspecialchars($product['discount_name']) ?>
                                 </div>
                             <?php elseif ($product['stock'] < 5): ?>
@@ -669,7 +682,7 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                                     <?php endif; ?>
                                     <span class="text-xs font-normal text-gray-400"><?= __('common_mmk') ?></span></span>
 
-                               
+
                                 <div class="flex gap-2">
                                     <a href="/sweetheaven/user/product_detail.php?id=<?= $product['id'] ?>"
                                         class="flex-1 text-center border py-2 rounded-xl text-xs font-semibold hover:bg-rose-50 transition-colors"
@@ -677,9 +690,10 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                                         <?= __('common_view') ?>
                                     </a>
                                     <?php if (!$isAdmin): ?>
-                                        <button onclick="addToCart(<?= $product['id'] ?>, '<?= addslashes($product['name']) ?>')"
+                                        <button
+                                            onclick="addToCart(<?= $product['id'] ?>, '<?= addslashes($product['name']) ?>')"
                                             class="bg-rose-400 flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-bold text-white transition-all duration-200 hover:opacity-90 shadow">
-                                           
+
                                             <img src="../images/cart2.png" class="w-5 h-5">
                                             <?= __('common_add_cart') ?>
                                         </button>
@@ -713,8 +727,8 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                         <img src="/sweetheaven/images/bow.jpg" alt="Customize your cake"
                             class="w-full h-96 object-cover">
                     </div>
-                    <div class="absolute -bottom-5 -right-5 bg-white rounded-2xl shadow-lg px-6 py-4 hidden md:block">
-                        <p class="text-3xl font-bold text-rose-500">🎨</p>
+                    <div class="absolute -bottom-5 -right-5 bg-white rounded-full shadow-lg px-6 py-4 hidden md:block">
+                        <p class="text-3xl text-center font-bold text-rose-500">🎨</p>
                         <p class="text-sm font-semibold text-gray-700"><?= __('customize_your_design') ?></p>
                         <p class="text-xs text-gray-400"><?= __('customize_well_bake') ?></p>
                     </div>
@@ -729,7 +743,7 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                     <p class="text-gray-500 leading-relaxed text-lg">
                         <?= __('customize_desc') ?>
                     </p>
-                    <div class="flex flex-wrap gap-6 text-sm">
+                    <div class="grid grid-cols-3 gap-3 text-sm">
                         <div class="flex items-center gap-3">
                             <span
                                 class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center text-rose-500 text-lg">🎂</span>
@@ -768,8 +782,8 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
         </div>
     </section>
 
-<!-- ═════════════════════════ PROMOTIONS ═════════════════════════ -->
-     <section class="py-16 bg-white">
+    <!-- ═════════════════════════ PROMOTIONS ═════════════════════════ -->
+    <section class="py-16 bg-white">
         <div class="max-w-7xl mx-auto px-6">
 
             <div class="grid lg:grid-cols-2  gap-6">
@@ -1159,7 +1173,8 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
             <div class="flex items-center justify-center mb-10 fade-up">
                 <div class="text-center">
                     <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;">
-                        <?= __('review_display_label') ?></p>
+                        <?= __('review_display_label') ?>
+                    </p>
                     <h2 class="serif text-3xl text-gray-800"><?= __('review_display_title') ?></h2>
                     <p class="text-gray-400 text-sm mt-2"><?= __('review_display_desc') ?></p>
                 </div>
@@ -1184,9 +1199,11 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                                             </div>
                                             <div class="min-w-0">
                                                 <p class="font-semibold text-gray-700 text-sm truncate">
-                                                    <?= htmlspecialchars($r['name']) ?></p>
+                                                    <?= htmlspecialchars($r['name']) ?>
+                                                </p>
                                                 <p class="text-xs text-gray-400">
-                                                    <?= date('M j, Y', strtotime($r['created_at'])) ?></p>
+                                                    <?= date('M j, Y', strtotime($r['created_at'])) ?>
+                                                </p>
                                             </div>
                                         </div>
                                         <p class="text-gray-500 text-sm leading-7">"<?= htmlspecialchars($r['message']) ?>"</p>
@@ -1515,7 +1532,7 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                         const badge = document.getElementById('cartBadge');
                         if (badge) { badge.textContent = data.cart_count; badge.classList.remove('hidden'); }
                     } else if (data.redirect) {
-                        window.location.href = '/sweetheaven/auth/login.php';
+                        openAuthModal('login');
                     }
                 });
         }
@@ -1537,7 +1554,7 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                         svg.setAttribute('fill', data.is_wishlisted ? 'currentColor' : 'none');
                         showToast(data.is_wishlisted ? '❤️ ' + (data.message || '<?= __('toast_added_wishlist') ?>') : '💔 <?= __('toast_removed_wishlist') ?>');
                         if (typeof updateWishlistBadge === 'function') updateWishlistBadge(data.wishlist_count);
-                    } else if (data.redirect) window.location.href = '/sweetheaven/auth/login.php';
+                    } else if (data.redirect) openAuthModal('login');
                 });
         }
 
@@ -1548,6 +1565,598 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
             t.classList.add('flex');
             setTimeout(() => { t.classList.add('hidden'); t.classList.remove('flex'); }, 3000);
         }
+    </script>
+
+    <!-- ═══════════════ AUTH MODAL ═══════════════ -->
+    <div id="authModal" class="fixed inset-0 z-[999] flex items-center justify-center p-4 hidden" role="dialog"
+        aria-modal="true" aria-label="Authentication">
+        <!-- Backdrop -->
+        <div id="authBackdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeAuthModal()"></div>
+
+        <!-- Card -->
+        <div class="relative w-full max-w-md overflow-hidden auth-card"
+            style="animation: modalSlideIn 0.38s cubic-bezier(0.34,1.46,0.64,1) both">
+
+            <!-- Close button -->
+            <button onclick="closeAuthModal()" id="authCloseBtn" class="auth-close-btn" aria-label="Close">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+            </button>
+
+            <!-- Brand header -->
+            <div class="auth-header">
+                <div class="auth-logo-ring">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c97878" stroke-width="1.6">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 id="authModalTitle" class="auth-title">Welcome back</h2>
+                    <p id="authModalSubtitle" class="auth-subtitle">Sign in to your Sweet Heaven account</p>
+                </div>
+            </div>
+
+            <div class="auth-body">
+
+                <!-- LOGIN PANEL -->
+                <div id="loginPanel">
+                    <div id="loginError" class="auth-alert auth-alert-error hidden">
+                        <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" class="shrink-0">
+                            <path fill-rule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <span id="loginErrorMsg"></span>
+                    </div>
+
+                    <form id="modalLoginForm" class="auth-form" onsubmit="submitLogin(event)">
+                        <div class="auth-field">
+                            <span class="auth-field-icon">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                            </span>
+                            <input type="email" id="modalEmail" name="email" required autocomplete="email"
+                                placeholder="Email address" class="auth-input">
+                        </div>
+                        <div class="auth-field">
+                            <span class="auth-field-icon">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </span>
+                            <input type="password" id="modalPassword" name="password" required
+                                autocomplete="current-password" placeholder="Password" class="auth-input auth-input-pr">
+                            <button type="button" onclick="toggleModalPassword('modalPassword',this)"
+                                class="auth-eye-btn" tabindex="-1">
+                                <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <button type="submit" id="loginSubmitBtn" class="auth-btn">
+                            <span id="loginBtnText">Sign In</span>
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </button>
+                    </form>
+
+                    <div class="auth-demo-box">
+                        <p class="auth-demo-title">&#10022; Demo Credentials</p>
+                        <p>Admin: admin@sweetheaven.com <span class="auth-demo-sep">/</span> admin123</p>
+                        <p>Customer: customer@sweetheaven.com <span class="auth-demo-sep">/</span> customer123</p>
+                    </div>
+
+                    <p class="auth-switch-text">
+                        Don't have an account?
+                        <button onclick="switchTab('register')" class="auth-switch-link">Create one free</button>
+                    </p>
+                </div>
+
+                <!-- REGISTER PANEL -->
+                <div id="registerPanel" class="hidden">
+                    <div id="registerError" class="auth-alert auth-alert-error hidden">
+                        <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" class="shrink-0">
+                            <path fill-rule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <span id="registerErrorMsg"></span>
+                    </div>
+                    <div id="registerSuccess" class="auth-alert auth-alert-success hidden">
+                        <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" class="shrink-0">
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <span id="registerSuccessMsg"></span>
+                    </div>
+
+                    <form id="modalRegisterForm" class="auth-form" onsubmit="submitRegister(event)">
+                        <div class="auth-field">
+                            <span class="auth-field-icon">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </span>
+                            <input type="text" id="regName" name="name" required autocomplete="name"
+                                placeholder="Full name" class="auth-input">
+                        </div>
+                        <div class="auth-field">
+                            <span class="auth-field-icon">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                            </span>
+                            <input type="email" id="regEmail" name="email" required autocomplete="email"
+                                placeholder="Email address" class="auth-input">
+                        </div>
+                        <div class="auth-field">
+                            <span class="auth-field-icon">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </span>
+                            <input type="password" id="regPassword" name="password" required autocomplete="new-password"
+                                placeholder="Password (min 6 chars)" class="auth-input auth-input-pr">
+                            <button type="button" onclick="toggleModalPassword('regPassword',this)" class="auth-eye-btn"
+                                tabindex="-1">
+                                <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="auth-field">
+                            <span class="auth-field-icon">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                            </span>
+                            <input type="password" id="regConfirm" name="confirm_password" required
+                                autocomplete="new-password" placeholder="Confirm password" class="auth-input">
+                        </div>
+                        <button type="submit" id="registerSubmitBtn" class="auth-btn">
+                            <span id="registerBtnText">Create Account</span>
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                        </button>
+                    </form>
+
+                    <p class="auth-switch-text">
+                        Already have an account?
+                        <button onclick="switchTab('login')" class="auth-switch-link">Sign in</button>
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .auth-card {
+            background: #fff9f9;
+            border-radius: 28px;
+            box-shadow: 0 24px 64px rgba(180, 80, 80, .14), 0 4px 16px rgba(200, 100, 100, .08);
+            border: 1px solid #f5dede;
+        }
+
+        .auth-close-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #fce8e8;
+            color: #b87070;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .2s, color .2s, transform .15s;
+            z-index: 10;
+        }
+
+        .auth-close-btn:hover {
+            background: #f9d4d4;
+            color: #9a4f4f;
+            transform: scale(1.1);
+        }
+
+        .auth-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 30px 30px 0;
+        }
+
+        .auth-logo-ring {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #fce8e8, #fdf0f0);
+            border: 1px solid #f5d5d5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #3d2020;
+            line-height: 1.3;
+            margin: 0;
+        }
+
+        .auth-subtitle {
+            font-size: .78rem;
+            color: #b08080;
+            margin: 3px 0 0;
+        }
+
+        .auth-body {
+            padding: 22px 30px 28px;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .auth-field {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-field-icon {
+            position: absolute;
+            left: 13px;
+            color: #d4a0a0;
+            pointer-events: none;
+            display: flex;
+            transition: color .2s;
+        }
+
+        .auth-field:focus-within .auth-field-icon {
+            color: #c97878;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 12px 14px 12px 40px;
+            border-radius: 14px;
+            border: 1.5px solid #f0d8d8;
+            background: #fff;
+            font-size: .855rem;
+            color: #3d2020;
+            outline: none;
+            font-family: inherit;
+            transition: border-color .22s, box-shadow .22s, background .22s;
+        }
+
+        .auth-input-pr {
+            padding-right: 42px;
+        }
+
+        .auth-input::placeholder {
+            color: #d4adad;
+        }
+
+        .auth-input:focus {
+            border-color: #e8a0a0;
+            box-shadow: 0 0 0 3.5px rgba(220, 130, 130, .14);
+            background: #fffbfb;
+        }
+
+        .auth-eye-btn {
+            position: absolute;
+            right: 13px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #d4a0a0;
+            padding: 2px;
+            display: flex;
+            transition: color .2s;
+        }
+
+        .auth-eye-btn:hover {
+            color: #c97878;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 13px 20px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #e8918a, #d97070);
+            color: #fff;
+            font-size: .9rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 4px;
+            font-family: inherit;
+            letter-spacing: .01em;
+            transition: opacity .2s, transform .15s, box-shadow .2s;
+            box-shadow: 0 4px 16px rgba(210, 100, 100, .25);
+        }
+
+        .auth-btn:hover {
+            opacity: .92;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 22px rgba(210, 100, 100, .3);
+        }
+
+        .auth-btn:active {
+            transform: scale(.98);
+        }
+
+        .auth-btn:disabled {
+            opacity: .65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-alert {
+            display: none;        /* hidden by default — JS removes .hidden to show */
+            align-items: flex-start;
+            gap: 9px;
+            padding: 11px 14px;
+            border-radius: 12px;
+            font-size: .8rem;
+            line-height: 1.45;
+            margin-bottom: 10px;
+        }
+        /* When .hidden is removed by JS, flex layout kicks in */
+        .auth-alert:not(.hidden) {
+            display: flex;
+        }
+
+        .auth-alert-error {
+            background: #fff0f0;
+            border: 1px solid #f5c8c8;
+            color: #a85050;
+        }
+
+        .auth-alert-success {
+            background: #f0faf4;
+            border: 1px solid #b8e6c8;
+            color: #3a7a55;
+        }
+
+        .auth-demo-box {
+            margin-top: 14px;
+            padding: 11px 14px;
+            border-radius: 13px;
+            background: linear-gradient(135deg, #fdf3f3, #fce8e8);
+            border: 1px solid #f5d8d8;
+            font-size: .72rem;
+            color: #a07070;
+            line-height: 1.7;
+        }
+
+        .auth-demo-title {
+            font-weight: 700;
+            color: #c97878;
+            margin-bottom: 3px;
+        }
+
+        .auth-demo-sep {
+            opacity: .5;
+            margin: 0 3px;
+        }
+
+        .auth-switch-text {
+            text-align: center;
+            font-size: .8rem;
+            color: #b08080;
+            margin-top: 18px;
+        }
+
+        .auth-switch-link {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            color: #d97070;
+            font-size: inherit;
+            font-family: inherit;
+            padding: 0;
+            margin-left: 3px;
+            transition: color .18s;
+        }
+
+        .auth-switch-link:hover {
+            color: #b85555;
+            text-decoration: underline;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(32px) scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+    </style>
+
+    <script>
+        /* ── Auth Modal ── */
+        function openAuthModal(tab = 'login') {
+            switchTab(tab);
+            document.getElementById('authModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            // focus first input after animation
+            setTimeout(() => {
+                const el = tab === 'login'
+                    ? document.getElementById('modalEmail')
+                    : document.getElementById('regName');
+                el && el.focus();
+            }, 100);
+        }
+        
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+            document.body.style.overflow = '';
+            // Clear all alert states
+            setLoginError('');
+            setRegisterError('');
+            document.getElementById('registerSuccess').classList.add('hidden');
+            // Reset both forms so they're fresh on next open
+            document.getElementById('modalLoginForm').reset();
+            document.getElementById('modalRegisterForm').reset();
+        }
+
+        function switchTab(tab) {
+            const isLogin = tab === 'login';
+            document.getElementById('loginPanel').classList.toggle('hidden', !isLogin);
+            document.getElementById('registerPanel').classList.toggle('hidden', isLogin);
+
+            // Update title and subtitle
+            const title    = document.getElementById('authModalTitle');
+            const subtitle = document.getElementById('authModalSubtitle');
+            if (title)    title.textContent    = isLogin ? 'Welcome back'     : 'Create an account';
+            if (subtitle) subtitle.textContent = isLogin
+                ? 'Sign in to your Sweet Heaven account'
+                : 'Join us and enjoy exclusive treats';
+
+            // Clear ALL alerts whenever the panel changes
+            setLoginError('');
+            setRegisterError('');
+            document.getElementById('registerSuccess').classList.add('hidden');
+        }
+
+        function setLoginError(msg) {
+            const el = document.getElementById('loginError');
+            document.getElementById('loginErrorMsg').textContent = msg || '';
+            if (msg) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+
+        function setRegisterError(msg) {
+            const el = document.getElementById('registerError');
+            document.getElementById('registerErrorMsg').textContent = msg || '';
+            if (msg) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+
+        function setBtnLoading(btnId, textId, loading, defaultText) {
+            const btn = document.getElementById(btnId);
+            const txt = document.getElementById(textId);
+            btn.disabled = loading;
+            btn.style.opacity = loading ? '0.7' : '1';
+            txt.textContent = loading ? 'Please wait…' : defaultText;
+        }
+
+        function submitLogin(e) {
+            e.preventDefault();
+            setLoginError('');
+            setBtnLoading('loginSubmitBtn', 'loginBtnText', true, 'Sign In');
+
+            const body = new URLSearchParams({
+                action: 'login',
+                email: document.getElementById('modalEmail').value,
+                password: document.getElementById('modalPassword').value,
+            });
+
+            fetch('/sweetheaven/api/auth_modal.php', { method: 'POST', body })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirect;
+                    } else {
+                        setLoginError(data.error);
+                        setBtnLoading('loginSubmitBtn', 'loginBtnText', false, 'Sign In');
+                    }
+                })
+                .catch(() => {
+                    setLoginError('Network error. Please try again.');
+                    setBtnLoading('loginSubmitBtn', 'loginBtnText', false, 'Sign In');
+                });
+        }
+       
+        function submitRegister(e) {
+            e.preventDefault();
+            setRegisterError('');
+            document.getElementById('registerSuccess').classList.add('hidden');
+            setBtnLoading('registerSubmitBtn', 'registerBtnText', true, 'Create Account');
+
+            const body = new URLSearchParams({
+                action: 'register',
+                name: document.getElementById('regName').value,
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPassword').value,
+                confirm_password: document.getElementById('regConfirm').value,
+            });
+
+            fetch('/sweetheaven/api/auth_modal.php', { method: 'POST', body })
+                .then(r => r.json())
+                .then(data => {
+                    setBtnLoading('registerSubmitBtn', 'registerBtnText', false, 'Create Account');
+                    if (data.success) {
+                        document.getElementById('modalRegisterForm').reset();
+                        const successEl = document.getElementById('registerSuccess');
+                        document.getElementById('registerSuccessMsg').textContent = data.message + ' You can now sign in.';
+                        successEl.classList.remove('hidden');
+                        // Auto-switch to login after 2 seconds
+                        setTimeout(() => switchTab('login'), 2000);
+                    } else {
+                        setRegisterError(data.error);
+                    }
+                })
+                .catch(() => {
+                    setRegisterError('Network error. Please try again.');
+                    setBtnLoading('registerSubmitBtn', 'registerBtnText', false, 'Create Account');
+                });
+        }
+
+        function toggleModalPassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeAuthModal();
+        });
     </script>
 </body>
 

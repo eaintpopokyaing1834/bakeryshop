@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <?php endif; ?>
 
-            <form method="POST" action="" class="space-y-5" id="loginForm">
+            <form method="POST" action="index.php" class="space-y-5" id="loginForm">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('login_email_label') ?></label>
                     <input type="email" name="email" id="email" required

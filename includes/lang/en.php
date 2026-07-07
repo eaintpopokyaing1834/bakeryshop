@@ -99,7 +99,7 @@ return [
     'customize_desc'       => "Can't find what you're looking for? Tell us your dream cake and we'll bring it to life. Choose your size, flavor, color, and message — add a reference image and we'll handle the rest.",
     'customize_size'       => 'Any Size & Flavor',
     'customize_size_sub'   => 'From 1lb to tiered cakes',
-    'customize_message'    => 'Personalized Message',
+    'customize_message'    => 'Message on cake',
     'customize_message_sub'=> 'Write anything you want',
     'customize_image'      => 'Reference Image',
     'customize_image_sub'  => 'Show us your inspiration',

@@ -28,6 +28,11 @@ if ($isLoggedIn && !$isAdmin) {
     $wishlistCount = (int) $wstmt->fetchColumn();
 }
 $_currentLang = currentLang();
+$categoryId = (int)($_GET['category_id'] ?? 0);
+$search     = trim($_GET['search'] ?? '');
+$discounted = (int)($_GET['discounted'] ?? 0);
+$sort       = trim($_GET['sort'] ?? '');
+
 ?>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet">
@@ -55,40 +60,61 @@ $_currentLang = currentLang();
         width: 100%;
     }
 
-    /* Language selector */
-    .lang-selector {
+    /* Language dropdown */
+    .lang-dropdown-wrap {
+        position: relative;
+    }
+    .lang-globe-btn {
         display: flex;
         align-items: center;
-        gap: 4px;
-        background: rgba(255, 255, 255, 0.7);
-        border: 1px solid rgba(244, 63, 94, 0.2);
+        justify-content: center;
+        width: 34px;
+        height: 34px;
         border-radius: 8px;
-        padding: 4px 8px;
-        transition: all 0.2s;
-    }
-
-    .lang-selector:hover {
-        background: rgba(255, 255, 255, 0.95);
-        border-color: rgba(244, 63, 94, 0.4);
-    }
-
-    .lang-selector select {
-        background: transparent;
-        border: none;
-        outline: none;
-        font-size: 12px;
-        font-weight: 600;
-        color: #57534e;
+        border: 1px solid rgba(244,63,94,.18);
+        background: rgba(255,255,255,.7);
+        color: #78716c;
         cursor: pointer;
-        padding: 0;
-        appearance: none;
-        -webkit-appearance: none;
+        transition: background .2s, border-color .2s, color .2s;
     }
-
-    .lang-selector select:focus {
-        outline: none;
-        box-shadow: none;
+    .lang-globe-btn:hover {
+        background: rgba(255,255,255,.95);
+        border-color: rgba(244,63,94,.4);
+        color: #e11d48;
     }
+    .lang-menu {
+        display: none;
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        min-width: 120px;
+        background: #fff;
+        border: 1px solid #f1e3e6;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(180,60,80,.12);
+        overflow: hidden;
+        z-index: 200;
+    }
+    .lang-menu.open { display: block; }
+    .lang-menu-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        padding: 9px 14px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #57534e;
+        background: none;
+        border: none;
+        cursor: pointer;
+        text-align: left;
+        transition: background .15s, color .15s;
+        font-family: inherit;
+    }
+    .lang-menu-item:hover   { background: #fff0f3; color: #e11d48; }
+    .lang-menu-item.active  { color: #e11d48; font-weight: 700; }
+    .lang-menu-item + .lang-menu-item { border-top: 1px solid #fce7eb; }
 </style>
 
 <nav class="bg-pink-200 backdrop-blur-md border-b border-stone-100 sticky top-0 z-50">
@@ -116,31 +142,70 @@ $_currentLang = currentLang();
                             class="bg-rose-50 text-rose-600 px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-rose-100 transition-colors"><?= __('nav_admin_panel') ?></a>
                     </li>
                 <?php endif; ?>
-                <form method="GET" class="flex gap-2 items-center justify-center py-6">
-                    <input type="hidden" name="category_id" value="<?= $categoryId ?>">
-                    <input type="hidden" name="sort" value="<?= $sort ?>">
-                    <input type="search" name="search" placeholder="🔍 Search products..."
-                        value="<?= htmlspecialchars($search) ?>"
-                        class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 w-48">
-                </form>
+                <!-- Search -->
+                    <form method="GET" action="products.php" class="flex gap-2">
+                        <input type="hidden" name="category_id" value="<?= $categoryId ?>">
+                        <input type="hidden" name="sort" value="<?= $sort ?>">
+                        <?php if ($discounted): ?><input type="hidden" name="discounted" value="1"><?php endif; ?>
+                        <input type="search" name="search" placeholder="<?= __('products_search_ph') ?>"
+                            value="<?= htmlspecialchars($search) ?>"
+                            class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 w-48">
+                    </form>
             </ul>
 
             <!-- Right Actions -->
             <div class="flex flex-row items-center gap-6">
 
-                <!-- Language Selector -->
-                <form method="POST" action="" class="lang-selector" id="langForm">
+                <!-- Language Selector (icon-only, dropdown on click) -->
+                <form method="POST" action="" id="langForm" style="display:none">
                     <input type="hidden" name="redirect" value="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>">
-                    <!-- Globe Icon -->
-                    <svg class="w-4 h-4 text-stone-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                    </svg>
-                    <select name="set_lang" onchange="this.form.submit()" aria-label="Language">
-                        <option value="en" <?= $_currentLang === 'en' ? 'selected' : '' ?>>ENG</option>
-                        <option value="my" <?= $_currentLang === 'my' ? 'selected' : '' ?>>မြန်မာ</option>
-                    </select>
+                    <input type="hidden" name="set_lang" id="langInput" value="<?= htmlspecialchars($_currentLang) ?>">
                 </form>
+
+                <div class="lang-dropdown-wrap" id="langDropdownWrap">
+                    <!-- Globe icon button -->
+                    <button type="button" class="lang-globe-btn" id="langGlobeBtn"
+                        onclick="toggleLangMenu()" aria-haspopup="true" aria-expanded="false"
+                        title="Select language">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                                d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                        </svg>
+                    </button>
+
+                    <!-- Dropdown menu -->
+                    <div class="lang-menu" id="langMenu" role="menu">
+                        <button type="button" class="lang-menu-item <?= $_currentLang === 'en' ? 'active' : '' ?>"
+                            onclick="setLang('en')" role="menuitem">
+                            <span>🌐</span> ENG
+                        </button>
+                        <button type="button" class="lang-menu-item <?= $_currentLang === 'my' ? 'active' : '' ?>"
+                            onclick="setLang('my')" role="menuitem">
+                            <span>🌐</span> မြန်မာ
+                        </button>
+                    </div>
+                </div>
+
+                <script>
+                function toggleLangMenu() {
+                    const menu = document.getElementById('langMenu');
+                    const btn  = document.getElementById('langGlobeBtn');
+                    const open = menu.classList.toggle('open');
+                    btn.setAttribute('aria-expanded', open);
+                }
+                function setLang(code) {
+                    document.getElementById('langInput').value = code;
+                    document.getElementById('langForm').submit();
+                }
+                // Close when clicking outside
+                document.addEventListener('click', function(e) {
+                    const wrap = document.getElementById('langDropdownWrap');
+                    if (wrap && !wrap.contains(e.target)) {
+                        document.getElementById('langMenu').classList.remove('open');
+                        document.getElementById('langGlobeBtn').setAttribute('aria-expanded', 'false');
+                    }
+                });
+                </script>
 
                 <?php if ($isLoggedIn): ?>
                     <?php if (!$isAdmin): ?>
@@ -280,8 +345,10 @@ $_currentLang = currentLang();
 
                 <?php else: ?>
                     <a href="/sweetheaven/auth/login.php"
+                        onclick="if(typeof openAuthModal==='function'){event.preventDefault();openAuthModal('login');}"
                         class="text-stone-600 hover:text-rose-500 font-medium text-sm transition-colors"><?= __('nav_login') ?></a>
                     <a href="/sweetheaven/auth/register.php"
+                        onclick="if(typeof openAuthModal==='function'){event.preventDefault();openAuthModal('register');}"
                         class="bg-rose-500 hover:bg-rose-600 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors"><?= __('nav_signup') ?></a>
                 <?php endif; ?>
 
@@ -321,9 +388,11 @@ $_currentLang = currentLang();
                     </li>
                 <?php else: ?>
                     <li><a href="/sweetheaven/auth/login.php"
+                            onclick="if(typeof openAuthModal==='function'){event.preventDefault();closeAuthModal&&closeAuthModal();toggleMobileMenu();openAuthModal('login');}"
                             class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm"><?= __('nav_login') ?></a>
                     </li>
                     <li><a href="/sweetheaven/auth/register.php"
+                            onclick="if(typeof openAuthModal==='function'){event.preventDefault();toggleMobileMenu();openAuthModal('register');}"
                             class="block px-4 py-2.5 text-rose-500 font-semibold rounded-lg hover:bg-rose-50 text-sm"><?= __('nav_signup') ?></a>
                     </li>
                 <?php endif; ?>
