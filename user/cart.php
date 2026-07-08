@@ -13,17 +13,57 @@ if (!empty($cart)) {
     $ids  = implode(',', array_map('intval', array_keys($cart)));
     $rows = $db->query("
         SELECT p.id, p.name, p.price, p.stock,
+               d.name  AS discount_name,
+               d.type  AS discount_type,
+               d.value AS discount_value,
                (SELECT image_url FROM product_images WHERE product_id=p.id AND is_primary=1 LIMIT 1) AS primary_image
-        FROM products p WHERE p.id IN ($ids)
+        FROM products p
+        LEFT JOIN discounts d ON p.discount_id = d.id AND d.status = 1
+        WHERE p.id IN ($ids)
     ")->fetchAll();
     foreach ($rows as $row) {
         $qty  = $cart[$row['id']]['qty'];
         $row['qty'] = $qty;
-        $row['item_total'] = $row['price'] * $qty;
-        $subtotal += $row['item_total'];
-        $cartProducts[] = $row;
+        // Apply per-product discount
+        $unitPrice = (float)$row['price'];
+        if (!empty($row['discount_value'])) {
+            if ($row['discount_type'] === 'percentage') {
+                $unitPrice = $unitPrice * (1 - $row['discount_value'] / 100);
+            } else {
+                $unitPrice = max(0, $unitPrice - $row['discount_value']);
+            }
+        }
+        $row['savings_per_unit'] = (float)$row['price'] - $unitPrice; // savings per single unit
+        $row['unit_price']        = $unitPrice;
+        $row['item_total']        = $unitPrice * $qty;  // discounted line total
+        $subtotal                += $row['item_total'];  // $subtotal = discounted grand total
+        $cartProducts[]           = $row;
     }
 }
+
+// Original price total (before any product discounts)
+$originalSubtotal = array_sum(array_map(
+    fn($i) => (float)$i['price'] * $i['qty'],
+    $cartProducts
+));
+
+// Product-level savings = original − discounted, across all qty
+$totalSavings = array_sum(array_map(
+    fn($i) => $i['savings_per_unit'] * $i['qty'],
+    $cartProducts
+));
+// $subtotal already equals $originalSubtotal - $totalSavings
+
+// First-order 5 % discount applies on the discounted subtotal (mirrors checkout.php)
+$firstOrderDiscount = 0;
+if (!empty($cartProducts) && isset($_SESSION['user_id'])) {
+    $ocStmt = $db->prepare("SELECT COUNT(*) FROM orders WHERE user_id=?");
+    $ocStmt->execute([$_SESSION['user_id']]);
+    if ($ocStmt->fetchColumn() == 0) {
+        $firstOrderDiscount = $subtotal * 0.05;
+    }
+}
+$grandTotal = $subtotal - $firstOrderDiscount;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -61,7 +101,9 @@ if (!empty($cart)) {
         <div class="lg:col-span-2 space-y-4" id="cartItemsContainer">
             <?php foreach ($cartProducts as $item): ?>
             <?php $imgSrc = $item['primary_image'] ? '/sweetheaven/'.$item['primary_image'] : '/sweetheaven/images/maincake.jpg'; ?>
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex gap-5 items-center" id="cart-item-<?= $item['id'] ?>">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex gap-5 items-center"
+                 id="cart-item-<?= $item['id'] ?>"
+                 data-savings-per-unit="<?= $item['savings_per_unit'] ?>">
                 <div class="w-20 h-20 rounded-xl overflow-hidden bg-rose-50 shrink-0">
                     <img src="<?= htmlspecialchars($imgSrc) ?>" class="w-full h-full object-cover" alt="<?= htmlspecialchars($item['name']) ?>">
                 </div>
@@ -72,16 +114,16 @@ if (!empty($cart)) {
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <button onclick="updateQty(<?= $item['id'] ?>, <?= $item['qty'] - 1 ?>)"
+                    <button onclick="updateQty(<?= $item['id'] ?>, parseInt(document.getElementById('qty-<?= $item['id'] ?>').textContent) - 1)"
                         class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold flex items-center justify-center transition-colors">−</button>
                     <span class="w-10 text-center font-bold text-gray-800" id="qty-<?= $item['id'] ?>"><?= $item['qty'] ?></span>
-                    <button onclick="updateQty(<?= $item['id'] ?>, <?= $item['qty'] + 1 ?>)"
+                    <button onclick="updateQty(<?= $item['id'] ?>, parseInt(document.getElementById('qty-<?= $item['id'] ?>').textContent) + 1)"
                         class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold flex items-center justify-center transition-colors">+</button>
                 </div>
 
-                <div class="text-right min-w-[100px]">
+                <div class="flex justify-center items-center gap-2 text-right min-w-[100px]">
                     <p class="font-bold text-gray-800" id="subtotal-<?= $item['id'] ?>"><?= number_format($item['item_total']) ?></p>
-                    <p class="text-xs text-gray-400"><?= __('common_mmk') ?></p>
+                    <p class="text-xs  text-gray-800"><?= __('common_mmk') ?></p>
                 </div>
 
                 <button onclick="removeItem(<?= $item['id'] ?>)"
@@ -95,38 +137,91 @@ if (!empty($cart)) {
         <!-- Order Summary -->
         <div class="lg:col-span-1">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
-                <h3 class="font-bold text-gray-800 text-lg mb-6"><?= __('cart_order_summary') ?></h3>
+                <h3 class="font-bold text-gray-800 text-lg mb-5"><?= __('cart_order_summary') ?></h3>
 
-                <div class="space-y-3 text-sm mb-6">
-                    <div class="flex justify-between text-gray-600">
-                        <span><?= __('cart_subtotal') ?></span>
-                        <span id="totalDisplay"><?= number_format($subtotal) ?> <?= __('common_mmk') ?></span>
+                <!-- Product list -->
+                <div class="space-y-4 mb-5 max-h-72 overflow-y-auto pr-1">
+                    <?php foreach ($cartProducts as $item):
+                        $imgSrc = $item['primary_image'] ? '/sweetheaven/'.$item['primary_image'] : '/sweetheaven/images/maincake.jpg';
+                    ?>
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl overflow-hidden bg-rose-50 shrink-0">
+                            <img src="<?= htmlspecialchars($imgSrc) ?>" class="w-full h-full object-cover" alt="<?= htmlspecialchars($item['name']) ?>">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-700 line-clamp-1"><?= htmlspecialchars($item['name']) ?></p>
+                            <p class="text-xs text-gray-400">x<?= $item['qty'] ?>
+                                <?php if (!empty($item['discount_name'])): ?>
+                                    <span class="text-green-600 font-semibold"> • <?= htmlspecialchars($item['discount_name']) ?></span>
+                                <?php endif; ?>
+                            </p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <p class="text-sm font-bold text-gray-700"><?= number_format($item['item_total']) ?></p>
+                            <?php if (!empty($item['discount_name'])): ?>
+                                <p class="text-[10px] line-through text-gray-400"><?= number_format($item['price'] * $item['qty']) ?></p>
+                            <?php endif; ?>
+                        </div>
                     </div>
-                    <div class="flex justify-between text-gray-600">
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- Totals -->
+                <div class="border-t border-gray-100 pt-4 space-y-2 text-sm">
+                    <div class="flex justify-between text-gray-500">
+                        <span><?= __('cart_subtotal') ?></span>
+                        <span id="subtotalDisplay"><?= number_format($originalSubtotal) ?> <?= __('common_mmk') ?></span>
+                    </div>
+
+                    <?php if ($totalSavings > 0): ?>
+                    <div class="flex justify-between text-green-600 font-medium" id="discountSavingsRow">
+                        <span><?= __('checkout_product_discounts') ?></span>
+                        <span id="discountDisplay">-<?= number_format($totalSavings) ?> <?= __('common_mmk') ?></span>
+                    </div>
+                    <?php else: ?>
+                    <div class="flex justify-between text-green-600 font-medium hidden" id="discountSavingsRow">
+                        <span><?= __('checkout_product_discounts') ?></span>
+                        <span id="discountDisplay"></span>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if ($firstOrderDiscount > 0): ?>
+                    <div class="flex justify-between text-blue-600 font-medium">
+                        <span><?= __('checkout_first_order_discount') ?></span>
+                        <span>-<?= number_format($firstOrderDiscount) ?> <?= __('common_mmk') ?></span>
+                    </div>
+                    <?php endif; ?>
+
+                    <div class="flex justify-between text-gray-400 text-xs italic">
                         <span><?= __('cart_shipping') ?></span>
                         <span class="text-green-600 font-medium"><?= __('cart_shipping_calc') ?></span>
                     </div>
-                    <div class="border-t border-gray-100 pt-3 flex justify-between font-bold text-gray-800 text-base">
+
+                    <div class="flex justify-between font-bold text-gray-800 text-base border-t border-gray-100 pt-2">
                         <span><?= __('cart_total') ?></span>
-                        <span id="grandTotal"><?= number_format($subtotal) ?> <?= __('common_mmk') ?></span>
+                        <span id="grandTotal"><?= number_format($grandTotal) ?> <?= __('common_mmk') ?></span>
                     </div>
                 </div>
 
-                <?php if (isset($_SESSION['user_id'])): ?>
-                <a href="/sweetheaven/user/checkout.php"
-                   class="block w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 rounded-2xl text-center transition-colors shadow-sm shadow-rose-100">
-                    <?= __('cart_checkout_btn') ?>
-                </a>
-                <?php else: ?>
-                <a href="/sweetheaven/auth/login.php"
-                   class="block w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 rounded-2xl text-center transition-colors">
-                    <?= __('cart_login_checkout') ?>
-                </a>
-                <?php endif; ?>
+                <!-- Actions -->
+                <div class="mt-6 space-y-3">
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                    <a href="/sweetheaven/user/checkout.php"
+                       id="proceedToCheckoutBtn"
+                       class="block w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 rounded-2xl text-center transition-colors shadow-sm shadow-rose-100">
+                        <?= __('cart_checkout_btn') ?>
+                    </a>
+                    <?php else: ?>
+                    <a href="/sweetheaven/auth/login.php"
+                       class="block w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 rounded-2xl text-center transition-colors shadow-sm shadow-rose-100">
+                        <?= __('cart_login_checkout') ?>
+                    </a>
+                    <?php endif; ?>
 
-                <a href="/sweetheaven/user/products.php" class="block text-center text-sm text-gray-400 hover:text-rose-500 mt-4 transition-colors">
-                    <?= __('cart_continue') ?>
-                </a>
+                    <a href="/sweetheaven/user/products.php" class="block text-center text-sm text-gray-400 hover:text-rose-500 transition-colors">
+                        <?= __('cart_continue') ?>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -136,6 +231,36 @@ if (!empty($cart)) {
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
 
 <script>
+const _firstOrderDiscount = <?= $firstOrderDiscount ?>;
+const _mmk = ' <?= __('common_mmk') ?>';
+
+// Recalculate total product-level savings from DOM data attributes
+function recalcSavings() {
+    let total = 0;
+    document.querySelectorAll('#cartItemsContainer > div[data-savings-per-unit]').forEach(row => {
+        const id  = row.id.replace('cart-item-', '');
+        const qty = parseInt(document.getElementById('qty-' + id)?.textContent) || 0;
+        total    += (parseFloat(row.dataset.savingsPerUnit) || 0) * qty;
+    });
+    return total;
+}
+
+function updateSummary(originalTotal) {
+    const savings    = recalcSavings();
+    const discounted = originalTotal - savings;
+    const grand      = discounted - _firstOrderDiscount;
+
+    const subtotalEl  = document.getElementById('subtotalDisplay');
+    const discountRow = document.getElementById('discountSavingsRow');
+    const discountEl  = document.getElementById('discountDisplay');
+    const grandEl     = document.getElementById('grandTotal');
+
+    if (subtotalEl)  subtotalEl.textContent  = originalTotal.toLocaleString('en') + _mmk;
+    if (discountEl)  discountEl.textContent  = '-' + Math.round(savings).toLocaleString('en') + _mmk;
+    if (discountRow) discountRow.classList.toggle('hidden', savings <= 0);
+    if (grandEl)     grandEl.textContent     = Math.round(grand).toLocaleString('en') + _mmk;
+}
+
 function updateQty(productId, newQty) {
     fetch('/sweetheaven/api/cart.php', {
         method: 'POST',
@@ -148,12 +273,16 @@ function updateQty(productId, newQty) {
             updateCartCountText();
         } else {
             const qtyEl = document.getElementById(`qty-${productId}`);
+            // Recompute per-item line total from savings data + new qty
+            const row   = document.getElementById(`cart-item-${productId}`);
+            const savingsPerUnit = parseFloat(row?.dataset?.savingsPerUnit) || 0;
             const subEl = document.getElementById(`subtotal-${productId}`);
             if (qtyEl) qtyEl.textContent = newQty;
-            if (subEl) subEl.textContent = Number(data.subtotal).toLocaleString('en');
+            // data.subtotal is original price × qty (from session), subtract savings to get discounted
+            if (subEl) subEl.textContent = Math.round(data.subtotal - savingsPerUnit * newQty).toLocaleString('en');
         }
-        document.getElementById('totalDisplay').textContent = Number(data.total).toLocaleString('en') + ' <?= __('common_mmk') ?>';
-        document.getElementById('grandTotal').textContent   = Number(data.total).toLocaleString('en') + ' <?= __('common_mmk') ?>';
+        // data.total = sum of (original session price × qty) across all items
+        updateSummary(data.total);
         const badge = document.getElementById('cartBadge');
         if (badge) { badge.textContent = data.cart_count; if(data.cart_count===0)badge.classList.add('hidden'); }
     });

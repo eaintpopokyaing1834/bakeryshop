@@ -72,7 +72,23 @@ if ($statusFilter !== 'all') { $where[] = "o.status = ?"; $params[] = $statusFil
 if ($search !== '') { $where[] = "(u.name LIKE ? OR o.id LIKE ?)"; $params[] = "%$search%"; $params[] = "%$search%"; }
 $whereSQL = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
-$orders = $db->prepare("
+// Count for pagination
+$countStmt = $db->prepare("
+    SELECT COUNT(*)
+    FROM orders o
+    JOIN users u ON o.user_id = u.id
+    $whereSQL
+");
+$countStmt->execute($params);
+$totalOrders = (int)$countStmt->fetchColumn();
+
+$perPage     = 10;
+$page = max(1, (int)($_GET['page'] ?? 1));
+$totalPages  = max(1, (int)ceil($totalOrders / $perPage));
+$page = min($page, $totalPages);
+$offset      = ($page - 1) * $perPage;
+
+$stmt = $db->prepare("
     SELECT o.*, u.name AS customer_name, u.email AS customer_email,
            pm.payment_name, p.status AS pay_status, p.screenshot
     FROM orders o
@@ -81,9 +97,13 @@ $orders = $db->prepare("
     LEFT JOIN payment_methods pm ON pm.id = p.payment_method_id
     $whereSQL
     ORDER BY o.order_date DESC
+    LIMIT $perPage OFFSET $offset
 ");
-$orders->execute($params);
-$orders = $orders->fetchAll();
+foreach ($params as $i => $val) {
+    $stmt->bindValue($i + 1, $val);
+}
+$stmt->execute();
+$orders = $stmt->fetchAll();
 
 $pageTitle = 'Order Management';
 require_once __DIR__ . '/../includes/admin_header.php';
@@ -96,8 +116,8 @@ $statusColors = [
     'cancelled'  => 'bg-red-100 text-red-700 border-red-200',
 ];
 ?>
-
-<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
+<div class="px-4">
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
     <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div class="flex flex-wrap gap-2">
             <?php foreach (['all','pending','processing','shipped','delivered','cancelled'] as $s): ?>
@@ -117,10 +137,12 @@ $statusColors = [
         </form>
     </div>
 </div>
+</div>
 
+<section class="px-4">
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-        <h3 class="font-bold text-gray-800">Orders <span class="text-gray-400 font-normal text-sm ml-2">(<?= count($orders) ?> total)</span></h3>
+        <h3 class="font-bold text-gray-800">Orders <span class="text-gray-400 font-normal text-sm ml-2">(<?= $totalOrders ?> total)</span></h3>
     </div>
 
     <div class="overflow-x-auto">
@@ -251,7 +273,24 @@ $statusColors = [
             </tbody>
         </table>
     </div>
+    <?php if ($totalPages > 1): ?>
+    <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+        <p class="text-sm text-gray-400">Page <?= $page ?> of <?= $totalPages ?></p>
+        <div class="flex items-center gap-1">
+            <?php if ($page > 1): ?>
+            <a href="?status=<?= urlencode($statusFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← Prev</a>
+            <?php endif; ?>
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+            <a href="?status=<?= urlencode($statusFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors <?= $i === $page ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>"><?= $i ?></a>
+            <?php endfor; ?>
+            <?php if ($page < $totalPages): ?>
+            <a href="?status=<?= urlencode($statusFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">Next →</a>
+            <?php endif; ?>
+        </div>
+    </div>
+    <?php endif; ?>
 </div>
+</section>
 
 <script>
 function updatePayment(orderId, action) {

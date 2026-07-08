@@ -40,9 +40,23 @@ if ($role !== 'all') { $where[] = "role = ?"; $params[] = $role; }
 if ($search !== '')  { $where[] = "(name LIKE ? OR email LIKE ?)"; $params[] = "%$search%"; $params[] = "%$search%"; }
 $whereSQL = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
-$users = $db->prepare("SELECT * FROM users $whereSQL ORDER BY created_at DESC");
-$users->execute($params);
-$users = $users->fetchAll();
+// Count for pagination
+$countStmt = $db->prepare("SELECT COUNT(*) FROM users $whereSQL");
+$countStmt->execute($params);
+$totalUsers = (int)$countStmt->fetchColumn();
+
+$perPage     = 10;
+$page = max(1, (int)($_GET['page'] ?? 1));
+$totalPages  = max(1, (int)ceil($totalUsers / $perPage));
+$page = min($page, $totalPages);
+$offset      = ($page - 1) * $perPage;
+
+$stmt = $db->prepare("SELECT * FROM users $whereSQL ORDER BY created_at DESC LIMIT $perPage OFFSET $offset");
+foreach ($params as $i => $val) {
+    $stmt->bindValue($i + 1, $val);
+}
+$stmt->execute();
+$users = $stmt->fetchAll();
 
 $totalCustomers = $db->query("SELECT COUNT(*) FROM users WHERE role='customer'")->fetchColumn();
 $totalAdmins    = $db->query("SELECT COUNT(*) FROM users WHERE role='admin'")->fetchColumn();
@@ -52,7 +66,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 ?>
 
 <!-- Stats -->
-<div class="grid grid-cols-3 gap-4 mb-6">
+<div class="grid grid-cols-3 gap-4 mb-6 px-4">
     <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
         <div class="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center">
             <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -83,6 +97,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 </div>
 
 <!-- Filter Bar -->
+ <div class="px-4">
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
     <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div class="flex gap-2">
@@ -103,11 +118,13 @@ require_once __DIR__ . '/../includes/admin_header.php';
         </form>
     </div>
 </div>
+</div>
 
 <!-- Users Table -->
+ <section class="px-4">
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-100">
-        <h3 class="font-bold text-gray-800">Users <span class="text-gray-400 font-normal text-sm ml-2">(<?= count($users) ?> found)</span></h3>
+        <h3 class="font-bold text-gray-800">Users <span class="text-gray-400 font-normal text-sm ml-2">(<?= $totalUsers ?> found)</span></h3>
     </div>
     <div class="overflow-x-auto">
         <table class="w-full">
@@ -128,7 +145,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <tr class="hover:bg-gray-50/50 transition-colors" id="user-row-<?= $u['id'] ?>">
                 <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-stone-300 to-stone-600 flex items-center justify-center text-white font-bold">
+                        <div class="w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold">
                             <?= strtoupper(substr($u['name'],0,1)) ?>
                         </div>
                         <div>
@@ -167,7 +184,24 @@ require_once __DIR__ . '/../includes/admin_header.php';
             </tbody>
         </table>
     </div>
+    <?php if ($totalPages > 1): ?>
+    <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+        <p class="text-sm text-gray-400">Page <?= $page ?> of <?= $totalPages ?></p>
+        <div class="flex items-center gap-1">
+            <?php if ($page > 1): ?>
+            <a href="?role=<?= urlencode($role) ?>&search=<?= urlencode($search) ?>&page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← Prev</a>
+            <?php endif; ?>
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+            <a href="?role=<?= urlencode($role) ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors <?= $i === $page ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>"><?= $i ?></a>
+            <?php endfor; ?>
+            <?php if ($page < $totalPages): ?>
+            <a href="?role=<?= urlencode($role) ?>&search=<?= urlencode($search) ?>&page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">Next →</a>
+            <?php endif; ?>
+        </div>
+    </div>
+    <?php endif; ?>
 </div>
+</section>
 
 <script>
 function toggleRole(userId, newRole) {

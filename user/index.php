@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 if (session_status() === PHP_SESSION_NONE)
     session_start();
 require_once __DIR__ . '/../includes/lang.php';
@@ -1519,6 +1519,75 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
     <?php require_once __DIR__ . '/../includes/footer.php'; ?>
 
     <script>
+        /* ── Pending Action State ──────────────────────────────────────────────
+           Stores the cart/wishlist action a guest attempted so it can be
+           executed automatically after they log in or register.
+        ─────────────────────────────────────────────────────────────────── */
+        let _pendingAction = null;
+
+        function setPendingAction(action) {
+            _pendingAction = action;
+        }
+
+        function clearPendingAction() {
+            _pendingAction = null;
+        }
+
+        function executePendingAction() {
+            if (!_pendingAction) return Promise.resolve();
+            const action = _pendingAction;
+            clearPendingAction();
+
+            if (action.type === 'cart') {
+                // Execute the cart add that was blocked; return the Promise so the
+                // caller can wait for completion before reloading the page
+                return fetch('/sweetheaven/api/cart.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=add&product_id=${action.productId}&qty=1`
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(`<?= __('toast_added_cart_js') ?>`.replace('%s', action.productName));
+                        const badge = document.getElementById('cartBadge');
+                        if (badge) { badge.textContent = data.cart_count; badge.classList.remove('hidden'); }
+                    }
+                });
+
+            } else if (action.type === 'wishlist') {
+                // Execute the wishlist toggle that was blocked
+                return fetch('/sweetheaven/api/wishlist.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `product_id=${action.productId}`
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update the button UI if the element reference is still valid
+                        const btn = action.btn;
+                        if (btn && document.body.contains(btn)) {
+                            const svg = btn.querySelector('svg');
+                            btn.classList.toggle('bg-rose-500', data.is_wishlisted);
+                            btn.classList.toggle('bg-white/90', !data.is_wishlisted);
+                            btn.classList.toggle('text-white', data.is_wishlisted);
+                            btn.classList.toggle('text-gray-400', !data.is_wishlisted);
+                            if (svg) svg.setAttribute('fill', data.is_wishlisted ? 'currentColor' : 'none');
+                        }
+                        showToast(data.is_wishlisted
+                            ? '❤️ ' + (data.message || '<?= __('toast_added_wishlist') ?>')
+                            : '💔 <?= __('toast_removed_wishlist') ?>');
+                        if (typeof updateWishlistBadge === 'function') updateWishlistBadge(data.wishlist_count);
+                    }
+                });
+            }
+
+            // Fallthrough: no recognised action type
+            return Promise.resolve();
+        }
+
+        /* ── Cart ──────────────────────────────────────────────────────────── */
         function addToCart(productId, productName) {
             fetch('/sweetheaven/api/cart.php', {
                 method: 'POST',
@@ -1532,11 +1601,14 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                         const badge = document.getElementById('cartBadge');
                         if (badge) { badge.textContent = data.cart_count; badge.classList.remove('hidden'); }
                     } else if (data.redirect) {
+                        // Store intent, then prompt login
+                        setPendingAction({ type: 'cart', productId, productName });
                         openAuthModal('login');
                     }
                 });
         }
 
+        /* ── Wishlist ───────────────────────────────────────────────────────── */
         function toggleWishlist(productId, btn) {
             fetch('/sweetheaven/api/wishlist.php', {
                 method: 'POST',
@@ -1554,10 +1626,15 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                         svg.setAttribute('fill', data.is_wishlisted ? 'currentColor' : 'none');
                         showToast(data.is_wishlisted ? '❤️ ' + (data.message || '<?= __('toast_added_wishlist') ?>') : '💔 <?= __('toast_removed_wishlist') ?>');
                         if (typeof updateWishlistBadge === 'function') updateWishlistBadge(data.wishlist_count);
-                    } else if (data.redirect) openAuthModal('login');
+                    } else if (data.redirect) {
+                        // Store intent (keep btn reference for UI update after login)
+                        setPendingAction({ type: 'wishlist', productId, btn });
+                        openAuthModal('login');
+                    }
                 });
         }
 
+        /* ── Toast ─────────────────────────────────────────────────────────── */
         function showToast(msg) {
             const t = document.getElementById('toast');
             document.getElementById('toastMsg').textContent = msg;
@@ -2037,6 +2114,8 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
             // Reset both forms so they're fresh on next open
             document.getElementById('modalLoginForm').reset();
             document.getElementById('modalRegisterForm').reset();
+            // Discard any stored pending action so stale intent doesn't linger
+            clearPendingAction();
         }
 
         function switchTab(tab) {
@@ -2101,7 +2180,26 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {
-                        window.location.href = data.redirect;
+                        if (_pendingAction) {
+                            // Reset button FIRST so it's not frozen if modal is reopened
+                            setBtnLoading('loginSubmitBtn', 'loginBtnText', false, 'Sign In');
+                            // Execute the pending action BEFORE closeAuthModal() — because
+                            // closeAuthModal() calls clearPendingAction(), which would null it out.
+                            // Wait for the API call to finish, then reload so PHP re-renders
+                            // the full logged-in page (header, nav, cart/wishlist counts).
+                            executePendingAction().then(() => {
+                                closeAuthModal();
+                                // Admins go to dashboard; regular users reload in place
+                                if (data.redirect && data.redirect.includes('admin')) {
+                                    window.location.href = data.redirect;
+                                } else {
+                                    window.location.reload();
+                                }
+                            });
+                        } else {
+                            // Normal login with no pending action — follow the redirect
+                            window.location.href = data.redirect;
+                        }
                     } else {
                         setLoginError(data.error);
                         setBtnLoading('loginSubmitBtn', 'loginBtnText', false, 'Sign In');

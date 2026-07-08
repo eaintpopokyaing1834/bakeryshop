@@ -33,7 +33,7 @@ if ($action === 'login') {
             ? '/sweetheaven/admin/dashboard.php'
             : '/sweetheaven/user/index.php';
 
-        echo json_encode(['success' => true, 'redirect' => $redirect]);
+        echo json_encode(['success' => true, 'redirect' => $redirect, 'name' => $user['name']]);
     } else {
         echo json_encode(['success' => false, 'error' => __('login_err_invalid')]);
     }

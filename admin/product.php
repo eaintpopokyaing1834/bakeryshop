@@ -133,18 +133,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_category'])) {
     exit;
 }
 
-// ── Fetch Data ────────────────────────────────────────
-$products = $db->query("
+// ── Pagination ────────────────────────────────────────
+$perPage       = 10;
+$page          = max(1, (int)($_GET['page'] ?? 1));
+$totalProducts = (int)$db->query("SELECT COUNT(*) FROM products")->fetchColumn();
+$totalPages    = max(1, (int)ceil($totalProducts / $perPage));
+$page          = min($page, $totalPages);
+$offset        = ($page - 1) * $perPage;
+
+$stmt = $db->prepare("
     SELECT p.*, c.name AS category_name, d.name AS discount_name, d.type AS discount_type, d.value AS discount_value,
            (SELECT image_url FROM product_images WHERE product_id=p.id AND is_primary=1 LIMIT 1) AS primary_image
     FROM products p
     JOIN categories c ON p.category_id = c.id
     LEFT JOIN discounts d ON p.discount_id = d.id
     ORDER BY p.created_at DESC
-")->fetchAll();
+    LIMIT $perPage OFFSET $offset
+");
+$stmt->execute();
+$products = $stmt->fetchAll();
 
 $categories = $db->query("SELECT * FROM categories ORDER BY name")->fetchAll();
-$discounts = $db->query("SELECT * FROM discounts WHERE status=1 ORDER BY name")->fetchAll();
+$discounts  = $db->query("SELECT * FROM discounts WHERE status=1 ORDER BY name")->fetchAll();
 
 $pageTitle = 'Product Management';
 require_once __DIR__ . '/../includes/admin_header.php';
@@ -158,7 +168,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 <?php endif; ?>
 
 <!-- Tabs -->
-<div class="flex gap-2 mb-6">
+<div class="flex gap-4 mb-6 px-4">
     <a href="?tab=products"
         class="px-6 py-2.5 rounded-xl font-semibold text-sm transition-colors
         <?= $activeTab === 'products' ? 'bg-rose-500 text-white shadow-md shadow-rose-100' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50' ?>">
@@ -172,11 +182,12 @@ require_once __DIR__ . '/../includes/admin_header.php';
 </div>
 
 <!-- PRODUCTS TAB -->
+ <div class="px-4">
 <?php if ($activeTab === 'products'): ?>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden ">
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between ">
             <h3 class="font-bold text-gray-800">All Products <span
-                    class="text-gray-400 font-normal text-sm ml-2">(<?= count($products) ?>)</span></h3>
+                    class="text-gray-400 font-normal text-sm ml-2">(<?= $totalProducts ?> total)</span></h3>
             <button onclick="openProductModal()"
                 class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,6 +263,22 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 </tbody>
             </table>
         </div>
+        <?php if ($totalPages > 1): ?>
+        <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+            <p class="text-sm text-gray-400">Page <?= $page ?> of <?= $totalPages ?></p>
+            <div class="flex items-center gap-1">
+                <?php if ($page > 1): ?>
+                <a href="?tab=products&page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← Prev</a>
+                <?php endif; ?>
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                <a href="?tab=products&page=<?= $i ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors <?= $i === $page ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>"><?= $i ?></a>
+                <?php endfor; ?>
+                <?php if ($page < $totalPages): ?>
+                <a href="?tab=products&page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">Next →</a>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 
 <?php else: // CATEGORIES TAB ?>
@@ -300,7 +327,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         </div>
     </div>
 <?php endif; ?>
-
+</div>
 <!-- Product Modal -->
 <div id="productModal"
     class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">

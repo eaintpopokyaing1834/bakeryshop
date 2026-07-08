@@ -59,15 +59,35 @@ if ($statusFilter !== 'all') { $where[] = "cr.status = ?"; $params[] = $statusFi
 if ($search !== '') { $where[] = "(u.name LIKE ? OR cr.id LIKE ?)"; $params[] = "%$search%"; $params[] = "%$search%"; }
 $whereSQL = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
-$requests = $db->prepare("
+// Count for pagination
+$countStmt = $db->prepare("
+    SELECT COUNT(*)
+    FROM customize_requests cr
+    JOIN users u ON cr.user_id = u.id
+    $whereSQL
+");
+$countStmt->execute($params);
+$totalRequests = (int)$countStmt->fetchColumn();
+
+$perPage     = 10;
+$page = max(1, (int)($_GET['page'] ?? 1));
+$totalPages  = max(1, (int)ceil($totalRequests / $perPage));
+$page = min($page, $totalPages);
+$offset      = ($page - 1) * $perPage;
+
+$stmt = $db->prepare("
     SELECT cr.*, u.name AS customer_name, u.email AS customer_email
     FROM customize_requests cr
     JOIN users u ON cr.user_id = u.id
     $whereSQL
     ORDER BY cr.created_at DESC
+    LIMIT $perPage OFFSET $offset
 ");
-$requests->execute($params);
-$requests = $requests->fetchAll();
+foreach ($params as $i => $val) {
+    $stmt->bindValue($i + 1, $val);
+}
+$stmt->execute();
+$requests = $stmt->fetchAll();
 
 $pageTitle = 'Customize Cake Requests';
 require_once __DIR__ . '/../includes/admin_header.php';
@@ -85,6 +105,7 @@ $statusColors = [
 </style>
 
 <!-- Filters Bar -->
+ <div class="px-4">
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
     <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div class="flex flex-wrap gap-2">
@@ -105,11 +126,12 @@ $statusColors = [
         </form>
     </div>
 </div>
-
+</div>
 <!-- Requests Table -->
+ <section class="px-4">
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-        <h3 class="font-bold text-gray-800">Customize Requests <span class="text-gray-400 font-normal text-sm ml-2">(<?= count($requests) ?> total)</span></h3>
+        <h3 class="font-bold text-gray-800">Customize Requests <span class="text-gray-400 font-normal text-sm ml-2">(<?= $totalRequests ?> total)</span></h3>
     </div>
 
     <div class="overflow-x-auto">
@@ -242,7 +264,24 @@ $statusColors = [
             </tbody>
         </table>
     </div>
+    <?php if ($totalPages > 1): ?>
+    <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+        <p class="text-sm text-gray-400">Page <?= $page ?> of <?= $totalPages ?></p>
+        <div class="flex items-center gap-1">
+            <?php if ($page > 1): ?>
+            <a href="?status=<?= urlencode($statusFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← Prev</a>
+            <?php endif; ?>
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+            <a href="?status=<?= urlencode($statusFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors <?= $i === $page ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>"><?= $i ?></a>
+            <?php endfor; ?>
+            <?php if ($page < $totalPages): ?>
+            <a href="?status=<?= urlencode($statusFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">Next →</a>
+            <?php endif; ?>
+        </div>
+    </div>
+    <?php endif; ?>
 </div>
+</section>
 
 <script>
 function toggleRequestDetails(id) {

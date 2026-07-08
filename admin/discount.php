@@ -56,6 +56,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 </div>
 <?php endif; ?>
 
+<section class="px-4">
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
         <h3 class="font-bold text-gray-800">All Discounts <span class="text-gray-400 font-normal text-sm ml-2">(<?= count($discounts) ?>)</span></h3>
@@ -163,6 +164,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         </form>
     </div>
 </div>
+</section>
 
 <script>
 function openDiscountModal(data = null) {

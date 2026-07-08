@@ -65,7 +65,7 @@ $pendingReviewsCount = (int) $db->query("SELECT COUNT(*) FROM customer_reviews W
 
     <!-- Sidebar -->
     <aside id="sidebar"
-        class="w-64 min-h-screen bg-pink-400 flex flex-col fixed top-0 left-0 z-40 transition-transform duration-300 -translate-x-full lg:translate-x-0">
+        class="w-64 min-h-screen bg-pink-300 flex flex-col fixed top-0 left-0 z-40 transition-transform duration-300 -translate-x-full lg:translate-x-0">
 
         <!-- Brand -->
         <div class="p-5 border-b border-slate-800">
@@ -75,8 +75,8 @@ $pendingReviewsCount = (int) $db->query("SELECT COUNT(*) FROM customer_reviews W
                     <img src="/sweetheaven/images/shoplogo.png" class="h-6 w-auto" alt="Logo">
                 </div>
                 <div class="min-w-0">
-                    <p class="text-white font-bold text-lg leading-tight whitespace-nowrap">Sweet Heaven</p>
-                    <p class="text-black text-md whitespace-nowrap">Admin Panel</p>
+                    <p class="text-pink-700 font-bold text-lg leading-tight whitespace-nowrap">Sweet Heaven</p>
+                    <p class="text-slate-500 text-sm whitespace-nowrap">Admin Panel</p>
                 </div>
             </a>
         </div>
@@ -88,7 +88,7 @@ $pendingReviewsCount = (int) $db->query("SELECT COUNT(*) FROM customer_reviews W
             <?php
             // Core Tailwind layout setups
             $baseClass = "flex items-center gap-3 px-4 py-2.5 rounded-lg text-black hover:text-white hover:bg-slate-800/50 transition-all duration-200 text-sm font-medium relative";
-            $activeClass = "bg-slate-500 text-rose-400 font-semibold sidebar-link-active";
+            $activeClass = "bg-white/60 text-rose-400 font-semibold sidebar-link-active";
             ?>
 
             <a href="/sweetheaven/admin/dashboard.php"
@@ -143,7 +143,7 @@ $pendingReviewsCount = (int) $db->query("SELECT COUNT(*) FROM customer_reviews W
                 </svg>
                 <span>Customize</span>
                 <?php
-                $pendingCustomizeCount = (int)$db->query("SELECT COUNT(*) FROM customize_requests WHERE status='pending'")->fetchColumn();
+                $pendingCustomizeCount = (int) $db->query("SELECT COUNT(*) FROM customize_requests WHERE status='pending'")->fetchColumn();
                 if ($pendingCustomizeCount > 0): ?>
                     <span
                         class="ml-auto bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30">
@@ -212,25 +212,28 @@ $pendingReviewsCount = (int) $db->query("SELECT COUNT(*) FROM customer_reviews W
 
         <!-- User Info -->
         <div class="p-4 border-t border-slate-800">
-            <div class="flex items-center gap-3 bg-slate-800/50 rounded-xl p-3">
+            <a href="/sweetheaven/auth/logout.php"
+                    class="text-slate-500 hover:text-rose-400 transition-colors shrink-0" title="Logout">
+            <div class="flex items-center gap-3 bg-rose-400/30 rounded-xl p-3">
                 <div
-                    class="w-9 h-9 bg-rose-500/20 rounded-full flex items-center justify-center text-rose-400 font-bold text-sm shrink-0">
+                    class="w-9 h-9 bg-pink-500 rounded-full flex items-center justify-center text-rose-800 font-bold text-sm shrink-0">
                     <?= strtoupper(substr($_SESSION['name'] ?? 'A', 0, 1)) ?>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-white text-lg font-semibold truncate">
+                    <p class="text-pink-700 text-lg font-semibold truncate">
                         <?= htmlspecialchars($_SESSION['name'] ?? 'Admin') ?>
                     </p>
-                    <p class="text-stone-400 text-md">Administrator</p>
+                    <p class="text-slate-500 text-sm">Administrator</p>
                 </div>
-                <a href="/sweetheaven/auth/logout.php"
-                    class="text-slate-500 hover:text-rose-400 transition-colors shrink-0" title="Logout">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                
+                    <!-- <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
-                </a>
+                -->
+                    <img src="../images/log.png" class="w-6 h-6">
             </div>
+             </a>
         </div>
     </aside>
 
@@ -258,9 +261,8 @@ $pendingReviewsCount = (int) $db->query("SELECT COUNT(*) FROM customer_reviews W
             </div>
             <div class="flex items-center gap-3">
                 <div
-                    class="hidden sm:flex items-center gap-2 bg-emerald-50 rounded-lg px-3 py-1.5 text-xs text-emerald-600 font-medium">
-                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
-                    <span>System Online</span>
+                    class="w-9 h-9 bg-rose-500/20 rounded-full flex items-center justify-center text-rose-400 font-bold text-sm shrink-0">
+                    <?= strtoupper(substr($_SESSION['name'] ?? 'A', 0, 1)) ?>
                 </div>
 
                 <!-- Notification Bell -->
@@ -296,4 +298,4 @@ $pendingReviewsCount = (int) $db->query("SELECT COUNT(*) FROM customer_reviews W
         </header>
 
         <!-- Page Content Slot -->
-        <main class="flex-1 p-6"></main>
+        <main class="flex-1 p-6">

@@ -6,9 +6,12 @@ require_once __DIR__ . '/../config/db.php';
 
 $db = getDB();
 
-function imgUrl($url) {
-    if (!$url) return '/sweetheaven/images/maincake.jpg';
-    if (strncmp($url, '../', 3) === 0) return '/sweetheaven/' . substr($url, 3);
+function imgUrl($url)
+{
+    if (!$url)
+        return '/sweetheaven/images/maincake.jpg';
+    if (strncmp($url, '../', 3) === 0)
+        return '/sweetheaven/' . substr($url, 3);
     return '/sweetheaven/' . $url;
 }
 
@@ -122,11 +125,9 @@ $relatedProducts = $relatedProducts->fetchAll();
                     <?php if (count($images) > 1): ?>
                         <div class="flex gap-3 overflow-x-auto">
                             <?php foreach ($images as $img): ?>
-                                <button
-                                    onclick="document.getElementById('mainImage').src='<?= imgUrl($img['image_url']) ?>'"
+                                <button onclick="document.getElementById('mainImage').src='<?= imgUrl($img['image_url']) ?>'"
                                     class="shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 border-transparent hover:border-stone-300 transition-colors">
-                                    <img src="<?= imgUrl($img['image_url']) ?>"
-                                        class="w-full h-full object-cover">
+                                    <img src="<?= imgUrl($img['image_url']) ?>" class="w-full h-full object-cover">
                                 </button>
                             <?php endforeach; ?>
                         </div>
@@ -135,90 +136,100 @@ $relatedProducts = $relatedProducts->fetchAll();
 
                 <!-- Product Info -->
                 <div>
-                    <div class="flex items-center gap-2 mb-3 flex-wrap">
-                        <span
-                            class="bg-rose-50 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full"><?= htmlspecialchars($product['category_name']) ?></span>
-                        <span
-                            class="<?= $product['stock'] > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' ?> text-xs font-semibold px-3 py-1 rounded-full">
-                            <?= $product['stock'] > 0 ? "In Stock ({$product['stock']})" : 'Out of Stock' ?>
-                        </span>
-                        <?php if ($product['discount_name'] && $product['discount_value']): ?>
-                            <span class="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
-                                🏷️ <?= htmlspecialchars($product['discount_name']) ?>
-                            </span>
-                        <?php endif; ?>
-                    </div>
+                    <div>
+                        <div class="flex justify-between">
 
-                    <h1 class="text-3xl font-bold text-gray-800 mb-3"><?= htmlspecialchars($product['name']) ?></h1>
-
-                    <!-- Rating summary -->
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="flex gap-1">
-                            <?php $starInt = round($avgRating);
-                            for ($s = 1; $s <= 5; $s++): ?>
-                                <svg class="w-5 h-5 <?= $s <= $starInt ? 'text-amber-400' : 'text-gray-200' ?>"
-                                    fill="currentColor" viewBox="0 0 20 20">
-                                    <path
-                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                            <?php endfor; ?>
-                        </div>
-                        <span class="text-sm text-gray-500"><?= number_format($avgRating, 1) ?> (<?= count($reviews) ?>
-                            review<?= count($reviews) !== 1 ? 's' : '' ?>)</span>
-                    </div>
-
-                    <div class="text-4xl font-bold text-rose-500 mb-6">
-                        <?php if ($product['discount_name'] && $product['discount_value']): ?>
-                            <?php $finalPrice = $product['discount_type'] === 'percentage'
-                                ? $product['price'] * (1 - $product['discount_value'] / 100)
-                                : max(0, $product['price'] - $product['discount_value']); ?>
-                            <span class="text-xl line-through text-gray-400 font-normal mr-2"><?= number_format($product['price']) ?></span>
-                            <?= number_format($finalPrice) ?>
-                        <?php else: ?>
-                            <?= number_format($product['price']) ?>
-                        <?php endif; ?>
-                        <span class="text-lg font-normal text-gray-400"><?= __('common_mmk') ?></span>
-                    </div>
-
-                    <p class="text-gray-500 leading-relaxed mb-8">
-                        <?= nl2br(htmlspecialchars($product['description'])) ?></p>
-
-                    <!-- Qty + Actions -->
-                    <?php if ($product['stock'] > 0): ?>
-                        <div class="flex items-center gap-4 mb-4">
-                            <div class="flex items-center border border-gray-200 rounded-xl overflow-hidden">
-                                <button onclick="changeQty(-1)"
-                                    class="px-4 py-3 text-gray-600 hover:bg-gray-100 transition-colors font-bold text-lg">−</button>
-                                <input type="number" id="qty" value="1" min="1" max="<?= $product['stock'] ?>"
-                                    class="w-16 text-center border-none focus:outline-none text-gray-800 font-semibold py-3">
-                                <button onclick="changeQty(1)"
-                                    class="px-4 py-3 text-gray-600 hover:bg-gray-100 transition-colors font-bold text-lg">+</button>
+                            <div class="flex items-center gap-2 mb-3 flex-wrap">
+                                <span
+                                    class="bg-rose-50 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full"><?= htmlspecialchars($product['category_name']) ?></span>
+                                <span
+                                    class="<?= $product['stock'] > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' ?> text-xs font-semibold px-3 py-1 rounded-full">
+                                    <?= $product['stock'] > 0 ? "In Stock ({$product['stock']})" : 'Out of Stock' ?>
+                                </span>
+                                <?php if ($product['discount_name'] && $product['discount_value']): ?>
+                                    <span class="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
+                                        🏷️ <?= htmlspecialchars($product['discount_name']) ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <div>
+                                <button onclick="toggleWishlist(<?= $product['id'] ?>, this)" id="wishlistBtn"
+                                    class="p-2 rounded-2xl border-2 <?= in_array($product['id'], $wishlistIds) ? 'border-rose-400 bg-rose-50 text-rose-500' : 'border-gray-200 text-gray-400 hover:border-stone-200' ?> transition-colors">
+                                    <svg class="w-6 h-6"
+                                        fill="<?= in_array($product['id'], $wishlistIds) ? 'currentColor' : 'none' ?>"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
-                        <?php if ($isCustomer): ?>
-                        <div class="flex gap-3 flex-wrap">
-                            <button onclick="addToCart(<?= $product['id'] ?>)"
-                                class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold py-4 rounded-2xl transition-colors flex items-center justify-center gap-2 shadow-sm shadow-rose-100">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                                Add to Cart
-                            </button>
-                            <button onclick="toggleWishlist(<?= $product['id'] ?>, this)" id="wishlistBtn"
-                                class="p-4 rounded-2xl border-2 <?= in_array($product['id'], $wishlistIds) ? 'border-rose-400 bg-rose-50 text-rose-500' : 'border-gray-200 text-gray-400 hover:border-stone-200' ?> transition-colors">
-                                <svg class="w-6 h-6"
-                                    fill="<?= in_array($product['id'], $wishlistIds) ? 'currentColor' : 'none' ?>"
-                                    stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                </svg>
-                            </button>
+
+                        <h1 class="text-3xl font-bold text-gray-800 mb-3"><?= htmlspecialchars($product['name']) ?></h1>
+
+                        <!-- Rating summary -->
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="flex gap-1">
+                                <?php $starInt = round($avgRating);
+                                for ($s = 1; $s <= 5; $s++): ?>
+                                    <svg class="w-5 h-5 <?= $s <= $starInt ? 'text-amber-400' : 'text-gray-200' ?>"
+                                        fill="currentColor" viewBox="0 0 20 20">
+                                        <path
+                                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                <?php endfor; ?>
+                            </div>
+                            <span class="text-sm text-gray-500"><?= number_format($avgRating, 1) ?>
+                                (<?= count($reviews) ?>
+                                review<?= count($reviews) !== 1 ? 's' : '' ?>)</span>
                         </div>
+
+                        <div class="text-4xl font-bold text-rose-500 mb-6">
+                            <?php if ($product['discount_name'] && $product['discount_value']): ?>
+                                <?php $finalPrice = $product['discount_type'] === 'percentage'
+                                    ? $product['price'] * (1 - $product['discount_value'] / 100)
+                                    : max(0, $product['price'] - $product['discount_value']); ?>
+                                <span
+                                    class="text-xl line-through text-gray-400 font-normal mr-2"><?= number_format($product['price']) ?></span>
+                                <?= number_format($finalPrice) ?>
+                            <?php else: ?>
+                                <?= number_format($product['price']) ?>
+                            <?php endif; ?>
+                            <span class="text-lg font-normal text-gray-400"><?= __('common_mmk') ?></span>
+                        </div>
+
+                        <p class="text-gray-500 leading-relaxed mb-8">
+                            <?= nl2br(htmlspecialchars($product['description'])) ?>
+                        </p>
+
+                        <!-- Qty + Actions -->
+                        <?php if ($product['stock'] > 0): ?>
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="flex items-center border border-gray-200 rounded-xl overflow-hidden">
+                                    <button onclick="changeQty(-1)"
+                                        class="px-4 py-3 text-gray-600 hover:bg-gray-100 transition-colors font-bold text-lg">−</button>
+                                    <input type="number" id="qty" value="1" min="1" max="<?= $product['stock'] ?>"
+                                        class="w-16 text-center border-none focus:outline-none text-gray-800 font-semibold py-3">
+                                    <button onclick="changeQty(1)"
+                                        class="px-4 py-3 text-gray-600 hover:bg-gray-100 transition-colors font-bold text-lg">+</button>
+                                </div>
+                            </div>
+                            <?php if ($isCustomer): ?>
+                                <div class="flex gap-3 flex-wrap">
+                                    <button onclick="addToCart(<?= $product['id'] ?>)"
+                                        class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold py-4 rounded-2xl transition-colors flex items-center justify-center gap-2 shadow-sm shadow-rose-100">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                        Add to Cart
+                                    </button>
+                                </div>
+                            </div>
                         <?php else: ?>
-                        <div class="bg-blue-50 text-blue-700 p-4 rounded-2xl text-center font-semibold text-sm">
-                            Admin accounts cannot purchase products.
-                        </div>
+                            <div class="bg-blue-50 text-blue-700 p-4 rounded-2xl text-center font-semibold text-sm">
+                                Admin accounts cannot purchase products.
+                            </div>
                         <?php endif; ?>
                     <?php else: ?>
                         <div class="bg-red-50 text-red-600 p-4 rounded-2xl text-center font-semibold">This product is
@@ -273,7 +284,8 @@ $relatedProducts = $relatedProducts->fetchAll();
                                 </div>
                                 <div>
                                     <p class="font-semibold text-gray-700 text-sm">
-                                        <?= htmlspecialchars($review['reviewer_name']) ?></p>
+                                        <?= htmlspecialchars($review['reviewer_name']) ?>
+                                    </p>
                                     <p class="text-xs text-gray-400"><?= date('M j, Y', strtotime($review['created_at'])) ?></p>
                                 </div>
                                 <div class="flex gap-0.5 ml-auto">
@@ -313,20 +325,23 @@ $relatedProducts = $relatedProducts->fetchAll();
                         <a href="/sweetheaven/user/product_detail.php?id=<?= $rp['id'] ?>"
                             class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-sm hover:-translate-y-0.5 transition-all duration-300 relative">
                             <?php if ($rpDiscount): ?>
-                                <div class="absolute top-2 left-2 bg-gradient-to-r from-green-400 to-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md z-10">
+                                <div
+                                    class="absolute top-2 left-2 bg-gradient-to-r from-green-400 to-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md z-10">
                                     <?= htmlspecialchars($rp['discount_name']) ?>
                                 </div>
                             <?php endif; ?>
-                            <img src="<?= htmlspecialchars($imgSrc) ?>" class="w-full h-40 object-cover"
+                            <img src="<?= htmlspecialchars($imgSrc) ?>" class="w-full h-60 object-cover"
                                 alt="<?= htmlspecialchars($rp['name']) ?>">
                             <div class="p-4">
                                 <p class="font-semibold text-gray-700 text-sm mb-1 line-clamp-1">
-                                    <?= htmlspecialchars($rp['name']) ?></p>
+                                    <?= htmlspecialchars($rp['name']) ?>
+                                </p>
                                 <p class="text-rose-500 font-bold text-sm">
                                     <?php if ($rpDiscount): ?>
-                                        <span class="text-xs line-through text-gray-400 font-normal mr-1"><?= number_format($rp['price']) ?></span>
+                                        <span
+                                            class="text-xs line-through text-gray-400 font-normal mr-1"><?= number_format($rp['price']) ?></span>
                                     <?php endif; ?>
-                                    <?= number_format($rpPrice) ?> <?= __('common_mmk') ?>
+                                    <?= number_format($rpPrice) ?>         <?= __('common_mmk') ?>
                                 </p>
                             </div>
                         </a>
@@ -343,6 +358,7 @@ $relatedProducts = $relatedProducts->fetchAll();
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
         </svg>
         <span id="toastMsg"></span>
+    </div>
     </div>
 
     <?php require_once __DIR__ . '/../includes/footer.php'; ?>
@@ -377,13 +393,13 @@ $relatedProducts = $relatedProducts->fetchAll();
                 body: `product_id=${productId}`
             }).then(r => r.json()).then(data => {
                 if (data.success) {
-            const svg = btn.querySelector('svg');
-            svg.setAttribute('fill', data.is_wishlisted ? 'currentColor' : 'none');
-            btn.classList.toggle('border-rose-400', data.is_wishlisted);
-            btn.classList.toggle('border-gray-200', !data.is_wishlisted);
-            btn.classList.toggle('bg-rose-50', data.is_wishlisted);
-            btn.classList.toggle('text-rose-500', data.is_wishlisted);
-            btn.classList.toggle('text-gray-400', !data.is_wishlisted);
+                    const svg = btn.querySelector('svg');
+                    svg.setAttribute('fill', data.is_wishlisted ? 'currentColor' : 'none');
+                    btn.classList.toggle('border-rose-400', data.is_wishlisted);
+                    btn.classList.toggle('border-gray-200', !data.is_wishlisted);
+                    btn.classList.toggle('bg-rose-50', data.is_wishlisted);
+                    btn.classList.toggle('text-rose-500', data.is_wishlisted);
+                    btn.classList.toggle('text-gray-400', !data.is_wishlisted);
                     showToast(data.is_wishlisted ? '❤️ ' + (data.message || 'Added to wishlist') : '💔 Removed from wishlist');
                     if (typeof updateWishlistBadge === 'function') updateWishlistBadge(data.wishlist_count);
                 } else if (data.redirect) window.location.href = '/sweetheaven/auth/login.php';

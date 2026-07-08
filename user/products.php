@@ -200,7 +200,7 @@ if ($isLoggedIn && !$isAdmin) {
                         : max(0, $product['price'] - $product['discount_value']);
                 }
                 ?>
-                <div class="product-card group bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 cursor-pointer">
+                <div class="product-card group bg-white rounded-2xl border border-gray-100 overflow-hidden  transition-all duration-500 shadow-md cursor-pointer">
                     <div class="relative overflow-hidden bg-gradient-to-br from-rose-50 to-amber-50 aspect-[4/3]">
                         <img src="<?= htmlspecialchars($imgSrc) ?>" alt="<?= htmlspecialchars($product['name']) ?>"
                              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">

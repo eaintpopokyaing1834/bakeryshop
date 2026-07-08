@@ -65,7 +65,7 @@ $statusColors = [
 ?>
 
 <!-- Metrics Cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-8 px-4">
 
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
         <div class="flex items-center justify-between mb-4">
@@ -114,7 +114,7 @@ $statusColors = [
 </div>
 
 <!-- Charts Row -->
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8 px-4">
 
     <!-- Revenue Chart -->
     <div class="xl:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -140,7 +140,7 @@ $statusColors = [
 </div>
 
 <!-- Bottom Row -->
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 p-6">
 
     <!-- Recent Orders -->
     <div class="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">

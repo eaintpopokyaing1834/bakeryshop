@@ -41,9 +41,23 @@ if ($statusFilter !== 'all') {
     $params[] = $statusFilter;
 }
 
-$reviews = $db->prepare("SELECT * FROM customer_reviews $where ORDER BY created_at DESC");
-$reviews->execute($params);
-$reviews = $reviews->fetchAll();
+// Count for pagination
+$countStmt = $db->prepare("SELECT COUNT(*) FROM customer_reviews $where");
+$countStmt->execute($params);
+$totalReviews = (int)$countStmt->fetchColumn();
+
+$perPage     = 10;
+$page = max(1, (int)($_GET['page'] ?? 1));
+$totalPages  = max(1, (int)ceil($totalReviews / $perPage));
+$page = min($page, $totalPages);
+$offset      = ($page - 1) * $perPage;
+
+$stmt = $db->prepare("SELECT * FROM customer_reviews $where ORDER BY created_at DESC LIMIT $perPage OFFSET $offset");
+foreach ($params as $i => $val) {
+    $stmt->bindValue($i + 1, $val);
+}
+$stmt->execute();
+$reviews = $stmt->fetchAll();
 
 $msg = htmlspecialchars($_GET['msg'] ?? '');
 
@@ -57,6 +71,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
     </div>
 <?php endif; ?>
 
+<section class="px-4">
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
         <h3 class="font-bold text-gray-800">Customer Reviews</h3>
@@ -137,6 +152,23 @@ require_once __DIR__ . '/../includes/admin_header.php';
             </tbody>
         </table>
     </div>
+    <?php if ($totalPages > 1): ?>
+    <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+        <p class="text-sm text-gray-400">Page <?= $page ?> of <?= $totalPages ?></p>
+        <div class="flex items-center gap-1">
+            <?php if ($page > 1): ?>
+            <a href="?status=<?= urlencode($statusFilter) ?>&page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← Prev</a>
+            <?php endif; ?>
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+            <a href="?status=<?= urlencode($statusFilter) ?>&page=<?= $i ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors <?= $i === $page ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>"><?= $i ?></a>
+            <?php endfor; ?>
+            <?php if ($page < $totalPages): ?>
+            <a href="?status=<?= urlencode($statusFilter) ?>&page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">Next →</a>
+            <?php endif; ?>
+        </div>
+    </div>
+    <?php endif; ?>
 </div>
+</section>
 
 <?php require_once __DIR__ . '/../includes/admin_footer.php'; ?>

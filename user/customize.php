@@ -161,12 +161,12 @@ $reqStatusColors = [
                                 <select name="size" required
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                                     <option value=""><?= __('customize_size_default') ?></option>
-                                    <option value="1 lb (6 inch)"><?= __('customize_size_1lb') ?></option>
-                                    <option value="2 lb (8 inch)"><?= __('customize_size_2lb') ?></option>
-                                    <option value="3 lb (10 inch)"><?= __('customize_size_3lb') ?></option>
-                                    <option value="5 lb (12 inch)"><?= __('customize_size_5lb') ?></option>
-                                    <option value="Tier 2 (6+8 inch)"><?= __('customize_size_tier2') ?></option>
-                                    <option value="Tier 3 (6+8+10 inch)"><?= __('customize_size_tier3') ?></option>
+                                    <option value="6 inch"><?= __('customize_size_6inch') ?></option>
+                                    <option value="8 inch"><?= __('customize_size_8inch') ?></option>
+                                    <option value="10 inch"><?= __('customize_size_10inch') ?></option>
+                                    <option value="12 inch"><?= __('customize_size_12inch') ?></option>
+                                    
+                                    
                                 </select>
                             </div>
                             <div>

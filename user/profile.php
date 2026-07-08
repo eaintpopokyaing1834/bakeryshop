@@ -106,8 +106,8 @@ $statusColors = [
 <div class="max-w-5xl mx-auto px-6 py-10">
 
     <!-- Profile Header -->
-    <div class="bg-gradient-to-br from-rose-500 to-stone-800 rounded-3xl p-8 mb-8 text-white flex items-center gap-6">
-        <div class="w-20 h-20 rounded-full overflow-hidden border-4 border-white/30 bg-stone-300 flex items-center justify-center shrink-0">
+    <div class="bg-pink-400 rounded-3xl p-8 mb-8 text-white flex items-center gap-6">
+        <div class="w-20 h-20 rounded-full overflow-hidden border-4 border-white/30 bg-pink-400 flex items-center justify-center shrink-0">
             <?php if ($user['profile_image']): ?>
             <img src="/sweetheaven/<?= htmlspecialchars($user['profile_image']) ?>" class="w-full h-full object-cover" alt="Profile">
             <?php else: ?>
@@ -116,10 +116,10 @@ $statusColors = [
         </div>
         <div>
             <h1 class="text-2xl font-bold"><?= htmlspecialchars($user['name']) ?></h1>
-            <p class="text-stone-400 text-sm"><?= htmlspecialchars($user['email']) ?></p>
+            <p class="text-slate-600 text-sm"><?= htmlspecialchars($user['email']) ?></p>
             <div class="flex items-center gap-3 mt-3">
                 <span class="bg-white/20 text-xs px-3 py-1 rounded-full font-semibold"><?= ucfirst($user['role']) ?></span>
-                <span class="text-stone-400 text-xs">Member since <?= date('M Y', strtotime($user['created_at'])) ?></span>
+                <span class="text-slate-600 text-xs">Member since <?= date('M Y', strtotime($user['created_at'])) ?></span>
             </div>
         </div>
     </div>
@@ -130,7 +130,7 @@ $statusColors = [
         <?php foreach ($tabs as $t => $label): ?>
         <a href="?tab=<?= $t ?>"
            class="flex-1 text-center py-3 px-4 rounded-xl text-sm font-semibold transition-colors
-           <?= $activeTab === $t ? 'bg-rose-500 text-white shadow-md shadow-rose-100' : 'text-gray-500 hover:text-rose-500 hover:bg-rose-50' ?>">
+           <?= $activeTab === $t ? 'bg-pink-500 text-white shadow-md shadow-rose-100' : 'text-gray-500 hover:text-rose-500 hover:bg-rose-50' ?>">
            <?= $label ?>
         </a>
         <?php endforeach; ?>
@@ -191,7 +191,7 @@ $statusColors = [
                 </div>
             </div>
 
-            <button type="submit" class="bg-rose-500 hover:bg-rose-600 text-white font-semibold px-8 py-3 rounded-xl transition-colors">
+            <button type="submit" class="bg-pink-500 hover:bg-pink-600 text-white font-semibold px-8 py-3 rounded-xl transition-colors">
                 Save Changes
             </button>
         </form>
@@ -340,12 +340,12 @@ $statusColors = [
         <?php foreach ($wishlist as $item): ?>
         <?php $imgSrc = $item['primary_image'] ? '/sweetheaven/'.$item['primary_image'] : '/sweetheaven/images/maincake.jpg'; ?>
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-sm transition-shadow">
-            <img src="<?= htmlspecialchars($imgSrc) ?>" class="w-full h-40 object-cover" alt="">
+            <img src="<?= htmlspecialchars($imgSrc) ?>" class="w-full h-60 object-cover" alt="">
             <div class="p-4">
                 <p class="font-bold text-gray-700 text-sm mb-1 line-clamp-1"><?= htmlspecialchars($item['name']) ?></p>
                 <p class="text-rose-500 font-bold text-sm mb-3"><?= number_format($item['price']) ?> <?= __('common_mmk') ?></p>
                 <div class="flex gap-2">
-                    <button onclick="addToCart(<?= $item['id'] ?>)" class="flex-1 bg-rose-500 text-white text-xs font-semibold py-2 rounded-xl hover:bg-rose-600 transition-colors">Add to Cart</button>
+                    <button onclick="addToCart(<?= $item['id'] ?>)" class="flex-1 bg-pink-500 text-white text-xs font-semibold py-2 rounded-xl hover:bg-rose-600 transition-colors">Add to Cart</button>
                     <button onclick="removeFromWishlist(<?= $item['id'] ?>, this)" class="p-2 text-gray-300 hover:text-red-500 transition-colors">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
                     </button>
