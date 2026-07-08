@@ -2,11 +2,21 @@
 session_start();
 require_once __DIR__ . '/../includes/lang.php';
 if (isset($_SESSION['user_id'])) {
-    header('Location: ' . ($_SESSION['role'] === 'admin' ? '/sweetheaven/admin/dashboard.php' : '/sweetheaven/user/index.php'));
+    $redirect = in_array($_SESSION['role'] ?? '', ['admin', 'cashier']) ? '/sweetheaven/admin/dashboard.php' : '/sweetheaven/user/index.php';
+    header('Location: ' . $redirect);
     exit;
 }
 
 require_once __DIR__ . '/../config/db.php';
+$db = getDB();
+
+// Ensure role ENUM includes 'cashier'
+try {
+    $db->exec("ALTER TABLE users MODIFY COLUMN role ENUM('admin','customer','cashier') DEFAULT 'customer'");
+} catch (PDOException $e) {
+    // ignore
+}
+
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -22,12 +32,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['role']    = $user['role'];
-            $_SESSION['name']    = $user['name'];
-            $_SESSION['cart']    = $_SESSION['cart'] ?? [];
-            header('Location: ' . ($user['role'] === 'admin' ? '/sweetheaven/admin/dashboard.php' : '/sweetheaven/user/index.php'));
-            exit;
+            if (($user['status'] ?? 'active') === 'inactive') {
+                $error = 'Your account has been suspended by the administrator.';
+            } else {
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['role']    = $user['role'];
+                $_SESSION['name']    = $user['name'];
+                $_SESSION['cart']    = $_SESSION['cart'] ?? [];
+                $redirect = in_array($user['role'], ['admin', 'cashier']) ? '/sweetheaven/admin/dashboard.php' : '/sweetheaven/user/index.php';
+                header('Location: ' . $redirect);
+                exit;
+            }
         } else {
             $error = __('login_err_invalid');
         }

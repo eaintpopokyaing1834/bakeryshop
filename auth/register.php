@@ -7,6 +7,15 @@ if (isset($_SESSION['user_id'])) {
 }
 
 require_once __DIR__ . '/../config/db.php';
+$db = getDB();
+
+// Ensure role ENUM includes 'cashier'
+try {
+    $db->exec("ALTER TABLE users MODIFY COLUMN role ENUM('admin','customer','cashier') DEFAULT 'customer'");
+} catch (PDOException $e) {
+    // ignore
+}
+
 $error   = '';
 $success = '';
 

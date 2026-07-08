@@ -1,8 +1,146 @@
 <?php
-require_once __DIR__ . '/../middleware/admin_check.php';
+require_once __DIR__ . '/../middleware/admin_only_check.php';
 require_once __DIR__ . '/../config/db.php';
 
 $db = getDB();
+
+// Ensure role ENUM includes 'cashier'
+try {
+    $db->exec("ALTER TABLE users MODIFY COLUMN role ENUM('admin','customer','cashier') DEFAULT 'customer'");
+} catch (PDOException $e) {
+    // ignore
+}
+
+// Ensure status column exists on users table
+try {
+    $db->exec("ALTER TABLE users ADD COLUMN status ENUM('active','inactive') DEFAULT 'active' AFTER role");
+} catch (PDOException $e) {
+    // Column already exists — ignore
+}
+
+// Handle status update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_status'])) {
+    header('Content-Type: application/json');
+    $userId   = (int)$_POST['user_id'];
+    $newStatus = $_POST['status'];
+
+    if (!in_array($newStatus, ['active', 'inactive'])) {
+        echo json_encode(['success' => false, 'msg' => 'Invalid status value.']);
+        exit;
+    }
+    if ($userId === (int)$_SESSION['user_id']) {
+        echo json_encode(['success' => false, 'msg' => 'You cannot change your own status.']);
+        exit;
+    }
+
+    // Prevent changing status of admin users
+    $checkRole = $db->prepare("SELECT role FROM users WHERE id = ?");
+    $checkRole->execute([$userId]);
+    $row = $checkRole->fetch();
+    if (!$row) {
+        echo json_encode(['success' => false, 'msg' => 'User not found.']);
+        exit;
+    }
+    if ($row['role'] === 'admin') {
+        echo json_encode(['success' => false, 'msg' => 'Cannot change the status of an admin account.']);
+        exit;
+    }
+
+    $db->prepare("UPDATE users SET status=? WHERE id=?")->execute([$newStatus, $userId]);
+    echo json_encode(['success' => true, 'status' => $newStatus]);
+    exit;
+}
+
+// Handle edit admin
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_edit_admin'])) {
+    header('Content-Type: application/json');
+    $userId   = (int)$_POST['user_id'];
+    $name     = trim($_POST['name'] ?? '');
+    $email    = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    if (empty($name) || empty($email)) {
+        echo json_encode(['success' => false, 'msg' => 'Name and email are required.']);
+        exit;
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo json_encode(['success' => false, 'msg' => 'Invalid email address.']);
+        exit;
+    }
+
+    // Check email uniqueness (exclude current user)
+    $check = $db->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
+    $check->execute([$email, $userId]);
+    if ($check->fetch()) {
+        echo json_encode(['success' => false, 'msg' => 'Email is already taken by another user.']);
+        exit;
+    }
+
+    if (!empty($password)) {
+        if (strlen($password) < 6) {
+            echo json_encode(['success' => false, 'msg' => 'Password must be at least 6 characters.']);
+            exit;
+        }
+        $hashed = password_hash($password, PASSWORD_BCRYPT);
+        $db->prepare("UPDATE users SET name=?, email=?, password=? WHERE id=?")->execute([$name, $email, $hashed, $userId]);
+    } else {
+        $db->prepare("UPDATE users SET name=?, email=? WHERE id=?")->execute([$name, $email, $userId]);
+    }
+
+    echo json_encode(['success' => true]);
+    exit;
+}
+
+// Handle add new admin
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_add_admin'])) {
+    header('Content-Type: application/json');
+
+    $name     = trim($_POST['name'] ?? '');
+    $email    = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $status   = $_POST['status'] ?? 'active';
+
+    if (empty($name) || empty($email) || empty($password)) {
+        echo json_encode(['success' => false, 'msg' => 'All fields are required.']);
+        exit;
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo json_encode(['success' => false, 'msg' => 'Invalid email address.']);
+        exit;
+    }
+    if (strlen($password) < 6) {
+        echo json_encode(['success' => false, 'msg' => 'Password must be at least 6 characters.']);
+        exit;
+    }
+    if (!in_array($status, ['active', 'inactive'])) {
+        $status = 'active';
+    }
+
+    $check = $db->prepare("SELECT id FROM users WHERE email = ?");
+    $check->execute([$email]);
+    if ($check->fetch()) {
+        echo json_encode(['success' => false, 'msg' => 'A user with this email already exists.']);
+        exit;
+    }
+
+    $hashed = password_hash($password, PASSWORD_BCRYPT);
+    $stmt = $db->prepare("INSERT INTO users (name, email, password, role, status, created_at) VALUES (?, ?, ?, 'admin', ?, NOW())");
+    $stmt->execute([$name, $email, $hashed, $status]);
+
+    $newId = $db->lastInsertId();
+    echo json_encode([
+        'success' => true,
+        'user' => [
+            'id'         => $newId,
+            'name'       => $name,
+            'email'      => $email,
+            'role'       => 'admin',
+            'status'     => $status,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]
+    ]);
+    exit;
+}
 
 // Handle role toggle
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_role'])) {
@@ -62,6 +200,12 @@ $totalCustomers = $db->query("SELECT COUNT(*) FROM users WHERE role='customer'")
 $totalAdmins    = $db->query("SELECT COUNT(*) FROM users WHERE role='admin'")->fetchColumn();
 
 $pageTitle = 'User Management';
+
+// Prevent browser caching so filter tabs always reflect current state
+header('Cache-Control: no-cache, no-store, must-revalidate');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 require_once __DIR__ . '/../includes/admin_header.php';
 ?>
 
@@ -123,8 +267,11 @@ require_once __DIR__ . '/../includes/admin_header.php';
 <!-- Users Table -->
  <section class="px-4">
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-100">
+    <div class="flex justify-between px-6 py-4 border-b border-gray-100">
         <h3 class="font-bold text-gray-800">Users <span class="text-gray-400 font-normal text-sm ml-2">(<?= $totalUsers ?> found)</span></h3>
+        <?php if ($role === 'admin'): ?>
+        <button onclick="openModal()" class="p-2 bg-rose-500 text-center text-white font-semibold rounded-xl">+ Add new admin</button>
+        <?php endif; ?>
     </div>
     <div class="overflow-x-auto">
         <table class="w-full">
@@ -134,12 +281,13 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     <th class="px-6 py-4 text-left">Email</th>
                     <th class="px-6 py-4 text-left">Role</th>
                     <th class="px-6 py-4 text-left">Joined</th>
-                    <th class="px-6 py-4 text-left">Actions</th>
+                    <th class="px-6 py-4 text-left">Status</th>
+                    <th class="px-6 py-4 text-right">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
             <?php if (empty($users)): ?>
-                <tr><td colspan="5" class="px-6 py-16 text-center text-gray-400">No users found</td></tr>
+                <tr><td colspan="6" class="px-6 py-16 text-center text-gray-400">No users found</td></tr>
             <?php else: ?>
             <?php foreach ($users as $u): ?>
             <tr class="hover:bg-gray-50/50 transition-colors" id="user-row-<?= $u['id'] ?>">
@@ -162,21 +310,33 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     </span>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-400"><?= date('M j, Y', strtotime($u['created_at'])) ?></td>
-                <td class="px-6 py-4">
-                    <?php if ($u['id'] != $_SESSION['user_id']): ?>
-                    <div class="flex items-center gap-2">
-                        <button onclick="toggleRole(<?= $u['id'] ?>, '<?= $u['role'] === 'admin' ? 'customer' : 'admin' ?>')"
-                            class="text-xs font-medium px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg transition-colors">
-                            → <?= $u['role'] === 'admin' ? 'Make Customer' : 'Make Admin' ?>
+                
+                 <td class="px-6 py-4">
+                    <?php if ($u['role'] === 'admin'): ?>
+                        <span class="text-xs font-medium px-3 py-1.5 rounded-lg <?= ($u['status'] ?? 'active') === 'active' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600' ?>">
+                            <?= ucfirst($u['status'] ?? 'active') ?>
+                        </span>
+                    <?php else: ?>
+                        <select onchange="toggleStatus(<?= $u['id'] ?>, this.value, this)"
+                            class="text-xs font-medium px-3 py-1.5 rounded-lg border-0 focus:ring-2 focus:ring-rose-300 cursor-pointer <?= ($u['status'] ?? 'active') === 'active' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600' ?>">
+                            <option value="active" <?= ($u['status'] ?? 'active') === 'active' ? 'selected' : '' ?>>Active</option>
+                            <option value="inactive" <?= ($u['status'] ?? 'active') === 'inactive' ? 'selected' : '' ?>>Inactive</option>
+                        </select>
+                    <?php endif; ?>
+                </td>
+                <td class="px-6 py-4 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                        <button onclick='openEditModal(<?= json_encode(["id" => $u["id"], "name" => $u["name"], "email" => $u["email"], "role" => $u["role"]]) ?>)'
+                            class="text-xs font-medium px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors">
+                            Edit
                         </button>
-                        <button onclick="deleteUser(<?= $u['id'] ?>, '<?= addslashes($u['name']) ?>')"
+                        <?php if ($u['id'] !== (int)$_SESSION['user_id']): ?>
+                        <button onclick="deleteUser(<?= $u['id'] ?>, '<?= htmlspecialchars($u['name'], ENT_QUOTES) ?>')"
                             class="text-xs font-medium px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors">
                             Delete
                         </button>
+                        <?php endif; ?>
                     </div>
-                    <?php else: ?>
-                    <span class="text-xs text-gray-400 italic">Your Account</span>
-                    <?php endif; ?>
                 </td>
             </tr>
             <?php endforeach; ?>
@@ -184,6 +344,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
             </tbody>
         </table>
     </div>
+    
     <?php if ($totalPages > 1): ?>
     <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
         <p class="text-sm text-gray-400">Page <?= $page ?> of <?= $totalPages ?></p>
@@ -203,6 +364,101 @@ require_once __DIR__ . '/../includes/admin_header.php';
 </div>
 </section>
 
+<!-- Add New Admin Modal -->
+<div id="addAdminModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50" onclick="closeModal()"></div>
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md relative">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <h3 class="font-bold text-gray-800">Add New Admin</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <form id="addAdminForm" class="px-6 py-5 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Name</label>
+                    <input type="text" name="name" required placeholder="Full name"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+                    <input type="email" name="email" required placeholder="admin@example.com"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+                    <input type="password" name="password" required minlength="6" placeholder="Min. 6 characters"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Status</label>
+                    <select name="status"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                <div id="addAdminError" class="text-red-500 text-sm hidden"></div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeModal()"
+                        class="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" id="addAdminBtn"
+                        class="flex-1 px-4 py-2.5 rounded-xl bg-rose-500 text-white text-sm font-semibold hover:bg-rose-600 transition-colors">
+                        Add Admin
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Admin Modal -->
+<div id="editAdminModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50" onclick="closeEditModal()"></div>
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md relative">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <h3 class="font-bold text-gray-800">Edit User</h3>
+                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <form id="editAdminForm" class="px-6 py-5 space-y-4">
+                <input type="hidden" name="user_id" id="editUserId">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Name</label>
+                    <input type="text" name="name" id="editName" required placeholder="Full name"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+                    <input type="email" name="email" id="editEmail" required placeholder="admin@example.com"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Password <span class="font-normal text-gray-400">(leave blank to keep current)</span></label>
+                    <input type="password" name="password" id="editPassword" minlength="6" placeholder="Min. 6 characters"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+                </div>
+                <div id="editAdminError" class="text-red-500 text-sm hidden"></div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeEditModal()"
+                        class="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" id="editAdminBtn"
+                        class="flex-1 px-4 py-2.5 rounded-xl bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 function toggleRole(userId, newRole) {
     const label = newRole === 'admin' ? 'an Admin' : 'a Customer';
@@ -210,7 +466,8 @@ function toggleRole(userId, newRole) {
     fetch('/sweetheaven/admin/user.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `ajax_role=1&user_id=${userId}&role=${newRole}`
+        body: `ajax_role=1&user_id=${userId}&role=${newRole}`,
+        credentials: 'same-origin'
     }).then(r => r.json()).then(d => { if (d.success) location.reload(); else alert(d.msg); });
 }
 
@@ -219,12 +476,133 @@ function deleteUser(userId, name) {
     fetch('/sweetheaven/admin/user.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `ajax_delete=1&user_id=${userId}`
+        body: `ajax_delete=1&user_id=${userId}`,
+        credentials: 'same-origin'
     }).then(r => r.json()).then(d => {
         if (d.success) document.getElementById(`user-row-${userId}`).remove();
         else alert(d.msg);
     });
 }
+
+/* ---- Toggle User Status ---- */
+function toggleStatus(userId, newStatus, selectEl) {
+    const label = newStatus === 'active' ? 'Activate' : 'Deactivate';
+    if (!confirm(`${label} this user?`)) {
+        selectEl.value = newStatus === 'active' ? 'inactive' : 'active';
+        return;
+    }
+    fetch('/sweetheaven/admin/user.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `ajax_status=1&user_id=${userId}&status=${newStatus}`,
+        credentials: 'same-origin'
+    }).then(r => r.json()).then(d => {
+        if (d.success) {
+            selectEl.className = `text-xs font-medium px-3 py-1.5 rounded-lg border-0 focus:ring-2 focus:ring-rose-300 cursor-pointer ${newStatus === 'active' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`;
+        } else {
+            alert(d.msg);
+            selectEl.value = newStatus === 'active' ? 'inactive' : 'active';
+        }
+    }).catch(() => {
+        alert('Request failed. Please try again.');
+        selectEl.value = newStatus === 'active' ? 'inactive' : 'active';
+    });
+}
+
+/* ---- Edit Admin Modal ---- */
+function openEditModal(user) {
+    document.getElementById('editUserId').value = user.id;
+    document.getElementById('editName').value = user.name;
+    document.getElementById('editEmail').value = user.email;
+    document.getElementById('editPassword').value = '';
+    document.getElementById('editAdminError').classList.add('hidden');
+    document.getElementById('editAdminModal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+    document.getElementById('editAdminModal').classList.add('hidden');
+}
+
+document.getElementById('editAdminForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('editAdminBtn');
+    const errDiv = document.getElementById('editAdminError');
+    const form = new FormData(this);
+    form.append('ajax_edit_admin', '1');
+
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    fetch('/sweetheaven/admin/user.php', {
+        method: 'POST',
+        body: form,
+        credentials: 'same-origin'
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            closeEditModal();
+            location.reload();
+        } else {
+            errDiv.textContent = d.msg;
+            errDiv.classList.remove('hidden');
+        }
+    })
+    .catch(() => {
+        errDiv.textContent = 'Something went wrong. Please try again.';
+        errDiv.classList.remove('hidden');
+    })
+    .finally(() => {
+        btn.textContent = 'Save Changes';
+        btn.disabled = false;
+    });
+});
+
+/* ---- Add New Admin Modal ---- */
+function openModal() {
+    document.getElementById('addAdminModal').classList.remove('hidden');
+    document.getElementById('addAdminForm').reset();
+    document.getElementById('addAdminError').classList.add('hidden');
+}
+
+function closeModal() {
+    document.getElementById('addAdminModal').classList.add('hidden');
+}
+
+document.getElementById('addAdminForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('addAdminBtn');
+    const errDiv = document.getElementById('addAdminError');
+    const form = new FormData(this);
+    form.append('ajax_add_admin', '1');
+
+    btn.textContent = 'Adding...';
+    btn.disabled = true;
+
+    fetch('/sweetheaven/admin/user.php', {
+        method: 'POST',
+        body: form,
+        credentials: 'same-origin'
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            closeModal();
+            location.reload();
+        } else {
+            errDiv.textContent = d.msg;
+            errDiv.classList.remove('hidden');
+        }
+    })
+    .catch(() => {
+        errDiv.textContent = 'Something went wrong. Please try again.';
+        errDiv.classList.remove('hidden');
+    })
+    .finally(() => {
+        btn.textContent = 'Add Admin';
+        btn.disabled = false;
+    });
+});
 </script>
 
 <?php require_once __DIR__ . '/../includes/admin_footer.php'; ?>

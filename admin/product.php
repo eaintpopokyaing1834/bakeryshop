@@ -3,6 +3,7 @@ require_once __DIR__ . '/../middleware/admin_check.php';
 require_once __DIR__ . '/../config/db.php';
 
 $db = getDB();
+$isAdmin = ($_SESSION['role'] ?? '') === 'admin';
 $message = $error = '';
 $activeTab = $_GET['tab'] ?? 'products';
 
@@ -10,6 +11,13 @@ $activeTab = $_GET['tab'] ?? 'products';
 if (isset($_SESSION['flash_message'])) {
     $message = $_SESSION['flash_message'];
     unset($_SESSION['flash_message']);
+}
+
+// ── Block cashiers from any write actions ──────────────
+if (!$isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'msg' => 'Cashiers do not have permission to modify products.']);
+    exit;
 }
 
 // ── AJAX: Handlers ────────────────────────────────────
@@ -188,6 +196,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between ">
             <h3 class="font-bold text-gray-800">All Products <span
                     class="text-gray-400 font-normal text-sm ml-2">(<?= $totalProducts ?> total)</span></h3>
+            <?php if ($isAdmin): ?>
             <button onclick="openProductModal()"
                 class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -195,6 +204,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 </svg>
                 Add Product
             </button>
+            <?php endif; ?>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">
@@ -247,6 +257,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                 </span>
                             </td>
                             <td class="px-6 py-4">
+                                <?php if ($isAdmin): ?>
                                 <div class="flex items-center gap-2">
                                     <button onclick="editProduct(<?= htmlspecialchars(json_encode($p)) ?>)"
                                         class="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1.5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
@@ -257,6 +268,9 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                         Delete
                                     </button>
                                 </div>
+                                <?php else: ?>
+                                <span class="text-xs text-gray-400">View only</span>
+                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -286,6 +300,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <h3 class="font-bold text-gray-800">All Categories <span
                     class="text-gray-400 font-normal text-sm ml-2">(<?= count($categories) ?>)</span></h3>
+            <?php if ($isAdmin): ?>
             <button onclick="openCategoryModal()"
                 class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -293,6 +308,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 </svg>
                 Add Category
             </button>
+            <?php endif; ?>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">
@@ -312,6 +328,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                             <td class="px-6 py-4 text-sm text-gray-500">
                                 <?= htmlspecialchars(substr($cat['description'] ?? '', 0, 80)) ?></td>
                             <td class="px-6 py-4">
+                                <?php if ($isAdmin): ?>
                                 <div class="flex items-center gap-2">
                                     <button
                                         onclick="editCategory(<?= $cat['id'] ?>, '<?= addslashes($cat['name']) ?>', '<?= addslashes($cat['description'] ?? '') ?>')"
@@ -319,6 +336,9 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                     <button onclick="deleteCategory(<?= $cat['id'] ?>, '<?= addslashes($cat['name']) ?>')"
                                         class="text-red-600 hover:text-red-800 text-sm font-medium px-3 py-1.5 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">Delete</button>
                                 </div>
+                                <?php else: ?>
+                                <span class="text-xs text-gray-400">View only</span>
+                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>

@@ -12,7 +12,7 @@ if (isset($_SESSION['cart'])) {
         $cartCount += $item['qty'];
 }
 $isLoggedIn = isset($_SESSION['user_id']);
-$isAdmin = ($isLoggedIn && $_SESSION['role'] === 'admin');
+$isAdmin = ($isLoggedIn && in_array($_SESSION['role'] ?? '', ['admin', 'cashier']));
 require_once __DIR__ . '/../config/db.php';
 $db = getDB();
 // Per-user unread count (customers only)
@@ -139,7 +139,7 @@ $sort       = trim($_GET['sort'] ?? '');
                 <?php endif; ?>
                 <?php if ($isAdmin): ?>
                     <li><a href="/sweetheaven/admin/dashboard.php"
-                            class="bg-rose-50 text-rose-600 px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-rose-100 transition-colors"><?= __('nav_admin_panel') ?></a>
+                            class="bg-rose-50 text-rose-600 px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-rose-100 transition-colors"><?= ($_SESSION['role'] ?? '') === 'cashier' ? 'Cashier Panel' : __('nav_admin_panel') ?></a>
                     </li>
                 <?php endif; ?>
                 <!-- Search -->
@@ -327,7 +327,7 @@ $sort       = trim($_GET['sort'] ?? '');
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                             d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
                                     </svg>
-                                    <?= __('nav_admin_panel') ?>
+                                    <?= ($_SESSION['role'] ?? '') === 'cashier' ? 'Cashier Panel' : __('nav_admin_panel') ?>
                                 </a>
                             <?php endif; ?>
                             <div class="border-t border-stone-100">
