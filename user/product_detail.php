@@ -54,7 +54,7 @@ $wishlistIds = [];
 $userReview = null;
 $isCustomer = false;
 if (isset($_SESSION['user_id'])) {
-    $isCustomer = ($_SESSION['role'] !== 'admin');
+    $isCustomer = ($_SESSION['role'] === 'customer');
     if ($isCustomer) {
         $wl = $db->prepare("SELECT product_id FROM wishlist WHERE user_id=?");
         $wl->execute([$_SESSION['user_id']]);

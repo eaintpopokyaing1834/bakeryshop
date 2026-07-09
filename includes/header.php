@@ -64,6 +64,7 @@ $sort       = trim($_GET['sort'] ?? '');
     .lang-dropdown-wrap {
         position: relative;
     }
+
     .lang-globe-btn {
         display: flex;
         align-items: center;
@@ -71,17 +72,19 @@ $sort       = trim($_GET['sort'] ?? '');
         width: 34px;
         height: 34px;
         border-radius: 8px;
-        border: 1px solid rgba(244,63,94,.18);
-        background: rgba(255,255,255,.7);
+        border: 1px solid rgba(244, 63, 94, .18);
+        background: rgba(255, 255, 255, .7);
         color: #78716c;
         cursor: pointer;
         transition: background .2s, border-color .2s, color .2s;
     }
+
     .lang-globe-btn:hover {
-        background: rgba(255,255,255,.95);
-        border-color: rgba(244,63,94,.4);
+        background: rgba(255, 255, 255, .95);
+        border-color: rgba(244, 63, 94, .4);
         color: #e11d48;
     }
+
     .lang-menu {
         display: none;
         position: absolute;
@@ -91,11 +94,15 @@ $sort       = trim($_GET['sort'] ?? '');
         background: #fff;
         border: 1px solid #f1e3e6;
         border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(180,60,80,.12);
+        box-shadow: 0 8px 24px rgba(180, 60, 80, .12);
         overflow: hidden;
         z-index: 200;
     }
-    .lang-menu.open { display: block; }
+
+    .lang-menu.open {
+        display: block;
+    }
+
     .lang-menu-item {
         display: flex;
         align-items: center;
@@ -112,9 +119,20 @@ $sort       = trim($_GET['sort'] ?? '');
         transition: background .15s, color .15s;
         font-family: inherit;
     }
-    .lang-menu-item:hover   { background: #fff0f3; color: #e11d48; }
-    .lang-menu-item.active  { color: #e11d48; font-weight: 700; }
-    .lang-menu-item + .lang-menu-item { border-top: 1px solid #fce7eb; }
+
+    .lang-menu-item:hover {
+        background: #fff0f3;
+        color: #e11d48;
+    }
+
+    .lang-menu-item.active {
+        color: #e11d48;
+        font-weight: 700;
+    }
+
+    .lang-menu-item+.lang-menu-item {
+        border-top: 1px solid #fce7eb;
+    }
 </style>
 
 <nav class="bg-pink-200 backdrop-blur-md border-b border-stone-100 sticky top-0 z-50">
@@ -143,14 +161,14 @@ $sort       = trim($_GET['sort'] ?? '');
                     </li>
                 <?php endif; ?>
                 <!-- Search -->
-                    <form method="GET" action="products.php" class="flex gap-2">
-                        <input type="hidden" name="category_id" value="<?= $categoryId ?>">
-                        <input type="hidden" name="sort" value="<?= $sort ?>">
-                        <?php if ($discounted): ?><input type="hidden" name="discounted" value="1"><?php endif; ?>
-                        <input type="search" name="search" placeholder="<?= __('products_search_ph') ?>"
-                            value="<?= htmlspecialchars($search) ?>"
-                            class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 w-48">
-                    </form>
+                <form method="GET" action="products.php" class="flex gap-2">
+                    <input type="hidden" name="category_id" value="<?= $categoryId ?>">
+                    <input type="hidden" name="sort" value="<?= $sort ?>">
+                    <?php if ($discounted): ?><input type="hidden" name="discounted" value="1"><?php endif; ?>
+                    <input type="search" name="search" placeholder="<?= __('products_search_ph') ?>"
+                        value="<?= htmlspecialchars($search) ?>"
+                        class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 w-48">
+                </form>
             </ul>
 
             <!-- Right Actions -->
@@ -169,7 +187,7 @@ $sort       = trim($_GET['sort'] ?? '');
                         title="Select language">
                         <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
-                                d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                                d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                         </svg>
                     </button>
 
@@ -187,24 +205,25 @@ $sort       = trim($_GET['sort'] ?? '');
                 </div>
 
                 <script>
-                function toggleLangMenu() {
-                    const menu = document.getElementById('langMenu');
-                    const btn  = document.getElementById('langGlobeBtn');
-                    const open = menu.classList.toggle('open');
-                    btn.setAttribute('aria-expanded', open);
-                }
-                function setLang(code) {
-                    document.getElementById('langInput').value = code;
-                    document.getElementById('langForm').submit();
-                }
-                // Close when clicking outside
-                document.addEventListener('click', function(e) {
-                    const wrap = document.getElementById('langDropdownWrap');
-                    if (wrap && !wrap.contains(e.target)) {
-                        document.getElementById('langMenu').classList.remove('open');
-                        document.getElementById('langGlobeBtn').setAttribute('aria-expanded', 'false');
+                    function toggleLangMenu() {
+                        const menu = document.getElementById('langMenu');
+                        const btn = document.getElementById('langGlobeBtn');
+                        const open = menu.classList.toggle('open');
+                        btn.setAttribute('aria-expanded', open);
                     }
-                });
+
+                    function setLang(code) {
+                        document.getElementById('langInput').value = code;
+                        document.getElementById('langForm').submit();
+                    }
+                    // Close when clicking outside
+                    document.addEventListener('click', function(e) {
+                        const wrap = document.getElementById('langDropdownWrap');
+                        if (wrap && !wrap.contains(e.target)) {
+                            document.getElementById('langMenu').classList.remove('open');
+                            document.getElementById('langGlobeBtn').setAttribute('aria-expanded', 'false');
+                        }
+                    });
                 </script>
 
                 <?php if ($isLoggedIn): ?>
@@ -371,9 +390,11 @@ $sort       = trim($_GET['sort'] ?? '');
                 <li><a href="/sweetheaven/user/products.php"
                         class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm"><?= __('nav_products') ?></a>
                 </li>
-                <li><a href="/sweetheaven/user/customize.php"
-                        class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm"><?= __('nav_customize') ?></a>
-                </li>
+                <?php if (!$isAdmin): ?>
+                    <li><a href="/sweetheaven/user/customize.php"
+                            class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm"><?= __('nav_customize') ?></a>
+                    </li>
+                <?php endif; ?>
                 <?php if (!$isAdmin): ?>
                     <li><a href="/sweetheaven/user/cart.php"
                             class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm"><?= __('nav_cart') ?>
@@ -401,7 +422,6 @@ $sort       = trim($_GET['sort'] ?? '');
     </div>
 </nav>
 <script>
-
     /* ── Profile dropdown ── */
     function toggleProfile() {
         document.getElementById('profileMenu').classList.toggle('hidden');
@@ -470,7 +490,9 @@ $sort       = trim($_GET['sort'] ?? '');
     }
 
     function markAllSeen() {
-        fetch('/sweetheaven/api/user_notifications.php?action=mark_seen', { method: 'POST' })
+        fetch('/sweetheaven/api/user_notifications.php?action=mark_seen', {
+                method: 'POST'
+            })
             .then(r => r.json())
             .then(() => {
                 // hide badge
@@ -525,7 +547,7 @@ $sort       = trim($_GET['sort'] ?? '');
                     }
                     _lastNotifCount = count;
                 })
-                .catch(() => { }); // silently ignore network errors
+                .catch(() => {}); // silently ignore network errors
         }
 
         // Poll every 30 seconds
@@ -554,7 +576,7 @@ $sort       = trim($_GET['sort'] ?? '');
     }
 
     /* ── Close dropdowns on outside click ── */
-    document.addEventListener('click', function (e) {
+    document.addEventListener('click', function(e) {
         // Profile
         const profileDd = document.getElementById('profileDropdown');
         if (profileDd && !profileDd.contains(e.target)) {

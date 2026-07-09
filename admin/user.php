@@ -169,17 +169,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_delete'])) {
     exit;
 }
 
-$search = trim($_GET['search'] ?? '');
-$role   = $_GET['role'] ?? 'all';
+// FIXED: Variable separation logic to prevent collisions with admin_header overrides
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$currentRoleFilter = isset($_GET['role']) ? trim($_GET['role']) : 'all';
+
+if (!in_array($currentRoleFilter, ['all', 'customer', 'admin'])) {
+    $currentRoleFilter = 'all';
+}
+
 $where  = [];
 $params = [];
 
-if ($role !== 'all') { $where[] = "role = ?"; $params[] = $role; }
-if ($search !== '')  { $where[] = "(name LIKE ? OR email LIKE ?)"; $params[] = "%$search%"; $params[] = "%$search%"; }
-$whereSQL = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+if ($currentRoleFilter !== 'all') { 
+    $where[] = "role = ?"; 
+    $params[] = $currentRoleFilter; 
+}
+if ($search !== '')  { 
+    $where[] = "(name LIKE ? OR email LIKE ?)"; 
+    $params[] = "%$search%"; 
+    $params[] = "%$search%"; 
+}
+$whereSQL = $where ? ' WHERE ' . implode(' AND ', $where) : '';
 
 // Count for pagination
-$countStmt = $db->prepare("SELECT COUNT(*) FROM users $whereSQL");
+$countStmt = $db->prepare("SELECT COUNT(*) FROM users" . $whereSQL);
 $countStmt->execute($params);
 $totalUsers = (int)$countStmt->fetchColumn();
 
@@ -189,7 +202,7 @@ $totalPages  = max(1, (int)ceil($totalUsers / $perPage));
 $page = min($page, $totalPages);
 $offset      = ($page - 1) * $perPage;
 
-$stmt = $db->prepare("SELECT * FROM users $whereSQL ORDER BY created_at DESC LIMIT $perPage OFFSET $offset");
+$stmt = $db->prepare("SELECT * FROM users" . $whereSQL . " ORDER BY created_at DESC LIMIT $perPage OFFSET $offset");
 foreach ($params as $i => $val) {
     $stmt->bindValue($i + 1, $val);
 }
@@ -241,20 +254,30 @@ require_once __DIR__ . '/../includes/admin_header.php';
 </div>
 
 <!-- Filter Bar -->
- <div class="px-4">
+<div class="px-4">
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
     <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div class="flex gap-2">
-            <?php foreach (['all' => 'All Users', 'customer' => 'Customers', 'admin' => 'Admins'] as $r => $label): ?>
-            <a href="?role=<?= $r ?>&search=<?= urlencode($search) ?>"
-               class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors
-               <?= $role === $r ? 'bg-rose-500 text-white shadow-md shadow-rose-100' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>">
-               <?= $label ?>
+            <!-- All Users Button -->
+            <a href="?role=all&search=<?= urlencode($search) ?>"
+               class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $currentRoleFilter === 'all' ? 'bg-rose-500 text-white shadow-md shadow-rose-100' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>">
+               All Users
             </a>
-            <?php endforeach; ?>
+            
+            <!-- Customers Button -->
+            <a href="?role=customer&search=<?= urlencode($search) ?>"
+               class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $currentRoleFilter === 'customer' ? 'bg-rose-500 text-white shadow-md shadow-rose-100' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>">
+               Customers
+            </a>
+            
+            <!-- Admins Button -->
+            <a href="?role=admin&search=<?= urlencode($search) ?>"
+               class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $currentRoleFilter === 'admin' ? 'bg-rose-500 text-white shadow-md shadow-rose-100' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>">
+               Admins
+            </a>
         </div>
         <form method="GET" class="flex gap-2">
-            <input type="hidden" name="role" value="<?= htmlspecialchars($role) ?>">
+            <input type="hidden" name="role" value="<?= htmlspecialchars($currentRoleFilter) ?>">
             <input type="search" name="search" placeholder="Search name or email..."
                 value="<?= htmlspecialchars($search) ?>"
                 class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 w-60">
@@ -265,12 +288,14 @@ require_once __DIR__ . '/../includes/admin_header.php';
 </div>
 
 <!-- Users Table -->
- <section class="px-4">
+<section class="px-4">
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-    <div class="flex justify-between px-6 py-4 border-b border-gray-100">
+    <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100">
         <h3 class="font-bold text-gray-800">Users <span class="text-gray-400 font-normal text-sm ml-2">(<?= $totalUsers ?> found)</span></h3>
-        <?php if ($role === 'admin'): ?>
-        <button onclick="openModal()" class="p-2 bg-rose-500 text-center text-white font-semibold rounded-xl">+ Add new admin</button>
+        
+        <!-- FIXED: Only render button explicitly on Admin filter -->
+        <?php if ($currentRoleFilter === 'admin'): ?>
+            <button onclick="openModal()" class="px-4 py-2 bg-rose-500 text-center text-white font-semibold rounded-xl hover:bg-rose-600 transition-colors shadow-md shadow-rose-100">+ Add new admin</button>
         <?php endif; ?>
     </div>
     <div class="overflow-x-auto">
@@ -350,13 +375,13 @@ require_once __DIR__ . '/../includes/admin_header.php';
         <p class="text-sm text-gray-400">Page <?= $page ?> of <?= $totalPages ?></p>
         <div class="flex items-center gap-1">
             <?php if ($page > 1): ?>
-            <a href="?role=<?= urlencode($role) ?>&search=<?= urlencode($search) ?>&page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← Prev</a>
+            <a href="?role=<?= urlencode($currentRoleFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← Prev</a>
             <?php endif; ?>
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-            <a href="?role=<?= urlencode($role) ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors <?= $i === $page ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>"><?= $i ?></a>
+            <a href="?role=<?= urlencode($currentRoleFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors <?= $i === $page ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>"><?= $i ?></a>
             <?php endfor; ?>
             <?php if ($page < $totalPages): ?>
-            <a href="?role=<?= urlencode($role) ?>&search=<?= urlencode($search) ?>&page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">Next →</a>
+            <a href="?role=<?= urlencode($currentRoleFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">Next →</a>
             <?php endif; ?>
         </div>
     </div>

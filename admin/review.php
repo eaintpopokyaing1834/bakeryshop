@@ -74,7 +74,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 <section class="px-4">
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
-        <h3 class="font-bold text-gray-800">Customer Reviews</h3>
+        <h3 class="font-bold text-gray-800">Customer Reviews(<?= count($reviews) ?>)</h3>
         <div class="flex gap-2">
             <?php foreach (['all', 'pending', 'approved', 'rejected'] as $s): ?>
                 <a href="?status=<?= $s ?>"

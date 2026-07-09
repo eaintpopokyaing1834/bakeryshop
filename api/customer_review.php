@@ -20,6 +20,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+if (!isset($_SESSION['user_id']) || in_array($_SESSION['role'] ?? '', ['admin', 'cashier'])) {
+    echo json_encode(['success' => false, 'message' => 'Unauthorized.']);
+    exit;
+}
+
 $name    = trim($_POST['name'] ?? '');
 $email   = trim($_POST['email'] ?? '');
 $message = trim($_POST['message'] ?? '');

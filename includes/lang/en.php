@@ -412,6 +412,8 @@ return [
     'customize_size_8inch' => '8 inch',
     'customize_size_10inch' => '10 inch',
     'customize_size_12inch' => '12 inch',
+    'customize_size_custom'=>'customize size',
+                                    
 
 
 

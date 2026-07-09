@@ -139,7 +139,7 @@ $reqStatusColors = [
                     <div class="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                     <h3 class="text-lg font-bold text-gray-800 mb-2">You have an active request</h3>
@@ -165,8 +165,8 @@ $reqStatusColors = [
                                     <option value="8 inch"><?= __('customize_size_8inch') ?></option>
                                     <option value="10 inch"><?= __('customize_size_10inch') ?></option>
                                     <option value="12 inch"><?= __('customize_size_12inch') ?></option>
-                                    
-                                    
+                                    <option value="Custom"><?= __('customize_size_custom') ?></option>
+
                                 </select>
                             </div>
                             <div>
@@ -239,138 +239,138 @@ $reqStatusColors = [
                     </div>
 
                     <button type="submit"
-                        class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 rounded-2xl transition-colors shadow-sm shadow-rose-100 text-base">
+                        class="w-full   bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 rounded-2xl transition-colors shadow-sm shadow-rose-100 text-base">
                         <?= __('customize_submit_btn') ?>
                     </button>
                 </form>
             <?php endif; ?>
-            </div>
+        </div>
 
-            <div id="my-requests">
-                <?php if (!empty($myRequests)): ?>
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center">
-                            <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h2 class="text-xl font-bold text-gray-800"><?= __('customize_my_requests') ?></h2>
-                            <p class="text-sm text-gray-400"><?= __('customize_my_requests_sub') ?></p>
-                        </div>
+        <div id="my-requests">
+            <?php if (!empty($myRequests)): ?>
+                <div class="flex items-center gap-3 m-6">
+                    <div class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
                     </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800"><?= __('customize_my_requests') ?></h2>
+                        <p class="text-sm text-gray-400"><?= __('customize_my_requests_sub') ?></p>
+                    </div>
+                </div>
 
-                    <div class="space-y-4">
-                        <?php foreach ($myRequests as $req): ?>
-                            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                                <div class="px-6 py-4 flex items-center justify-between border-b border-gray-50">
-                                    <div class="flex items-center gap-4">
-                                        <p class="font-bold text-gray-800">#<?= str_pad($req['id'], 4, '0', STR_PAD_LEFT) ?>
-                                        </p>
-                                        <span
-                                            class="text-xs font-bold px-2.5 py-1 rounded-full <?= $reqStatusColors[$req['status']] ?? 'bg-gray-100 text-gray-600' ?>">
-                                            <?= ucfirst($req['status']) ?>
-                                        </span>
-                                    </div>
-                                    <p class="text-xs text-gray-400"><?= date('M j, Y', strtotime($req['created_at'])) ?>
+                <div class="space-y-4">
+                    <?php foreach ($myRequests as $req): ?>
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                            <div class="px-6 py-4 flex items-center justify-between border-b border-gray-50">
+                                <div class="flex items-center gap-4">
+                                    <p class="font-bold text-gray-800">#<?= str_pad($req['id'], 4, '0', STR_PAD_LEFT) ?>
                                     </p>
+                                    <span
+                                        class="text-xs font-bold px-2.5 py-1 rounded-full <?= $reqStatusColors[$req['status']] ?? 'bg-gray-100 text-gray-600' ?>">
+                                        <?= ucfirst($req['status']) ?>
+                                    </span>
                                 </div>
-                                <div class="px-6 py-4">
-                                    <div class="grid sm:grid-cols-2 gap-4 text-sm">
-                                        <div class="space-y-1">
-                                            <p><span class="font-semibold text-gray-600"><?= __('customize_req_size') ?></span>
-                                                <?= htmlspecialchars($req['size']) ?></p>
-                                            <p><span class="font-semibold text-gray-600"><?= __('customize_req_flavor') ?></span>
-                                                <?= htmlspecialchars($req['flavor']) ?></p>
-                                            <?php if ($req['color']): ?>
-                                                <p><span class="font-semibold text-gray-600"><?= __('customize_req_color') ?></span>
-                                                    <?= htmlspecialchars($req['color']) ?></p><?php endif; ?>
-                                            <?php if ($req['cake_message']): ?>
-                                                <p><span class="font-semibold text-gray-600"><?= __('customize_req_message') ?></span>
-                                                    <?= htmlspecialchars($req['cake_message']) ?></p><?php endif; ?>
-                                            <p><span class="font-semibold text-gray-600"><?= __('customize_req_delivery') ?></span>
-                                                <?= date('M j, Y', strtotime($req['delivery_date'])) ?></p>
-                                        </div>
-                                        <div class="space-y-1">
-                                            <?php if ($req['reference_image']): ?>
-                                                <div>
-                                                    <span class="font-semibold text-gray-600"><?= __('customize_req_reference') ?></span>
-                                                    <a href="/sweetheaven/<?= htmlspecialchars($req['reference_image']) ?>"
-                                                        target="_blank" class="block mt-1">
-                                                        <img src="/sweetheaven/<?= htmlspecialchars($req['reference_image']) ?>"
-                                                            class="w-20 h-20 object-cover rounded-lg border border-gray-200">
-                                                    </a>
-                                                </div>
-                                            <?php endif; ?>
-                                            <?php if ($req['status'] === 'approved' && $req['admin_price']): ?>
-                                                <p class="mt-2"><span class="font-semibold text-gray-600"><?= __('customize_req_price') ?></span> <span
-                                                        class="text-rose-500 font-bold text-base"><?= number_format($req['admin_price']) ?>
-                                                        <?= __('common_mmk') ?></span></p>
-                                            <?php endif; ?>
-                                            <?php if ($req['admin_note']): ?>
-                                                <p><span class="font-semibold text-gray-600"><?= __('customize_req_admin_note') ?></span>
-                                                    <?= htmlspecialchars($req['admin_note']) ?></p>
-                                            <?php endif; ?>
-                                        </div>
+                                <p class="text-xs text-gray-400"><?= date('M j, Y', strtotime($req['created_at'])) ?>
+                                </p>
+                            </div>
+                            <div class="px-6 py-4">
+                                <div class="grid sm:grid-cols-2 gap-4 text-sm">
+                                    <div class="space-y-1">
+                                        <p><span class="font-semibold text-gray-600"><?= __('customize_req_size') ?></span>
+                                            <?= htmlspecialchars($req['size']) ?></p>
+                                        <p><span class="font-semibold text-gray-600"><?= __('customize_req_flavor') ?></span>
+                                            <?= htmlspecialchars($req['flavor']) ?></p>
+                                        <?php if ($req['color']): ?>
+                                            <p><span class="font-semibold text-gray-600"><?= __('customize_req_color') ?></span>
+                                                <?= htmlspecialchars($req['color']) ?></p><?php endif; ?>
+                                        <?php if ($req['cake_message']): ?>
+                                            <p><span class="font-semibold text-gray-600"><?= __('customize_req_message') ?></span>
+                                                <?= htmlspecialchars($req['cake_message']) ?></p><?php endif; ?>
+                                        <p><span class="font-semibold text-gray-600"><?= __('customize_req_delivery') ?></span>
+                                            <?= date('M j, Y', strtotime($req['delivery_date'])) ?></p>
                                     </div>
-                                    <?php if ($req['additional_notes']): ?>
-                                        <p class="text-xs text-gray-400 mt-2">📝
-                                            <?= htmlspecialchars($req['additional_notes']) ?>
-                                        </p>
-                                    <?php endif; ?>
-                                    <div class="mt-4 flex gap-3">
-                                        <?php if ($req['status'] === 'approved'): ?>
-                                            <a href="/sweetheaven/user/checkout.php?customize_id=<?= $req['id'] ?>"
-                                                class="inline-flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-semibold px-6 py-3 rounded-xl transition-colors text-sm">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                                </svg>
-                                                <?= __('customize_req_order') ?>
-                                            </a>
-                                        <?php elseif ($req['status'] === 'pending'): ?>
-                                            <span
-                                                class="inline-flex items-center gap-2 text-amber-600 bg-amber-50 px-4 py-2.5 rounded-xl text-sm font-medium">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                                <?= __('customize_status_pending') ?>
-                                            </span>
-                                        <?php elseif ($req['status'] === 'rejected'): ?>
-                                            <span
-                                                class="inline-flex items-center gap-2 text-red-600 bg-red-50 px-4 py-2.5 rounded-xl text-sm font-medium">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
-                                                <?= __('customize_status_rejected') ?>
-                                            </span>
-                                        <?php elseif ($req['status'] === 'ordered'): ?>
-                                            <span
-                                                class="inline-flex items-center gap-2 text-blue-600 bg-blue-50 px-4 py-2.5 rounded-xl text-sm font-medium">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M5 13l4 4L19 7" />
-                                                </svg>
-                                                <?= __('customize_status_ordered') ?>
-                                            </span>
+                                    <div class="space-y-1">
+                                        <?php if ($req['reference_image']): ?>
+                                            <div>
+                                                <span class="font-semibold text-gray-600"><?= __('customize_req_reference') ?></span>
+                                                <a href="/sweetheaven/<?= htmlspecialchars($req['reference_image']) ?>"
+                                                    target="_blank" class="block mt-1">
+                                                    <img src="/sweetheaven/<?= htmlspecialchars($req['reference_image']) ?>"
+                                                        class="w-20 h-20 object-cover rounded-lg border border-gray-200">
+                                                </a>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if ($req['status'] === 'approved' && $req['admin_price']): ?>
+                                            <p class="mt-2"><span class="font-semibold text-gray-600"><?= __('customize_req_price') ?></span> <span
+                                                    class="text-rose-500 font-bold text-base"><?= number_format($req['admin_price']) ?>
+                                                    <?= __('common_mmk') ?></span></p>
+                                        <?php endif; ?>
+                                        <?php if ($req['admin_note']): ?>
+                                            <p><span class="font-semibold text-gray-600"><?= __('customize_req_admin_note') ?></span>
+                                                <?= htmlspecialchars($req['admin_note']) ?></p>
                                         <?php endif; ?>
                                     </div>
                                 </div>
+                                <?php if ($req['additional_notes']): ?>
+                                    <p class="text-xs text-gray-400 mt-2">📝
+                                        <?= htmlspecialchars($req['additional_notes']) ?>
+                                    </p>
+                                <?php endif; ?>
+                                <div class="mt-4 flex gap-3">
+                                    <?php if ($req['status'] === 'approved'): ?>
+                                        <a href="/sweetheaven/user/checkout.php?customize_id=<?= $req['id'] ?>"
+                                            class="inline-flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-semibold px-6 py-3 rounded-xl transition-colors text-sm">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                            </svg>
+                                            <?= __('customize_req_order') ?>
+                                        </a>
+                                    <?php elseif ($req['status'] === 'pending'): ?>
+                                        <span
+                                            class="inline-flex items-center gap-2 text-amber-600 bg-amber-50 px-4 py-2.5 rounded-xl text-sm font-medium">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <?= __('customize_status_pending') ?>
+                                        </span>
+                                    <?php elseif ($req['status'] === 'rejected'): ?>
+                                        <span
+                                            class="inline-flex items-center gap-2 text-red-600 bg-red-50 px-4 py-2.5 rounded-xl text-sm font-medium">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                            <?= __('customize_status_rejected') ?>
+                                        </span>
+                                    <?php elseif ($req['status'] === 'ordered'): ?>
+                                        <span
+                                            class="inline-flex items-center gap-2 text-blue-600 bg-blue-50 px-4 py-2.5 rounded-xl text-sm font-medium">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            <?= __('customize_status_ordered') ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
                             </div>
-                        <?php endforeach; ?>
-                    </div>
-                <?php else: ?>
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
-                        <p class="text-4xl mb-3">🎂</p>
-                        <h3 class="text-lg font-bold text-gray-700 mb-1"><?= __('customize_no_requests_title') ?></h3>
-                        <p class="text-sm text-gray-400"><?= __('customize_no_requests_sub') ?></p>
-                    </div>
-                <?php endif; ?>
-            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
+                    <p class="text-4xl mb-3">🎂</p>
+                    <h3 class="text-lg font-bold text-gray-700 mb-1"><?= __('customize_no_requests_title') ?></h3>
+                    <p class="text-sm text-gray-400"><?= __('customize_no_requests_sub') ?></p>
+                </div>
+            <?php endif; ?>
         </div>
+    </div>
     </div>
 
     <?php require_once __DIR__ . '/../includes/footer.php'; ?>
@@ -385,9 +385,17 @@ $reqStatusColors = [
         dropzone.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', () => {
             const file = fileInput.files[0];
-            if (!file) { placeholder.classList.remove('hidden'); preview.classList.add('hidden'); return; }
+            if (!file) {
+                placeholder.classList.remove('hidden');
+                preview.classList.add('hidden');
+                return;
+            }
             const reader = new FileReader();
-            reader.onload = e => { previewImg.src = e.target.result; placeholder.classList.add('hidden'); preview.classList.remove('hidden'); };
+            reader.onload = e => {
+                previewImg.src = e.target.result;
+                placeholder.classList.add('hidden');
+                preview.classList.remove('hidden');
+            };
             reader.readAsDataURL(file);
         });
         document.getElementById('removeImage').addEventListener('click', (e) => {
@@ -398,5 +406,4 @@ $reqStatusColors = [
         });
     </script>
 </body>
-
 </html>

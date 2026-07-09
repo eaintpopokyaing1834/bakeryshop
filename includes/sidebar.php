@@ -67,6 +67,7 @@ $activeClass = "bg-white/60 text-rose-400 font-semibold sidebar-link-active";
             </svg>
             <span>Products</span>
         </a>
+
         <!-- Customize — both roles -->
         <a href="/sweetheaven/admin/customize.php"
             class="<?= $baseClass ?> <?= $currentPage === 'customize' ? $activeClass : '' ?>">
@@ -100,25 +101,11 @@ $activeClass = "bg-white/60 text-rose-400 font-semibold sidebar-link-active";
                 </span>
             <?php endif; ?>
         </a>
-    </nav>
 
-    <!-- View Store — both roles -->
-    <div class="pt-5 mt-4 border-t border-slate-800">
-        <p class="text-stone-500 text-[11px] font-semibold uppercase tracking-widest px-4 mb-3">Store</p>
-        <a href="/sweetheaven/user/index.php" target="_blank" class="<?= $baseClass ?>">
-            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
-            <span>View Store</span>
-        </a>
-    </div>
-
-    <?php if ($role === 'admin'): ?>
         <!-- Users — admin only -->
-        <a href="/sweetheaven/admin/user.php" class="<?= $baseClass ?> <?= $currentPage === 'user' ? $activeClass : '' ?>">
+        <?php if ($role === 'admin'): ?>
+        <a href="/sweetheaven/admin/user.php"
+            class="<?= $baseClass ?> <?= $currentPage === 'user' ? $activeClass : '' ?>">
             <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                     d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -155,21 +142,22 @@ $activeClass = "bg-white/60 text-rose-400 font-semibold sidebar-link-active";
             </svg>
             <span>Payments</span>
         </a>
+        <?php endif; ?>
+    </nav>
 
-        <!-- Settings — admin only -->
-        <a href="/sweetheaven/admin/settings.php"
-            class="<?= $baseClass ?> <?= $currentPage === 'settings' ? $activeClass : '' ?>">
+    <!-- View Store — both roles -->
+    <div class="pt-5 mt-4 border-t border-slate-800">
+        <p class="text-stone-500 text-[11px] font-semibold uppercase tracking-widest px-4 mb-3">Store</p>
+        <a href="/sweetheaven/user/index.php" target="_blank" class="<?= $baseClass ?>">
             <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
-            <span>Settings</span>
+            <span>View Store</span>
         </a>
-    <?php endif; ?>
-
-    
+    </div>
 
     <!-- User Info -->
     <div class="p-4 border-t border-slate-800">
@@ -179,7 +167,7 @@ $activeClass = "bg-white/60 text-rose-400 font-semibold sidebar-link-active";
                 <div
                     class="w-9 h-9 bg-pink-500 rounded-full flex items-center justify-center text-rose-800 font-bold text-sm shrink-0">
                     <?= strtoupper(substr($_SESSION['name'] ?? 'A', 0, 1)) ?>
-                </div>o
+                </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-pink-700 text-lg font-semibold truncate">
                         <?= htmlspecialchars($_SESSION['name'] ?? 'User') ?>
@@ -189,13 +177,5 @@ $activeClass = "bg-white/60 text-rose-400 font-semibold sidebar-link-active";
                 <img src="../images/log.png" class="w-6 h-6">
             </div>
         </a>
-        <!-- <a href="/sweetheaven/auth/logout.php"
-            class="mt-2 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800/50 transition-all duration-200 text-sm font-medium">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <span>Log Out</span>
-        </a> -->
     </div>
 </aside>

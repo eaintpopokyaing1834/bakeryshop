@@ -66,7 +66,7 @@ $discountedProducts = $db->query("
     ORDER BY d.value DESC, p.created_at DESC
 ")->fetchAll();
 
-$isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
+$isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['admin', 'cashier']);
 
 ?>
 <!DOCTYPE html>
@@ -636,6 +636,7 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                         <div class="relative overflow-hidden bg-gradient-to-br from-rose-50 to-amber-50 aspect-[4/3]">
                             <img src="<?= htmlspecialchars($imgSrc) ?>" alt="<?= htmlspecialchars($product['name']) ?>"
                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                            <?php if (!$isAdmin): ?>
                             <button onclick="event.stopPropagation(); toggleWishlist(<?= $product['id'] ?>, this)"
                                 class="absolute top-2 right-2 w-9 h-9 rounded-full bg-white/90 text-gray-400 shadow-md flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all duration-200 backdrop-blur-sm"
                                 title="Wishlist">
@@ -644,6 +645,7 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                                         d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
                             </button>
+                            <?php endif; ?>
                             <?php if ($hasDiscount): ?>
                                 <div class="absolute top-0 left-0 bg-rose-500 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md"
                                     viewBox="0 0 24 24">
@@ -769,7 +771,7 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                             </div>
                         </div>
                     </div>
-                    <a href="/sweetheaven/user/customize.php"
+                    <a href="<?= $isAdmin ? '/sweetheaven/admin/dashboard.php' : '/sweetheaven/user/customize.php' ?>"
                         class="inline-flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-bold px-8 py-4 rounded-2xl transition-all duration-300 shadow-lg shadow-rose-200 hover:shadow-xl hover:-translate-y-0.5 text-base">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1068,6 +1070,7 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                                     <?= htmlspecialchars($dpBadgeLabel) ?>
                                 </div>
                                 <!-- Wishlist -->
+                                <?php if (!$isAdmin): ?>
                                 <button onclick="event.stopPropagation(); toggleWishlist(<?= $dp['id'] ?>, this)"
                                     class="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 text-gray-400 shadow flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all duration-200"
                                     title="Wishlist">
@@ -1076,6 +1079,7 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
                                             d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                     </svg>
                                 </button>
+                                <?php endif; ?>
                             </div>
                             <!-- Card body -->
                             <div class="p-4">
@@ -1233,7 +1237,7 @@ $isAdmin = isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin';
     </section>
 
     <!-- ═════════════════════════ REVIEW FORM ═════════════════════════ -->
-    <?php if (isset($_SESSION['user_id']) && $_SESSION['role'] !== 'admin'): ?>
+    <?php if (isset($_SESSION['user_id']) && !in_array($_SESSION['role'] ?? '', ['admin', 'cashier'])): ?>
         <section id="review-form" class="pb-20 bg-[#fdf8f3]">
             <div class="max-w-2xl mx-auto px-6">
                 <div class="border-t border-gray-200 pt-16">

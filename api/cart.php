@@ -16,7 +16,7 @@ function cartCount(): int {
 
 switch ($action) {
     case 'add':
-        if (!isset($_SESSION['user_id']) || $_SESSION['role'] === 'admin') {
+        if (!isset($_SESSION['user_id']) || in_array($_SESSION['role'] ?? '', ['admin', 'cashier'])) {
             echo json_encode(['success' => false, 'redirect' => true]);
             exit;
         }

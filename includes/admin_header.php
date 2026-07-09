@@ -83,10 +83,12 @@ $pendingReviewsCount = (int) $db->query("SELECT COUNT(*) FROM customer_reviews W
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <div
-                    class="w-9 h-9 bg-rose-500/20 rounded-full flex items-center justify-center text-rose-400 font-bold text-sm shrink-0">
-                    <?= strtoupper(substr($_SESSION['name'] ?? 'A', 0, 1)) ?>
-                </div>
+                <a href="">
+                    <div
+                        class="w-9 h-9 bg-rose-500/20 rounded-full flex items-center justify-center text-rose-400 font-bold text-sm shrink-0">
+                        <?= strtoupper(substr($_SESSION['name'] ?? 'A', 0, 1)) ?>
+                    </div>
+                </a>
 
                 <!-- Notification Bell -->
                 <div class="relative" id="notifWrapper">
