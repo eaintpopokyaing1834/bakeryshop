@@ -8,8 +8,24 @@ $db = getDB();
 $totalRevenue = $db->query("SELECT COALESCE(SUM(total_amount),0) AS rev FROM orders WHERE status != 'cancelled'")->fetchColumn();
 $totalOrders  = $db->query("SELECT COUNT(*) FROM orders")->fetchColumn();
 $totalUsers   = $db->query("SELECT COUNT(*) FROM users WHERE role='customer'")->fetchColumn();
+$totalProducts = $db->query("SELECT COUNT(*) FROM products")->fetchColumn();
 $lowStock     = $db->query("SELECT COUNT(*) FROM products WHERE stock < 10")->fetchColumn();
 $pendingOrders = $db->query("SELECT COUNT(*) FROM orders WHERE status='pending'")->fetchColumn();
+$completedOrders = $db->query("SELECT COUNT(*) FROM orders WHERE status='delivered'")->fetchColumn();
+
+// ── Best-Selling Products (top 5) ────────────────────
+$bestSellingProducts = $db->query("
+    SELECT p.name, SUM(oi.quantity) AS total_sold
+    FROM order_items oi
+    JOIN products p ON oi.product_id = p.id
+    JOIN orders o ON oi.order_id = o.id
+    WHERE o.status != 'cancelled'
+    GROUP BY p.id
+    ORDER BY total_sold DESC
+    LIMIT 5
+")->fetchAll();
+$bestSellingLabels = array_column($bestSellingProducts, 'name');
+$bestSellingData = array_map('intval', array_column($bestSellingProducts, 'total_sold'));
 
 // ── Monthly Revenue (current year) ───────────────────
 $monthlyRev = $db->query("
@@ -64,8 +80,8 @@ $statusColors = [
 ];
 ?>
 
-<!-- Metrics Cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-8 px-4">
+<!-- Metrics Cards Row 1 -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-6 px-4">
 
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
         <div class="flex items-center justify-between mb-4">
@@ -113,6 +129,50 @@ $statusColors = [
     </div>
 </div>
 
+<!-- Metrics Cards Row 2 -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-8 px-4">
+
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center">
+                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            </div>
+        </div>
+        <p class="text-2xl font-bold text-gray-800"><?= $totalProducts ?></p>
+        <p class="text-sm text-gray-400 mt-1">Total Products</p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center">
+                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+        </div>
+        <p class="text-2xl font-bold text-gray-800"><?= $pendingOrders ?></p>
+        <p class="text-sm text-gray-400 mt-1">Pending Orders</p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+        </div>
+        <p class="text-2xl font-bold text-gray-800"><?= $completedOrders ?></p>
+        <p class="text-sm text-gray-400 mt-1">Completed Orders</p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-cyan-100 rounded-2xl flex items-center justify-center">
+                <svg class="w-6 h-6 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+            </div>
+        </div>
+        <p class="text-2xl font-bold text-gray-800"><?= $totalUsers ?></p>
+        <p class="text-sm text-gray-400 mt-1">Total Customers</p>
+    </div>
+</div>
+
 <!-- Charts Row -->
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8 px-4">
 
@@ -136,6 +196,48 @@ $statusColors = [
         <?php else: ?>
             <div id="statusChart"></div>
         <?php endif; ?>
+    </div>
+</div>
+
+<!-- Best-Selling Products Chart -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8 px-4">
+    <div class="xl:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-lg font-bold text-gray-800">Best-Selling Products</h3>
+                <p class="text-sm text-gray-400">Top 5 by quantity sold</p>
+            </div>
+        </div>
+        <?php if (empty($bestSellingProducts)): ?>
+            <div class="h-48 flex items-center justify-center text-gray-400 text-sm">No sales data yet</div>
+        <?php else: ?>
+            <div id="bestSellingChart"></div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Top Product Quick Stats -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-6 py-5 border-b border-gray-100">
+            <h3 class="text-lg font-bold text-gray-800">Top Products</h3>
+            <p class="text-sm text-gray-400">By units sold</p>
+        </div>
+        <div class="p-4 space-y-3">
+            <?php if (empty($bestSellingProducts)): ?>
+            <div class="py-8 text-center text-gray-400 text-sm">No sales data yet</div>
+            <?php else: ?>
+            <?php foreach ($bestSellingProducts as $i => $product): ?>
+            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                <div class="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 font-bold text-sm shrink-0">
+                    <?= $i + 1 ?>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-gray-700 truncate"><?= htmlspecialchars($product['name']) ?></p>
+                    <p class="text-xs text-gray-400"><?= $product['total_sold'] ?> sold</p>
+                </div>
+            </div>
+            <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
     </div>
 </div>
 
@@ -254,6 +356,8 @@ const revenueData   = <?= json_encode(array_values($revenueData)) ?>;
 const monthLabels   = <?= json_encode($monthLabels) ?>;
 const statusLabels  = <?= json_encode($statusLabels ?: ['No Data']) ?>;
 const statusData    = <?= json_encode($statusData ?: [1]) ?>;
+const bestLabels    = <?= json_encode($bestSellingLabels) ?>;
+const bestData      = <?= json_encode($bestSellingData) ?>;
 
 // Revenue Chart
 new ApexCharts(document.querySelector('#revenueChart'), {
@@ -279,6 +383,21 @@ if (document.querySelector('#statusChart')) {
         legend: { position: 'bottom', fontSize: '12px' },
         dataLabels: { enabled: false },
         plotOptions: { pie: { donut: { size: '65%' } } }
+    }).render();
+}
+
+// Best-Selling Products Chart
+if (document.querySelector('#bestSellingChart') && bestLabels.length > 0) {
+    new ApexCharts(document.querySelector('#bestSellingChart'), {
+        series: [{ name: 'Units Sold', data: bestData }],
+        chart: { type: 'bar', height: 280, toolbar: { show: false }, fontFamily: 'Poppins, sans-serif' },
+        plotOptions: { bar: { horizontal: true, borderRadius: 4, dataLabels: { position: 'top' } } },
+        xaxis: { categories: bestLabels },
+        yaxis: { labels: { style: { fontSize: '12px' } } },
+        colors: ['#f43f5e'],
+        dataLabels: { enabled: true, offsetX: 20, style: { fontSize: '12px', colors: ['#333'] } },
+        grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
+        tooltip: { y: { formatter: v => v + ' units' } }
     }).render();
 }
 </script>
