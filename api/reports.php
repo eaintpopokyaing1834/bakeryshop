@@ -10,6 +10,7 @@ $period = $_GET['period'] ?? 'monthly';
 $categoryId = isset($_GET['category_id']) ? (int)$_GET['category_id'] : 0;
 $page = max(1, (int)($_GET['page'] ?? 1));
 $perPage = 10;
+$printMode = isset($_GET['print']) && $_GET['print'] === '1';
 
 // ── Date Range Calculation ──────────────────────────
 $startDate = null;
@@ -81,7 +82,7 @@ $stmt = $db->prepare("
 $stmt->execute($params);
 $totalProductsSold = (int)$stmt->fetchColumn();
 
-// ── Best-Selling Products ───────────────────────────
+// ── Best-Selling Products (period-filtered) ──────────
 $paramsBest = array_merge($params);
 $stmt = $db->prepare("
     SELECT p.name, SUM(oi.quantity) AS total_sold, SUM(oi.quantity * oi.price) AS revenue
@@ -96,6 +97,29 @@ $stmt = $db->prepare("
 ");
 $stmt->execute($paramsBest);
 $bestSelling = $stmt->fetchAll();
+
+// ── Best-Selling Products (all-time, for chart) ─────
+$allTimeParams = [];
+$allTimeCategoryJoin = "";
+$allTimeCategoryWhere = "";
+if ($categoryId > 0) {
+    $allTimeCategoryJoin = " JOIN order_items oi_at ON o.id = oi_at.order_id JOIN products p_at ON oi_at.product_id = p_at.id";
+    $allTimeCategoryWhere = " AND p_at.category_id = ?";
+    $allTimeParams[] = $categoryId;
+}
+$stmt = $db->prepare("
+    SELECT p.name, SUM(oi.quantity) AS total_sold, SUM(oi.quantity * oi.price) AS revenue
+    FROM order_items oi
+    JOIN products p ON oi.product_id = p.id
+    JOIN orders o ON oi.order_id = o.id
+    {$allTimeCategoryJoin}
+    WHERE o.status != 'cancelled'{$allTimeCategoryWhere}
+    GROUP BY p.id
+    ORDER BY total_sold DESC
+    LIMIT 10
+");
+$stmt->execute($allTimeParams);
+$bestSellingAllTime = $stmt->fetchAll();
 
 // ── Order Status Summary ────────────────────────────
 $statusParams = array_merge($params);
@@ -127,23 +151,38 @@ $stmt = $db->prepare("
 $stmt->execute($statusParamsSimple);
 $statusSummary = $stmt->fetchAll();
 
-// ── Paginated Orders ────────────────────────────────
-$offset = ($page - 1) * $perPage;
+// ── Orders (paginated or full for print) ────────────
 $orderParams = array_merge($params);
 
-$stmt = $db->prepare("
-    SELECT o.id, u.name AS customer, o.total_amount, o.status, o.order_date
-    FROM orders o
-    JOIN users u ON o.user_id = u.id
-    {$categoryJoin}
-    WHERE {$where}{$categoryWhere}
-    ORDER BY o.order_date DESC
-    LIMIT {$perPage} OFFSET {$offset}
-");
+if ($printMode) {
+    // Print mode: only shipped and delivered orders
+    $printWhere = str_replace("o.status != 'cancelled'", "o.status IN ('shipped', 'delivered')", $where);
+    $orderSql = "
+        SELECT o.id, u.name AS customer, o.total_amount, o.status, o.order_date
+        FROM orders o
+        JOIN users u ON o.user_id = u.id
+        {$categoryJoin}
+        WHERE {$printWhere}{$categoryWhere}
+        ORDER BY o.order_date DESC
+    ";
+} else {
+    $orderSql = "
+        SELECT o.id, u.name AS customer, o.total_amount, o.status, o.order_date
+        FROM orders o
+        JOIN users u ON o.user_id = u.id
+        {$categoryJoin}
+        WHERE {$where}{$categoryWhere}
+        ORDER BY o.order_date DESC
+    ";
+    $offset = ($page - 1) * $perPage;
+    $orderSql .= " LIMIT {$perPage} OFFSET {$offset}";
+}
+
+$stmt = $db->prepare($orderSql);
 $stmt->execute($orderParams);
 $orders = $stmt->fetchAll();
 
-$totalPages = max(1, ceil($totalOrders / $perPage));
+$totalPages = $printMode ? 1 : max(1, ceil($totalOrders / $perPage));
 
 // ── Response ────────────────────────────────────────
 echo json_encode([
@@ -151,6 +190,7 @@ echo json_encode([
     'total_revenue' => $totalRevenue,
     'total_products_sold' => $totalProductsSold,
     'best_selling' => $bestSelling,
+    'best_selling_all_time' => $bestSellingAllTime,
     'status_summary' => $statusSummary,
     'orders' => $orders,
     'total_pages' => $totalPages,

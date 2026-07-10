@@ -19,15 +19,67 @@ $statusColors = [
 ];
 ?>
 
+<style>
+@media print {
+    /* Hide sidebar */
+    body > aside { display: none !important; }
+
+    /* Reset body */
+    body {
+        background: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Remove sidebar offset */
+    .flex-1.lg\:ml-64 { margin-left: 0 !important; padding: 0 !important; }
+    .flex-1.lg\:ml-64 > header { display: none !important; }
+
+    /* Hide main content except print summary */
+    .flex-1.lg\:ml-64 > main > *:not(#printSummaryContainer) {
+        display: none !important;
+    }
+
+    /* Show the print summary */
+    #printSummaryContainer {
+        display: block !important;
+        padding: 20px !important;
+    }
+}
+</style>
+
+<!-- Print-Only Summary Container (shown only in print) -->
+<div id="printSummaryContainer" style="display:none; font-family: Calibri, Arial, sans-serif; padding:20px;">
+    <!-- Title -->
+    <div style="text-align:center; margin-bottom:16px;">
+        <h1 id="printSummaryTitle" style="font-size:22px; font-weight:700; margin-bottom:2px;">Report</h1>
+        <p id="printSummaryDateRange" style="font-size:12px; color:#666;"></p>
+    </div>
+
+    <!-- Orders Table -->
+    <table style="width:100%; border-collapse:collapse; font-size:11px;">
+        <thead>
+            <tr>
+                <th style="background:#2563eb; color:white; padding:8px 10px; text-align:left; border:1px solid #1d4ed8;">Order ID</th>
+                <th style="background:#2563eb; color:white; padding:8px 10px; text-align:left; border:1px solid #1d4ed8;">Customer</th>
+                <th style="background:#2563eb; color:white; padding:8px 10px; text-align:right; border:1px solid #1d4ed8;">Amount</th>
+                <th style="background:#2563eb; color:white; padding:8px 10px; text-align:left; border:1px solid #1d4ed8;">Status</th>
+                <th style="background:#2563eb; color:white; padding:8px 10px; text-align:left; border:1px solid #1d4ed8;">Date</th>
+            </tr>
+        </thead>
+        <tbody id="printOrdersBody">
+            <tr><td colspan="5" style="padding:10px; text-align:center; color:#999;">Loading...</td></tr>
+        </tbody>
+    </table>
+</div>
+
 <!-- Filter Bar -->
-<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6 mx-4">
+<div id="filterBar" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6 mx-4">
     <div class="flex flex-wrap items-end gap-4">
         <!-- Time Period -->
         <div>
             <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Time Period</label>
             <div class="flex gap-1 bg-gray-100 rounded-lg p-1" id="periodGroup">
-                <button type="button" data-period="daily" class="period-btn px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-800">Daily</button>
-                <button type="button" data-period="weekly" class="period-btn px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-800">Weekly</button>
                 <button type="button" data-period="monthly" class="period-btn px-4 py-2 text-sm font-medium rounded-md transition-all bg-white shadow text-rose-600">Monthly</button>
                 <button type="button" data-period="yearly" class="period-btn px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-800">Yearly</button>
                 <button type="button" data-period="custom" class="period-btn px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-800">Custom</button>
@@ -35,7 +87,7 @@ $statusColors = [
         </div>
 
         <!-- Custom Date Range (hidden by default) -->
-        <div id="customDateRange" class="hidden flex gap-2">
+        <div id="customDateRange" class="hidden flex gap-2 items-end">
             <div>
                 <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Start Date</label>
                 <input type="date" id="startDate" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none">
@@ -66,6 +118,12 @@ $statusColors = [
         <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             Export to Excel
+        </button>
+
+        <!-- Print Report Button -->
+        <button onclick="printReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+            Print Report
         </button>
     </div>
 </div>
@@ -198,6 +256,8 @@ $statusColors = [
             <tbody class="divide-y divide-gray-50" id="ordersTable">
                 <tr><td colspan="5" class="px-6 py-10 text-center text-gray-400">Loading...</td></tr>
             </tbody>
+            <!-- Print-only: all orders -->
+            <tbody id="ordersTableAll" style="display:none;"></tbody>
         </table>
     </div>
     <!-- Pagination -->
@@ -224,12 +284,7 @@ document.querySelectorAll('.period-btn').forEach(btn => {
         this.classList.remove('text-gray-600');
         currentPeriod = this.dataset.period;
 
-        const customRange = document.getElementById('customDateRange');
-        if (currentPeriod === 'custom') {
-            customRange.classList.remove('hidden');
-        } else {
-            customRange.classList.add('hidden');
-        }
+        document.getElementById('customDateRange').classList.toggle('hidden', currentPeriod !== 'custom');
         currentPage = 1;
         fetchReport();
     });
@@ -253,9 +308,9 @@ function fetchReport() {
         .then(r => r.json())
         .then(data => {
             updateSummaryCards(data);
-            updateBestSellingChart(data.best_selling);
+            updateBestSellingChart(data.best_selling_all_time);
             updateStatusChart(data.status_summary);
-            updateBestSellingTable(data.best_selling);
+            updateBestSellingTable(data.best_selling_all_time);
             updateStatusTable(data.status_summary);
             updateOrdersTable(data.orders);
             updatePagination(data.total_pages, data.current_page, data.total_orders);
@@ -486,6 +541,65 @@ function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+}
+
+// ── Print Report ─────────────────────────────────────
+function getPeriodLabel() {
+    if (currentPeriod === 'yearly') return 'Yearly Report';
+    if (currentPeriod === 'custom') return 'Custom Report';
+    return 'Monthly Report';
+}
+
+function getDateRangeText() {
+    const today = new Date();
+    if (currentPeriod === 'yearly') return today.getFullYear().toString();
+    if (currentPeriod === 'custom') {
+        const s = document.getElementById('startDate').value;
+        const e = document.getElementById('endDate').value;
+        return (s || 'Start') + ' to ' + (e || 'End');
+    }
+    return today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+}
+
+function printReport() {
+    document.getElementById('printSummaryTitle').textContent = getPeriodLabel();
+    document.getElementById('printSummaryDateRange').textContent = getDateRangeText();
+    document.getElementById('printOrdersBody').innerHTML = '<tr><td colspan="5" style="padding:10px; text-align:center; color:#999;">Loading...</td></tr>';
+
+    let url = `/sweetheaven/api/reports.php?period=${currentPeriod}&print=1`;
+    if (currentPeriod === 'custom') {
+        const start = document.getElementById('startDate').value;
+        const end = document.getElementById('endDate').value;
+        if (start) url += `&start_date=${start}`;
+        if (end) url += `&end_date=${end}`;
+    }
+    const catId = document.getElementById('categoryFilter').value;
+    if (catId > 0) url += `&category_id=${catId}`;
+
+    fetch(url)
+        .then(r => r.json())
+        .then(data => {
+            const tbody = document.getElementById('printOrdersBody');
+            if (!data.orders || data.orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="padding:10px; text-align:center; color:#999;">No shipped or delivered orders found</td></tr>';
+            } else {
+                tbody.innerHTML = data.orders.map(o => {
+                    const sc = { shipped:'#4f46e5', delivered:'#16a34a' }[o.status] || '#666';
+                    return `<tr>
+                        <td style="padding:6px 10px; border:1px solid #ccc;">#${String(o.id).padStart(4, '0')}</td>
+                        <td style="padding:6px 10px; border:1px solid #ccc;">${escapeHtml(o.customer)}</td>
+                        <td style="padding:6px 10px; border:1px solid #ccc; text-align:right;">${formatMMK(o.total_amount)}</td>
+                        <td style="padding:6px 10px; border:1px solid #ccc;"><span style="padding:1px 6px; border:1px solid ${sc}; color:${sc}; border-radius:3px; font-size:10px;">${o.status.charAt(0).toUpperCase() + o.status.slice(1)}</span></td>
+                        <td style="padding:6px 10px; border:1px solid #ccc;">${new Date(o.order_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+                    </tr>`;
+                }).join('');
+            }
+            setTimeout(() => window.print(), 150);
+        })
+        .catch(err => {
+            console.error('Print error:', err);
+            window.print();
+        });
 }
 
 // ── Initial Load ─────────────────────────────────────
