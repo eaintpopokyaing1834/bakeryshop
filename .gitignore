@@ -1,3 +1,4 @@
 images/
 uploads/
 !uploads/products/
+.mimocode
