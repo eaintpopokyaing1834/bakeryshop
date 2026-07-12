@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../middleware/admin_check.php';
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../includes/lang.php';
 $db = getDB();
 
 // Create table if not exists
@@ -61,26 +62,26 @@ $reviews = $stmt->fetchAll();
 
 $msg = htmlspecialchars($_GET['msg'] ?? '');
 
-$pageTitle = 'Review Management';
+$pageTitle = __('review_page_title');
 require_once __DIR__ . '/../includes/admin_header.php';
 ?>
 
 <?php if ($msg): ?>
     <div class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-700 px-5 py-3 rounded-xl text-sm font-medium">
-        Review <?= $msg ?> successfully.
+        <?= __('review_heading') ?> <?= $msg ?>
     </div>
 <?php endif; ?>
 
 <section class="px-4">
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
-        <h3 class="font-bold text-gray-800">Customer Reviews(<?= count($reviews) ?>)</h3>
+        <h3 class="font-bold text-gray-800"><?= __('review_heading') ?> (<?= count($reviews) ?>)</h3>
         <div class="flex gap-2">
             <?php foreach (['all', 'pending', 'approved', 'rejected'] as $s): ?>
                 <a href="?status=<?= $s ?>"
                     class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors
                     <?= $statusFilter === $s ? 'bg-rose-500 text-white shadow-md shadow-rose-100' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>">
-                    <?= ucfirst($s) ?>
+                    <?= match($s) { 'pending' => __('status_pending'), 'approved' => __('status_approved'), 'rejected' => __('status_rejected'), default => ucfirst($s) } ?>
                 </a>
             <?php endforeach; ?>
         </div>
@@ -90,12 +91,12 @@ require_once __DIR__ . '/../includes/admin_header.php';
         <table class="w-full">
             <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
                 <tr>
-                    <th class="px-6 py-4 text-left">Customer</th>
-                    <th class="px-6 py-4 text-left">Email</th>
-                    <th class="px-6 py-4 text-left">Review</th>
-                    <th class="px-6 py-4 text-left">Date</th>
-                    <th class="px-6 py-4 text-left">Status</th>
-                    <th class="px-6 py-4 text-left">Actions</th>
+                    <th class="px-6 py-4 text-left"><?= __('admin_customer') ?></th>
+                    <th class="px-6 py-4 text-left"><?= __('review_col_email') ?></th>
+                    <th class="px-6 py-4 text-left"><?= __('review_col_review') ?></th>
+                    <th class="px-6 py-4 text-left"><?= __('admin_date') ?></th>
+                    <th class="px-6 py-4 text-left"><?= __('admin_status') ?></th>
+                    <th class="px-6 py-4 text-left"><?= __('admin_actions') ?></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
@@ -103,7 +104,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     <tr>
                         <td colspan="6" class="px-6 py-16 text-center text-gray-400">
                             <p class="text-4xl mb-3">💬</p>
-                            No reviews found
+                            <?= __('review_no_reviews') ?>
                         </td>
                     </tr>
                 <?php else: ?>
@@ -129,21 +130,21 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                     <?= $r['status'] === 'approved' ? 'bg-green-100 text-green-700' : '' ?>
                                     <?= $r['status'] === 'pending' ? 'bg-amber-100 text-amber-700' : '' ?>
                                     <?= $r['status'] === 'rejected' ? 'bg-red-100 text-red-700' : '' ?>">
-                                    <?= ucfirst($r['status']) ?>
+                                    <?= match($r['status']) { 'pending' => __('status_pending'), 'approved' => __('status_approved'), 'rejected' => __('status_rejected'), default => $r['status'] } ?>
                                 </span>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex gap-2">
                                     <?php if ($r['status'] !== 'approved'): ?>
                                         <a href="?action=approve&id=<?= $r['id'] ?>"
-                                            class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors">Approve</a>
+                                            class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors"><?= __('review_action_approve') ?></a>
                                     <?php endif; ?>
                                     <?php if ($r['status'] !== 'rejected'): ?>
                                         <a href="?action=reject&id=<?= $r['id'] ?>"
-                                            class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors">Reject</a>
+                                            class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors"><?= __('review_action_reject') ?></a>
                                     <?php endif; ?>
                                     <a href="?action=delete&id=<?= $r['id'] ?>" onclick="return confirm('Delete this review?')"
-                                        class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors">Delete</a>
+                                        class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors"><?= __('review_action_delete') ?></a>
                                 </div>
                             </td>
                         </tr>
@@ -154,16 +155,16 @@ require_once __DIR__ . '/../includes/admin_header.php';
     </div>
     <?php if ($totalPages > 1): ?>
     <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-        <p class="text-sm text-gray-400">Page <?= $page ?> of <?= $totalPages ?></p>
+        <p class="text-sm text-gray-400"><?= __('admin_page_of', [$page, $totalPages]) ?></p>
         <div class="flex items-center gap-1">
             <?php if ($page > 1): ?>
-            <a href="?status=<?= urlencode($statusFilter) ?>&page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← Prev</a>
+            <a href="?status=<?= urlencode($statusFilter) ?>&page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← <?= __('admin_prev') ?></a>
             <?php endif; ?>
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
             <a href="?status=<?= urlencode($statusFilter) ?>&page=<?= $i ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors <?= $i === $page ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>"><?= $i ?></a>
             <?php endfor; ?>
             <?php if ($page < $totalPages): ?>
-            <a href="?status=<?= urlencode($statusFilter) ?>&page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">Next →</a>
+            <a href="?status=<?= urlencode($statusFilter) ?>&page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"><?= __('admin_next') ?> →</a>
             <?php endif; ?>
         </div>
     </div>

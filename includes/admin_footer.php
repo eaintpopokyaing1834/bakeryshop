@@ -14,6 +14,26 @@
         }
     }
 
+    function toggleAdminLangMenu() {
+        const menu = document.getElementById('adminLangMenu');
+        const btn = document.getElementById('adminLangGlobeBtn');
+        const open = menu.classList.toggle('open');
+        btn.setAttribute('aria-expanded', open);
+    }
+
+    function setAdminLang(code) {
+        document.getElementById('adminLangInput').value = code;
+        document.getElementById('adminLangForm').submit();
+    }
+
+    document.addEventListener('click', function(e) {
+        const wrap = document.getElementById('adminLangDropdownWrap');
+        if (wrap && !wrap.contains(e.target)) {
+            document.getElementById('adminLangMenu').classList.remove('open');
+            document.getElementById('adminLangGlobeBtn').setAttribute('aria-expanded', 'false');
+        }
+    });
+
     function toggleNotifDropdown() {
         const dropdown = document.getElementById('notifDropdown');
         dropdown.classList.toggle('hidden');
@@ -28,7 +48,7 @@
             .then(data => {
                 const list = document.getElementById('notifList');
                 if (data.length === 0) {
-                    list.innerHTML = '<p class="text-center text-gray-400 text-sm py-6">No notifications</p>';
+                    list.innerHTML = '<p class="text-center text-gray-400 text-sm py-6"><?= __('admin_no_notifications') ?></p>';
                     return;
                 }
                 list.innerHTML = data.map(n => {

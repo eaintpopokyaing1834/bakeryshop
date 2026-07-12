@@ -1,6 +1,7 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/../middleware/admin_check.php';
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../includes/lang.php';
 $db = getDB();
 
 $msg     = '';
@@ -80,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
 }
 
 $paymentMethods = $db->query("SELECT * FROM payment_methods ORDER BY id ASC")->fetchAll();
-$pageTitle = 'Payment Settings';
+$pageTitle = __('payment_page_title');
 require_once __DIR__ . '/../includes/admin_header.php';
 ?>
 
@@ -93,15 +94,15 @@ require_once __DIR__ . '/../includes/admin_header.php';
 <!-- Header Row -->
 <div class="flex items-center justify-between mb-6 px-4">
     <div>
-        <h2 class="text-xl font-bold text-gray-800">Payment Methods</h2>
-        <p class="text-sm text-gray-400 mt-0.5"><?= count($paymentMethods) ?> method<?= count($paymentMethods) !== 1 ? 's' : '' ?> configured</p>
+        <h2 class="text-xl font-bold text-gray-800"><?= __('payment_heading') ?></h2>
+        <p class="text-sm text-gray-400 mt-0.5"><?= sprintf(__('payment_methods_count'), count($paymentMethods)) ?></p>
     </div>
     <button onclick="openAddModal()"
         class="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-all shadow-sm hover:shadow-md active:scale-95">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
         </svg>
-        Add New Payment
+        <?= __('payment_add') ?>
     </button>
 </div>
 
@@ -121,10 +122,10 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 </div>
                 <h3 class="font-bold text-gray-800"><?= htmlspecialchars($pm['payment_name']) ?></h3>
             </div>
-            <form method="POST" onsubmit="return confirm('Delete <?= htmlspecialchars(addslashes($pm['payment_name'])) ?>? This cannot be undone.');">
+            <form method="POST" onsubmit="return confirm('<?= sprintf(__('admin_confirm_delete'), htmlspecialchars(addslashes($pm['payment_name']))) ?>');">
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="payment_method_id" value="<?= $pm['id'] ?>">
-                <button type="submit" title="Delete"
+                <button type="submit" title="<?= __('admin_delete_tooltip') ?>"
                     class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -140,7 +141,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <input type="hidden" name="payment_method_id" value="<?= $pm['id'] ?>">
 
             <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Method Name</label>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5"><?= __('payment_label_method') ?></label>
                 <input type="text" name="payment_name" required
                     value="<?= htmlspecialchars($pm['payment_name'] ?? '') ?>"
                     class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
@@ -148,13 +149,13 @@ require_once __DIR__ . '/../includes/admin_header.php';
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Account Name</label>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5"><?= __('payment_label_account') ?></label>
                     <input type="text" name="acc_name" required
                         value="<?= htmlspecialchars($pm['acc_name'] ?? '') ?>"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Phone Number</label>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5"><?= __('payment_label_phone') ?></label>
                     <input type="number" name="acc_no" required
                         value="<?= htmlspecialchars($pm['acc_no'] ?? '') ?>"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
@@ -162,25 +163,25 @@ require_once __DIR__ . '/../includes/admin_header.php';
             </div>
 
             <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">QR Code Image</label>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5"><?= __('payment_label_qr') ?></label>
                 <?php if (!empty($pm['qr_image'])): ?>
                 <div class="mb-3 flex items-center gap-4">
                     <img src="/sweetheaven/<?= htmlspecialchars($pm['qr_image']) ?>"
                         class="w-24 h-24 object-contain border border-gray-200 rounded-xl bg-gray-50" alt="QR">
                     <div>
-                        <p class="text-xs text-gray-500 font-medium">Current QR code</p>
-                        <p class="text-xs text-gray-400 mt-0.5">Upload new file to replace</p>
+                        <p class="text-xs text-gray-500 font-medium"><?= __('payment_qr_current') ?></p>
+                        <p class="text-xs text-gray-400 mt-0.5"><?= __('payment_qr_upload') ?></p>
                     </div>
                 </div>
                 <?php endif; ?>
                 <input type="file" name="qr_image[]" accept="image/jpeg,image/png,image/webp"
                     class="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-rose-50 file:text-rose-600 hover:file:bg-rose-100">
-                <p class="text-xs text-gray-400 mt-1">Allowed: JPG, JPEG, PNG, WEBP</p>
+                <p class="text-xs text-gray-400 mt-1"><?= __('payment_allowed') ?></p>
             </div>
 
             <button type="submit"
                 class="w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors shadow-sm hover:shadow-md active:scale-[0.98]">
-                Save Changes
+                <?= __('payment_save') ?>
             </button>
         </form>
     </div>
@@ -192,8 +193,8 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                 d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
         </svg>
-        <p class="font-semibold text-gray-500">No payment methods yet.</p>
-        <p class="text-sm mt-1">Click <strong>Add New Payment</strong> to get started.</p>
+        <p class="font-semibold text-gray-500"><?= __('payment_no_methods') ?></p>
+        <p class="text-sm mt-1"><?= __('payment_no_methods_hint') ?></p>
     </div>
     <?php endif; ?>
 </div>
@@ -205,8 +206,8 @@ require_once __DIR__ . '/../includes/admin_header.php';
 
         <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
             <div>
-                <h3 class="font-bold text-gray-800 text-lg">Add New Payment Method</h3>
-                <p class="text-sm text-gray-400 mt-0.5">Fill in the details below</p>
+                <h3 class="font-bold text-gray-800 text-lg"><?= __('payment_add_title') ?></h3>
+                <p class="text-sm text-gray-400 mt-0.5"><?= __('payment_add_subtitle') ?></p>
             </div>
             <button onclick="closeAddModal()"
                 class="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
@@ -220,38 +221,38 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <input type="hidden" name="action" value="create">
 
             <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Method Name <span class="text-rose-500">*</span></label>
-                <input type="text" name="payment_name" required placeholder="e.g. KBZ Pay, AYA Pay…"
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5"><?= __('payment_label_method') ?> <span class="text-rose-500">*</span></label>
+                <input type="text" name="payment_name" required placeholder="<?= __('payment_ph_method') ?>"
                     class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
             </div>
 
             <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Account Name <span class="text-rose-500">*</span></label>
-                <input type="text" name="acc_name" required placeholder="e.g. Sweet Heaven Bakery"
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5"><?= __('payment_label_account') ?> <span class="text-rose-500">*</span></label>
+                <input type="text" name="acc_name" required placeholder="<?= __('payment_ph_account') ?>"
                     class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
             </div>
 
             <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Phone Number <span class="text-rose-500">*</span></label>
-                <input type="text" name="acc_no" required placeholder="e.g. 09 1234 56789"
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5"><?= __('payment_label_phone') ?> <span class="text-rose-500">*</span></label>
+                <input type="text" name="acc_no" required placeholder="<?= __('payment_ph_phone') ?>"
                     class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
             </div>
 
             <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">QR Code Image</label>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5"><?= __('payment_label_qr') ?></label>
                 <input type="file" name="qr_image[]" accept="image/jpeg,image/png,image/webp"
                     class="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-rose-50 file:text-rose-600 hover:file:bg-rose-100">
-                <p class="text-xs text-gray-400 mt-1">Optional — Allowed: JPG, JPEG, PNG, WEBP</p>
+                <p class="text-xs text-gray-400 mt-1"><?= __('payment_qr_optional') ?></p>
             </div>
 
             <div class="flex gap-3 pt-2">
                 <button type="button" onclick="closeAddModal()"
                     class="flex-1 px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold text-sm hover:bg-gray-50 transition-colors">
-                    Cancel
+                    <?= __('admin_cancel') ?>
                 </button>
                 <button type="submit"
                     class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors shadow-sm hover:shadow-md active:scale-[0.98]">
-                    Add Payment Method
+                    <?= __('payment_btn_add') ?>
                 </button>
             </div>
         </form>

@@ -1,13 +1,14 @@
 <?php
 require_once __DIR__ . '/../middleware/admin_check.php';
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../includes/lang.php';
 
 $db = getDB();
 
 // Fetch categories for filter dropdown
 $categories = $db->query("SELECT id, name FROM categories ORDER BY name")->fetchAll();
 
-$pageTitle = 'Reports';
+$pageTitle = __('reports_page_title');
 require_once __DIR__ . '/../includes/admin_header.php';
 
 $statusColors = [
@@ -52,7 +53,7 @@ $statusColors = [
 <div id="printSummaryContainer" style="display:none; font-family: Calibri, Arial, sans-serif; padding:20px;">
     <!-- Title -->
     <div style="text-align:center; margin-bottom:16px;">
-        <h1 id="printSummaryTitle" style="font-size:22px; font-weight:700; margin-bottom:2px;">Report</h1>
+        <h1 id="printSummaryTitle" style="font-size:22px; font-weight:700; margin-bottom:2px;"><?= __('reports_page_title') ?></h1>
         <p id="printSummaryDateRange" style="font-size:12px; color:#666;"></p>
     </div>
 
@@ -60,15 +61,15 @@ $statusColors = [
     <table style="width:100%; border-collapse:collapse; font-size:11px;">
         <thead>
             <tr>
-                <th style="background:#2563eb; color:white; padding:8px 10px; text-align:left; border:1px solid #1d4ed8;">Order ID</th>
-                <th style="background:#2563eb; color:white; padding:8px 10px; text-align:left; border:1px solid #1d4ed8;">Customer</th>
-                <th style="background:#2563eb; color:white; padding:8px 10px; text-align:right; border:1px solid #1d4ed8;">Amount</th>
-                <th style="background:#2563eb; color:white; padding:8px 10px; text-align:left; border:1px solid #1d4ed8;">Status</th>
-                <th style="background:#2563eb; color:white; padding:8px 10px; text-align:left; border:1px solid #1d4ed8;">Date</th>
+                <th style="background:#2563eb; color:white; padding:8px 10px; text-align:left; border:1px solid #1d4ed8;"><?= __('admin_order_id') ?></th>
+                <th style="background:#2563eb; color:white; padding:8px 10px; text-align:left; border:1px solid #1d4ed8;"><?= __('admin_customer') ?></th>
+                <th style="background:#2563eb; color:white; padding:8px 10px; text-align:right; border:1px solid #1d4ed8;"><?= __('admin_amount') ?></th>
+                <th style="background:#2563eb; color:white; padding:8px 10px; text-align:left; border:1px solid #1d4ed8;"><?= __('admin_status') ?></th>
+                <th style="background:#2563eb; color:white; padding:8px 10px; text-align:left; border:1px solid #1d4ed8;"><?= __('admin_date') ?></th>
             </tr>
         </thead>
         <tbody id="printOrdersBody">
-            <tr><td colspan="5" style="padding:10px; text-align:center; color:#999;">Loading...</td></tr>
+            <tr><td colspan="5" style="padding:10px; text-align:center; color:#999;"><?= __('reports_loading') ?></td></tr>
         </tbody>
     </table>
 </div>
@@ -78,31 +79,31 @@ $statusColors = [
     <div class="flex flex-wrap items-end gap-4">
         <!-- Time Period -->
         <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Time Period</label>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2"><?= __('reports_filter_period') ?></label>
             <div class="flex gap-1 bg-gray-100 rounded-lg p-1" id="periodGroup">
-                <button type="button" data-period="monthly" class="period-btn px-4 py-2 text-sm font-medium rounded-md transition-all bg-white shadow text-rose-600">Monthly</button>
-                <button type="button" data-period="yearly" class="period-btn px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-800">Yearly</button>
-                <button type="button" data-period="custom" class="period-btn px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-800">Custom</button>
+                <button type="button" data-period="monthly" class="period-btn px-4 py-2 text-sm font-medium rounded-md transition-all bg-white shadow text-rose-600"><?= __('reports_period_monthly') ?></button>
+                <button type="button" data-period="yearly" class="period-btn px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-800"><?= __('reports_period_yearly') ?></button>
+                <button type="button" data-period="custom" class="period-btn px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-800"><?= __('reports_period_custom') ?></button>
             </div>
         </div>
 
         <!-- Custom Date Range (hidden by default) -->
         <div id="customDateRange" class="hidden flex gap-2 items-end">
             <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Start Date</label>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2"><?= __('reports_filter_start') ?></label>
                 <input type="date" id="startDate" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none">
             </div>
             <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">End Date</label>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2"><?= __('reports_filter_end') ?></label>
                 <input type="date" id="endDate" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none" value="<?= date('Y-m-d') ?>">
             </div>
         </div>
 
         <!-- Category Filter -->
         <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Category</label>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2"><?= __('reports_filter_category') ?></label>
             <select id="categoryFilter" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none bg-white">
-                <option value="0">All Categories</option>
+                <option value="0"><?= __('reports_all_categories') ?></option>
                 <?php foreach ($categories as $cat): ?>
                     <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
                 <?php endforeach; ?>
@@ -111,19 +112,19 @@ $statusColors = [
 
         <!-- Apply Button -->
         <button onclick="fetchReport()" class="bg-rose-500 hover:bg-rose-600 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm">
-            Apply Filters
+            <?= __('reports_apply') ?>
         </button>
 
         <!-- Export Button -->
         <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            Export to Excel
+            <?= __('reports_export') ?>
         </button>
 
         <!-- Print Report Button -->
         <button onclick="printReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-            Print Report
+            <?= __('reports_print') ?>
         </button>
     </div>
 </div>
@@ -137,7 +138,7 @@ $statusColors = [
             </div>
         </div>
         <p class="text-2xl font-bold text-gray-800" id="statOrders">-</p>
-        <p class="text-sm text-gray-400 mt-1">Total Orders</p>
+        <p class="text-sm text-gray-400 mt-1"><?= __('reports_total_orders') ?></p>
     </div>
 
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -147,7 +148,7 @@ $statusColors = [
             </div>
         </div>
         <p class="text-2xl font-bold text-gray-800" id="statRevenue">-</p>
-        <p class="text-sm text-gray-400 mt-1">Total Revenue</p>
+        <p class="text-sm text-gray-400 mt-1"><?= __('reports_total_revenue') ?></p>
     </div>
 
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -157,7 +158,7 @@ $statusColors = [
             </div>
         </div>
         <p class="text-2xl font-bold text-gray-800" id="statProductsSold">-</p>
-        <p class="text-sm text-gray-400 mt-1">Products Sold</p>
+        <p class="text-sm text-gray-400 mt-1"><?= __('reports_products_sold') ?></p>
     </div>
 
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -167,7 +168,7 @@ $statusColors = [
             </div>
         </div>
         <p class="text-2xl font-bold text-gray-800" id="statTotalSales">-</p>
-        <p class="text-sm text-gray-400 mt-1">Total Sales</p>
+        <p class="text-sm text-gray-400 mt-1"><?= __('reports_total_sales') ?></p>
     </div>
 </div>
 
@@ -175,19 +176,19 @@ $statusColors = [
 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6 px-4">
     <!-- Best-Selling Products Chart -->
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 class="text-lg font-bold text-gray-800 mb-1">Best-Selling Products</h3>
-        <p class="text-sm text-gray-400 mb-6">By quantity sold</p>
+        <h3 class="text-lg font-bold text-gray-800 mb-1"><?= __('reports_best_selling') ?></h3>
+        <p class="text-sm text-gray-400 mb-6"><?= __('reports_by_qty') ?></p>
         <div id="bestSellingChart">
-            <div class="h-48 flex items-center justify-center text-gray-400 text-sm">Loading...</div>
+            <div class="h-48 flex items-center justify-center text-gray-400 text-sm"><?= __('reports_loading') ?></div>
         </div>
     </div>
 
     <!-- Order Status Chart -->
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 class="text-lg font-bold text-gray-800 mb-1">Order Status Summary</h3>
+        <h3 class="text-lg font-bold text-gray-800 mb-1"><?= __('reports_status_summary') ?></h3>
         <p class="text-sm text-gray-400 mb-6">Current distribution</p>
         <div id="statusChart">
-            <div class="h-48 flex items-center justify-center text-gray-400 text-sm">Loading...</div>
+            <div class="h-48 flex items-center justify-center text-gray-400 text-sm"><?= __('reports_loading') ?></div>
         </div>
     </div>
 </div>
@@ -195,21 +196,21 @@ $statusColors = [
 <!-- Best-Selling Products Table -->
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6 mx-4">
     <div class="px-6 py-5 border-b border-gray-100">
-        <h3 class="text-lg font-bold text-gray-800">Best-Selling Products</h3>
-        <p class="text-sm text-gray-400">Detailed breakdown</p>
+        <h3 class="text-lg font-bold text-gray-800"><?= __('reports_best_selling') ?></h3>
+        <p class="text-sm text-gray-400"><?= __('reports_detailed') ?></p>
     </div>
     <div class="overflow-x-auto">
         <table class="w-full">
             <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
                 <tr>
                     <th class="px-6 py-3 text-left">#</th>
-                    <th class="px-6 py-3 text-left">Product</th>
-                    <th class="px-6 py-3 text-left">Quantity Sold</th>
-                    <th class="px-6 py-3 text-left">Revenue</th>
+                    <th class="px-6 py-3 text-left"><?= __('reports_col_product') ?></th>
+                    <th class="px-6 py-3 text-left"><?= __('reports_col_qty_sold') ?></th>
+                    <th class="px-6 py-3 text-left"><?= __('reports_col_revenue') ?></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50" id="bestSellingTable">
-                <tr><td colspan="4" class="px-6 py-10 text-center text-gray-400">Loading...</td></tr>
+                <tr><td colspan="4" class="px-6 py-10 text-center text-gray-400"><?= __('reports_loading') ?></td></tr>
             </tbody>
         </table>
     </div>
@@ -218,19 +219,19 @@ $statusColors = [
 <!-- Order Status Summary Table -->
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6 mx-4">
     <div class="px-6 py-5 border-b border-gray-100">
-        <h3 class="text-lg font-bold text-gray-800">Order Status Breakdown</h3>
+        <h3 class="text-lg font-bold text-gray-800"><?= __('reports_status_breakdown') ?></h3>
     </div>
     <div class="overflow-x-auto">
         <table class="w-full">
             <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
                 <tr>
-                    <th class="px-6 py-3 text-left">Status</th>
-                    <th class="px-6 py-3 text-left">Count</th>
-                    <th class="px-6 py-3 text-left">Percentage</th>
+                    <th class="px-6 py-3 text-left"><?= __('admin_status') ?></th>
+                    <th class="px-6 py-3 text-left"><?= __('reports_col_count') ?></th>
+                    <th class="px-6 py-3 text-left"><?= __('reports_col_percentage') ?></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50" id="statusTable">
-                <tr><td colspan="3" class="px-6 py-10 text-center text-gray-400">Loading...</td></tr>
+                <tr><td colspan="3" class="px-6 py-10 text-center text-gray-400"><?= __('reports_loading') ?></td></tr>
             </tbody>
         </table>
     </div>
@@ -239,22 +240,22 @@ $statusColors = [
 <!-- Orders Table -->
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6 mx-4">
     <div class="px-6 py-5 border-b border-gray-100">
-        <h3 class="text-lg font-bold text-gray-800">Orders</h3>
-        <p class="text-sm text-gray-400">Filtered results</p>
+        <h3 class="text-lg font-bold text-gray-800"><?= __('reports_orders_heading') ?></h3>
+        <p class="text-sm text-gray-400"><?= __('reports_filtered') ?></p>
     </div>
     <div class="overflow-x-auto">
         <table class="w-full">
             <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
                 <tr>
-                    <th class="px-6 py-3 text-left">Order ID</th>
-                    <th class="px-6 py-3 text-left">Customer</th>
-                    <th class="px-6 py-3 text-left">Amount</th>
-                    <th class="px-6 py-3 text-left">Status</th>
-                    <th class="px-6 py-3 text-left">Date</th>
+                    <th class="px-6 py-3 text-left"><?= __('admin_order_id') ?></th>
+                    <th class="px-6 py-3 text-left"><?= __('admin_customer') ?></th>
+                    <th class="px-6 py-3 text-left"><?= __('admin_amount') ?></th>
+                    <th class="px-6 py-3 text-left"><?= __('admin_status') ?></th>
+                    <th class="px-6 py-3 text-left"><?= __('admin_date') ?></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50" id="ordersTable">
-                <tr><td colspan="5" class="px-6 py-10 text-center text-gray-400">Loading...</td></tr>
+                <tr><td colspan="5" class="px-6 py-10 text-center text-gray-400"><?= __('reports_loading') ?></td></tr>
             </tbody>
             <!-- Print-only: all orders -->
             <tbody id="ordersTableAll" style="display:none;"></tbody>
@@ -333,7 +334,7 @@ function updateBestSellingChart(products) {
     const container = document.getElementById('bestSellingChart');
 
     if (!products || products.length === 0) {
-        container.innerHTML = '<div class="h-48 flex items-center justify-center text-gray-400 text-sm">No sales data</div>';
+        container.innerHTML = '<div class="h-48 flex items-center justify-center text-gray-400 text-sm"><?= __('reports_no_data') ?></div>';
         if (bestSellingChartInstance) { bestSellingChartInstance.destroy(); bestSellingChartInstance = null; }
         return;
     }
@@ -343,7 +344,7 @@ function updateBestSellingChart(products) {
     if (bestSellingChartInstance) bestSellingChartInstance.destroy();
 
     bestSellingChartInstance = new ApexCharts(container, {
-        series: [{ name: 'Units Sold', data: products.map(p => parseInt(p.total_sold)) }],
+        series: [{ name: '<?= __('reports_units_sold') ?>', data: products.map(p => parseInt(p.total_sold)) }],
         chart: { type: 'bar', height: 300, toolbar: { show: false }, fontFamily: 'Poppins, sans-serif' },
         plotOptions: { bar: { horizontal: true, borderRadius: 4, dataLabels: { position: 'top' } } },
         xaxis: { categories: products.map(p => p.name.length > 20 ? p.name.substring(0, 20) + '...' : p.name) },
@@ -351,7 +352,7 @@ function updateBestSellingChart(products) {
         colors: ['#f43f5e'],
         dataLabels: { enabled: true, offsetX: 20, style: { fontSize: '12px', colors: ['#333'] } },
         grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
-        tooltip: { y: { formatter: v => v + ' units' } }
+        tooltip: { y: { formatter: v => v + ' <?= __('reports_units') ?>' } }
     });
     bestSellingChartInstance.render();
 }
@@ -367,7 +368,7 @@ function updateStatusChart(statuses) {
     const values = allStatuses.map(s => statusMap[s] || 0);
 
     if (values.every(v => v === 0)) {
-        container.innerHTML = '<div class="h-48 flex items-center justify-center text-gray-400 text-sm">No orders</div>';
+        container.innerHTML = '<div class="h-48 flex items-center justify-center text-gray-400 text-sm"><?= __('reports_no_orders') ?></div>';
         if (statusChartInstance) { statusChartInstance.destroy(); statusChartInstance = null; }
         return;
     }
@@ -392,7 +393,7 @@ function updateStatusChart(statuses) {
 function updateBestSellingTable(products) {
     const tbody = document.getElementById('bestSellingTable');
     if (!products || products.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-10 text-center text-gray-400">No sales data</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-10 text-center text-gray-400"><?= __('reports_no_data') ?></td></tr>';
         return;
     }
     tbody.innerHTML = products.map((p, i) => `
@@ -423,7 +424,7 @@ function updateStatusTable(statuses) {
     const totalCount = statuses.reduce((sum, s) => sum + parseInt(s.cnt), 0);
 
     if (totalCount === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" class="px-6 py-10 text-center text-gray-400">No orders</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3" class="px-6 py-10 text-center text-gray-400"><?= __('reports_no_orders') ?></td></tr>';
         return;
     }
 
@@ -448,7 +449,7 @@ function updateStatusTable(statuses) {
 function updateOrdersTable(orders) {
     const tbody = document.getElementById('ordersTable');
     if (!orders || orders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-gray-400">No orders found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-gray-400"><?= __('reports_no_orders') ?></td></tr>';
         return;
     }
 
@@ -484,14 +485,14 @@ function updateOrdersTable(orders) {
 
 // ── Pagination ───────────────────────────────────────
 function updatePagination(totalPages, current, totalOrders) {
-    document.getElementById('pageInfo').textContent = `Page ${current} of ${totalPages} (${totalOrders} orders)`;
+    document.getElementById('pageInfo').textContent = '<?= __('reports_page_info') ?>'.replace('{current}', current).replace('{total}', totalPages).replace('{orders}', totalOrders);
 
     const btns = document.getElementById('pageButtons');
     if (totalPages <= 1) { btns.innerHTML = ''; return; }
 
     let html = '';
     if (current > 1) {
-        html += `<button onclick="goToPage(${current - 1})" class="px-3 py-1 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">Prev</button>`;
+        html += `<button onclick="goToPage(${current - 1})" class="px-3 py-1 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"><?= __('reports_prev') ?></button>`;
     }
 
     for (let i = 1; i <= totalPages; i++) {
@@ -503,7 +504,7 @@ function updatePagination(totalPages, current, totalOrders) {
     }
 
     if (current < totalPages) {
-        html += `<button onclick="goToPage(${current + 1})" class="px-3 py-1 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">Next</button>`;
+        html += `<button onclick="goToPage(${current + 1})" class="px-3 py-1 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"><?= __('reports_next') ?></button>`;
     }
 
     btns.innerHTML = html;
@@ -534,7 +535,7 @@ function exportToExcel() {
 
 // ── Helpers ──────────────────────────────────────────
 function formatMMK(val) {
-    return parseFloat(val || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' MMK';
+    return parseFloat(val || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' <?= __('admin_mmk') ?>';
 }
 
 function escapeHtml(str) {
@@ -545,9 +546,9 @@ function escapeHtml(str) {
 
 // ── Print Report ─────────────────────────────────────
 function getPeriodLabel() {
-    if (currentPeriod === 'yearly') return 'Yearly Report';
-    if (currentPeriod === 'custom') return 'Custom Report';
-    return 'Monthly Report';
+    if (currentPeriod === 'yearly') return '<?= __('reports_yearly_title') ?>';
+    if (currentPeriod === 'custom') return '<?= __('reports_custom_title') ?>';
+    return '<?= __('reports_monthly_title') ?>';
 }
 
 function getDateRangeText() {
@@ -556,7 +557,7 @@ function getDateRangeText() {
     if (currentPeriod === 'custom') {
         const s = document.getElementById('startDate').value;
         const e = document.getElementById('endDate').value;
-        return (s || 'Start') + ' to ' + (e || 'End');
+        return (s || '<?= __('reports_start') ?>') + ' to ' + (e || '<?= __('reports_end') ?>');
     }
     return today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 }
@@ -564,7 +565,7 @@ function getDateRangeText() {
 function printReport() {
     document.getElementById('printSummaryTitle').textContent = getPeriodLabel();
     document.getElementById('printSummaryDateRange').textContent = getDateRangeText();
-    document.getElementById('printOrdersBody').innerHTML = '<tr><td colspan="5" style="padding:10px; text-align:center; color:#999;">Loading...</td></tr>';
+    document.getElementById('printOrdersBody').innerHTML = '<tr><td colspan="5" style="padding:10px; text-align:center; color:#999;"><?= __('reports_loading') ?></td></tr>';
 
     let url = `/sweetheaven/api/reports.php?period=${currentPeriod}&print=1`;
     if (currentPeriod === 'custom') {
@@ -581,7 +582,7 @@ function printReport() {
         .then(data => {
             const tbody = document.getElementById('printOrdersBody');
             if (!data.orders || data.orders.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="padding:10px; text-align:center; color:#999;">No shipped or delivered orders found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="padding:10px; text-align:center; color:#999;"><?= __('reports_no_shipped') ?></td></tr>';
             } else {
                 tbody.innerHTML = data.orders.map(o => {
                     const sc = { shipped:'#4f46e5', delivered:'#16a34a' }[o.status] || '#666';

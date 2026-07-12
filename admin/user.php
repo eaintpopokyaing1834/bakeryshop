@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../middleware/admin_only_check.php';
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../includes/lang.php';
 
 $db = getDB();
 
@@ -212,7 +213,7 @@ $users = $stmt->fetchAll();
 $totalCustomers = $db->query("SELECT COUNT(*) FROM users WHERE role='customer'")->fetchColumn();
 $totalAdmins    = $db->query("SELECT COUNT(*) FROM users WHERE role='admin'")->fetchColumn();
 
-$pageTitle = 'User Management';
+$pageTitle = __('user_page_title');
 
 // Prevent browser caching so filter tabs always reflect current state
 header('Cache-Control: no-cache, no-store, must-revalidate');
@@ -230,7 +231,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         </div>
         <div>
             <p class="text-2xl font-bold text-gray-800"><?= $totalCustomers + $totalAdmins ?></p>
-            <p class="text-sm text-gray-400">Total Users</p>
+            <p class="text-sm text-gray-400"><?= __('user_total_users') ?></p>
         </div>
     </div>
     <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
@@ -239,7 +240,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         </div>
         <div>
             <p class="text-2xl font-bold text-gray-800"><?= $totalCustomers ?></p>
-            <p class="text-sm text-gray-400">Customers</p>
+            <p class="text-sm text-gray-400"><?= __('user_customers') ?></p>
         </div>
     </div>
     <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
@@ -248,7 +249,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         </div>
         <div>
             <p class="text-2xl font-bold text-gray-800"><?= $totalAdmins ?></p>
-            <p class="text-sm text-gray-400">Administrators</p>
+            <p class="text-sm text-gray-400"><?= __('user_administrators') ?></p>
         </div>
     </div>
 </div>
@@ -261,27 +262,27 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <!-- All Users Button -->
             <a href="?role=all&search=<?= urlencode($search) ?>"
                class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $currentRoleFilter === 'all' ? 'bg-rose-500 text-white shadow-md shadow-rose-100' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>">
-               All Users
+               <?= __('user_filter_all') ?>
             </a>
             
             <!-- Customers Button -->
             <a href="?role=customer&search=<?= urlencode($search) ?>"
                class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $currentRoleFilter === 'customer' ? 'bg-rose-500 text-white shadow-md shadow-rose-100' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>">
-               Customers
+               <?= __('user_filter_customers') ?>
             </a>
             
             <!-- Admins Button -->
             <a href="?role=admin&search=<?= urlencode($search) ?>"
                class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $currentRoleFilter === 'admin' ? 'bg-rose-500 text-white shadow-md shadow-rose-100' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>">
-               Admins
+               <?= __('user_filter_admins') ?>
             </a>
         </div>
         <form method="GET" class="flex gap-2">
             <input type="hidden" name="role" value="<?= htmlspecialchars($currentRoleFilter) ?>">
-            <input type="search" name="search" placeholder="Search name or email..."
+            <input type="search" name="search" placeholder="<?= __('user_search_ph') ?>"
                 value="<?= htmlspecialchars($search) ?>"
                 class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 w-60">
-            <button class="bg-rose-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-rose-600">Search</button>
+            <button class="bg-rose-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-rose-600"><?= __('admin_search') ?></button>
         </form>
     </div>
 </div>
@@ -291,11 +292,11 @@ require_once __DIR__ . '/../includes/admin_header.php';
 <section class="px-4">
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100">
-        <h3 class="font-bold text-gray-800">Users <span class="text-gray-400 font-normal text-sm ml-2">(<?= $totalUsers ?> found)</span></h3>
+        <h3 class="font-bold text-gray-800"><?= __('user_heading') ?> <span class="text-gray-400 font-normal text-sm ml-2">(<?= $totalUsers ?> found)</span></h3>
         
         <!-- FIXED: Only render button explicitly on Admin filter -->
         <?php if ($currentRoleFilter === 'admin'): ?>
-            <button onclick="openModal()" class="px-4 py-2 bg-rose-500 text-center text-white font-semibold rounded-xl hover:bg-rose-600 transition-colors shadow-md shadow-rose-100">+ Add new admin</button>
+            <button onclick="openModal()" class="px-4 py-2 bg-rose-500 text-center text-white font-semibold rounded-xl hover:bg-rose-600 transition-colors shadow-md shadow-rose-100"><?= __('user_add_admin') ?></button>
         <?php endif; ?>
     </div>
     <div class="overflow-x-auto">
@@ -303,16 +304,16 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
                 <tr>
                     <th class="px-6 py-4 text-left">User</th>
-                    <th class="px-6 py-4 text-left">Email</th>
-                    <th class="px-6 py-4 text-left">Role</th>
-                    <th class="px-6 py-4 text-left">Joined</th>
-                    <th class="px-6 py-4 text-left">Status</th>
-                    <th class="px-6 py-4 text-right">Actions</th>
+                    <th class="px-6 py-4 text-left"><?= __('admin_email') ?></th>
+                    <th class="px-6 py-4 text-left"><?= __('admin_role') ?></th>
+                    <th class="px-6 py-4 text-left"><?= __('admin_joined') ?></th>
+                    <th class="px-6 py-4 text-left"><?= __('user_col_status') ?></th>
+                    <th class="px-6 py-4 text-right"><?= __('admin_actions') ?></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
             <?php if (empty($users)): ?>
-                <tr><td colspan="6" class="px-6 py-16 text-center text-gray-400">No users found</td></tr>
+                <tr><td colspan="6" class="px-6 py-16 text-center text-gray-400"><?= __('user_no_users') ?></td></tr>
             <?php else: ?>
             <?php foreach ($users as $u): ?>
             <tr class="hover:bg-gray-50/50 transition-colors" id="user-row-<?= $u['id'] ?>">
@@ -323,7 +324,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                         </div>
                         <div>
                             <p class="font-semibold text-gray-700 text-sm"><?= htmlspecialchars($u['name']) ?></p>
-                            <p class="text-xs text-gray-400">ID: #<?= $u['id'] ?></p>
+                            <p class="text-xs text-gray-400"><?= __('user_id_prefix') ?> #<?= $u['id'] ?></p>
                         </div>
                     </div>
                 </td>
@@ -331,7 +332,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 <td class="px-6 py-4">
                     <span class="text-xs font-bold px-3 py-1 rounded-full
                         <?= $u['role'] === 'admin' ? 'bg-rose-100 text-rose-700' : 'bg-green-100 text-green-700' ?>">
-                        <?= ucfirst($u['role']) ?>
+                        <?= $u['role'] === 'customer' ? __('admin_customer') : ucfirst($u['role']) ?>
                     </span>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-400"><?= date('M j, Y', strtotime($u['created_at'])) ?></td>
@@ -339,13 +340,13 @@ require_once __DIR__ . '/../includes/admin_header.php';
                  <td class="px-6 py-4">
                     <?php if ($u['role'] === 'admin'): ?>
                         <span class="text-xs font-medium px-3 py-1.5 rounded-lg <?= ($u['status'] ?? 'active') === 'active' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600' ?>">
-                            <?= ucfirst($u['status'] ?? 'active') ?>
+                            <?= ($u['status'] ?? 'active') === 'active' ? __('admin_active') : __('admin_inactive') ?>
                         </span>
                     <?php else: ?>
                         <select onchange="toggleStatus(<?= $u['id'] ?>, this.value, this)"
                             class="text-xs font-medium px-3 py-1.5 rounded-lg border-0 focus:ring-2 focus:ring-rose-300 cursor-pointer <?= ($u['status'] ?? 'active') === 'active' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600' ?>">
-                            <option value="active" <?= ($u['status'] ?? 'active') === 'active' ? 'selected' : '' ?>>Active</option>
-                            <option value="inactive" <?= ($u['status'] ?? 'active') === 'inactive' ? 'selected' : '' ?>>Inactive</option>
+                            <option value="active" <?= ($u['status'] ?? 'active') === 'active' ? 'selected' : '' ?>><?= __('admin_active') ?></option>
+                            <option value="inactive" <?= ($u['status'] ?? 'active') === 'inactive' ? 'selected' : '' ?>><?= __('admin_inactive') ?></option>
                         </select>
                     <?php endif; ?>
                 </td>
@@ -353,12 +354,12 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     <div class="flex items-center justify-end gap-2">
                         <button onclick='openEditModal(<?= json_encode(["id" => $u["id"], "name" => $u["name"], "email" => $u["email"], "role" => $u["role"]]) ?>)'
                             class="text-xs font-medium px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors">
-                            Edit
+                            <?= __('admin_edit') ?>
                         </button>
                         <?php if ($u['id'] !== (int)$_SESSION['user_id']): ?>
                         <button onclick="deleteUser(<?= $u['id'] ?>, '<?= htmlspecialchars($u['name'], ENT_QUOTES) ?>')"
                             class="text-xs font-medium px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors">
-                            Delete
+                            <?= __('admin_delete') ?>
                         </button>
                         <?php endif; ?>
                     </div>
@@ -372,16 +373,16 @@ require_once __DIR__ . '/../includes/admin_header.php';
     
     <?php if ($totalPages > 1): ?>
     <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-        <p class="text-sm text-gray-400">Page <?= $page ?> of <?= $totalPages ?></p>
+        <p class="text-sm text-gray-400"><?= sprintf(__('admin_page_of'), $page, $totalPages) ?></p>
         <div class="flex items-center gap-1">
             <?php if ($page > 1): ?>
-            <a href="?role=<?= urlencode($currentRoleFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← Prev</a>
+            <a href="?role=<?= urlencode($currentRoleFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"><?= __('admin_prev') ?></a>
             <?php endif; ?>
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
             <a href="?role=<?= urlencode($currentRoleFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors <?= $i === $page ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>"><?= $i ?></a>
             <?php endfor; ?>
             <?php if ($page < $totalPages): ?>
-            <a href="?role=<?= urlencode($currentRoleFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">Next →</a>
+            <a href="?role=<?= urlencode($currentRoleFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"><?= __('admin_next') ?></a>
             <?php endif; ?>
         </div>
     </div>
@@ -395,33 +396,33 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md relative">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                <h3 class="font-bold text-gray-800">Add New Admin</h3>
+                <h3 class="font-bold text-gray-800"><?= __('user_add_title') ?></h3>
                 <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
             <form id="addAdminForm" class="px-6 py-5 space-y-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Name</label>
-                    <input type="text" name="name" required placeholder="Full name"
+                    <label class="block text-sm font-semibold text-gray-700 mb-1"><?= __('user_label_name') ?></label>
+                    <input type="text" name="name" required placeholder="<?= __('user_ph_name') ?>"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-                    <input type="email" name="email" required placeholder="admin@example.com"
+                    <label class="block text-sm font-semibold text-gray-700 mb-1"><?= __('user_label_email') ?></label>
+                    <input type="email" name="email" required placeholder="<?= __('user_ph_email') ?>"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
-                    <input type="password" name="password" required minlength="6" placeholder="Min. 6 characters"
+                    <label class="block text-sm font-semibold text-gray-700 mb-1"><?= __('user_label_password') ?></label>
+                    <input type="password" name="password" required minlength="6" placeholder="<?= __('user_ph_password') ?>"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Status</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1"><?= __('user_label_status') ?></label>
                     <select name="status"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white">
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
+                        <option value="active"><?= __('admin_active') ?></option>
+                        <option value="inactive"><?= __('admin_inactive') ?></option>
                     </select>
                 </div>
                 <div id="addAdminError" class="text-red-500 text-sm hidden"></div>
@@ -432,7 +433,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     </button>
                     <button type="submit" id="addAdminBtn"
                         class="flex-1 px-4 py-2.5 rounded-xl bg-rose-500 text-white text-sm font-semibold hover:bg-rose-600 transition-colors">
-                        Add Admin
+                        <?= __('user_btn_add') ?>
                     </button>
                 </div>
             </form>
@@ -446,7 +447,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md relative">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                <h3 class="font-bold text-gray-800">Edit User</h3>
+                <h3 class="font-bold text-gray-800"><?= __('user_edit_title') ?></h3>
                 <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
@@ -454,18 +455,18 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <form id="editAdminForm" class="px-6 py-5 space-y-4">
                 <input type="hidden" name="user_id" id="editUserId">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Name</label>
-                    <input type="text" name="name" id="editName" required placeholder="Full name"
+                    <label class="block text-sm font-semibold text-gray-700 mb-1"><?= __('user_label_name') ?></label>
+                    <input type="text" name="name" id="editName" required placeholder="<?= __('user_ph_name') ?>"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-                    <input type="email" name="email" id="editEmail" required placeholder="admin@example.com"
+                    <label class="block text-sm font-semibold text-gray-700 mb-1"><?= __('user_label_email') ?></label>
+                    <input type="email" name="email" id="editEmail" required placeholder="<?= __('user_ph_email') ?>"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Password <span class="font-normal text-gray-400">(leave blank to keep current)</span></label>
-                    <input type="password" name="password" id="editPassword" minlength="6" placeholder="Min. 6 characters"
+                    <label class="block text-sm font-semibold text-gray-700 mb-1"><?= __('user_label_password') ?> <span class="font-normal text-gray-400">(<?= __('user_hint_blank') ?>)</span></label>
+                    <input type="password" name="password" id="editPassword" minlength="6" placeholder="<?= __('user_ph_password') ?>"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
                 </div>
                 <div id="editAdminError" class="text-red-500 text-sm hidden"></div>
@@ -476,7 +477,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     </button>
                     <button type="submit" id="editAdminBtn"
                         class="flex-1 px-4 py-2.5 rounded-xl bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors">
-                        Save Changes
+                        <?= __('user_btn_save') ?>
                     </button>
                 </div>
             </form>
@@ -486,8 +487,8 @@ require_once __DIR__ . '/../includes/admin_header.php';
 
 <script>
 function toggleRole(userId, newRole) {
-    const label = newRole === 'admin' ? 'an Admin' : 'a Customer';
-    if (!confirm(`Make this user ${label}?`)) return;
+    const confirmMsg = newRole === 'admin' ? '<?= __('user_confirm_admin') ?>' : '<?= __('user_confirm_customer') ?>';
+    if (!confirm(confirmMsg)) return;
     fetch('/sweetheaven/admin/user.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -497,7 +498,7 @@ function toggleRole(userId, newRole) {
 }
 
 function deleteUser(userId, name) {
-    if (!confirm(`Delete user "${name}"? This action cannot be undone.`)) return;
+    if (!confirm('<?= __('user_confirm_delete') ?>'.replace('{name}', name))) return;
     fetch('/sweetheaven/admin/user.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -511,8 +512,8 @@ function deleteUser(userId, name) {
 
 /* ---- Toggle User Status ---- */
 function toggleStatus(userId, newStatus, selectEl) {
-    const label = newStatus === 'active' ? 'Activate' : 'Deactivate';
-    if (!confirm(`${label} this user?`)) {
+    const confirmMsg = newStatus === 'active' ? '<?= __('user_confirm_activate') ?>' : '<?= __('user_confirm_deactivate') ?>';
+    if (!confirm(confirmMsg)) {
         selectEl.value = newStatus === 'active' ? 'inactive' : 'active';
         return;
     }
@@ -529,7 +530,7 @@ function toggleStatus(userId, newStatus, selectEl) {
             selectEl.value = newStatus === 'active' ? 'inactive' : 'active';
         }
     }).catch(() => {
-        alert('Request failed. Please try again.');
+        alert('<?= __('user_error_request') ?>');
         selectEl.value = newStatus === 'active' ? 'inactive' : 'active';
     });
 }
@@ -555,7 +556,7 @@ document.getElementById('editAdminForm').addEventListener('submit', function(e) 
     const form = new FormData(this);
     form.append('ajax_edit_admin', '1');
 
-    btn.textContent = 'Saving...';
+    btn.textContent = '<?= __('user_btn_saving') ?>';
     btn.disabled = true;
 
     fetch('/sweetheaven/admin/user.php', {
@@ -574,11 +575,11 @@ document.getElementById('editAdminForm').addEventListener('submit', function(e) 
         }
     })
     .catch(() => {
-        errDiv.textContent = 'Something went wrong. Please try again.';
+        errDiv.textContent = '<?= __('user_error_generic') ?>';
         errDiv.classList.remove('hidden');
     })
     .finally(() => {
-        btn.textContent = 'Save Changes';
+        btn.textContent = '<?= __('user_btn_save') ?>';
         btn.disabled = false;
     });
 });
@@ -601,7 +602,7 @@ document.getElementById('addAdminForm').addEventListener('submit', function(e) {
     const form = new FormData(this);
     form.append('ajax_add_admin', '1');
 
-    btn.textContent = 'Adding...';
+    btn.textContent = '<?= __('user_btn_adding') ?>';
     btn.disabled = true;
 
     fetch('/sweetheaven/admin/user.php', {
@@ -620,11 +621,11 @@ document.getElementById('addAdminForm').addEventListener('submit', function(e) {
         }
     })
     .catch(() => {
-        errDiv.textContent = 'Something went wrong. Please try again.';
+        errDiv.textContent = '<?= __('user_error_generic') ?>';
         errDiv.classList.remove('hidden');
     })
     .finally(() => {
-        btn.textContent = 'Add Admin';
+        btn.textContent = '<?= __('user_btn_add') ?>';
         btn.disabled = false;
     });
 });

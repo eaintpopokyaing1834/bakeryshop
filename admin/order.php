@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../middleware/admin_check.php';
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../includes/lang.php';
 
 $db = getDB();
 $message = $error = '';
@@ -40,15 +41,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_status'])) {
         if ($order && $order['status'] !== $newStatus) {
             // Build a friendly notification message with emoji
             $statusLabels = [
-                'pending'    => 'is pending review ⏳',
-                'processing' => 'is confirmed and being processed 🛠️',
-                'shipped'    => 'has been shipped 🚚',
-                'delivered'  => 'has been delivered ✅',
-                'cancelled'  => 'has been cancelled ❌',
+                'pending'    => __('order_notif_pending'),
+                'processing' => __('order_notif_confirmed'),
+                'shipped'    => __('order_notif_shipped'),
+                'delivered'  => __('order_notif_delivered'),
+                'cancelled'  => __('order_notif_cancelled'),
             ];
             $label   = $statusLabels[$newStatus] ?? "status changed to $newStatus";
             $orderNo = '#' . str_pad($orderId, 4, '0', STR_PAD_LEFT);
-            $message = "Your order $orderNo $label. Thank you for shopping with Sweet Heaven! 🍰";
+            $message = sprintf(__('order_notif_msg'), $orderNo, $label);
 
             $db->prepare("
                 INSERT INTO notifications (user_id, order_id, type, message, is_seen)
@@ -105,7 +106,7 @@ foreach ($params as $i => $val) {
 $stmt->execute();
 $orders = $stmt->fetchAll();
 
-$pageTitle = 'Order Management';
+$pageTitle = __('order_page_title');
 require_once __DIR__ . '/../includes/admin_header.php';
 
 $statusColors = [
@@ -124,16 +125,16 @@ $statusColors = [
             <a href="?status=<?= $s ?>&search=<?= urlencode($search) ?>"
                class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors
                <?= $statusFilter === $s ? 'bg-rose-500 text-white shadow-md shadow-rose-100' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>">
-               <?= ucfirst($s) ?>
+               <?= $s === 'all' ? __('admin_all') : ucfirst(__("status_$s")) ?>
             </a>
             <?php endforeach; ?>
         </div>
         <form method="GET" class="flex gap-2">
             <input type="hidden" name="status" value="<?= htmlspecialchars($statusFilter) ?>">
-            <input type="search" name="search" placeholder="Search order or customer..."
+            <input type="search" name="search" placeholder="<?= __('order_search_ph') ?>"
                 value="<?= htmlspecialchars($search) ?>"
                 class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 w-60">
-            <button class="bg-rose-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-rose-600">Search</button>
+            <button class="bg-rose-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-rose-600"><?= __('admin_search') ?></button>
         </form>
     </div>
 </div>
@@ -142,28 +143,28 @@ $statusColors = [
 <section class="px-4">
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-        <h3 class="font-bold text-gray-800">Orders <span class="text-gray-400 font-normal text-sm ml-2">(<?= $totalOrders ?> total)</span></h3>
+        <h3 class="font-bold text-gray-800"><?= __('admin_nav_orders') ?> <span class="text-gray-400 font-normal text-sm ml-2">(<?= $totalOrders ?> <?= __('admin_total') ?>)</span></h3>
     </div>
 
     <div class="overflow-x-auto">
         <table class="w-full">
             <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
                 <tr>
-                    <th class="px-6 py-4 text-left">Order ID</th>
-                    <th class="px-6 py-4 text-left">Customer</th>
-                    <th class="px-6 py-4 text-left">Total</th>
-                    <th class="px-6 py-4 text-left">Shipping</th>
-                    <th class="px-6 py-4 text-left">Payment</th>
-                    <th class="px-6 py-4 text-left">Status</th>
-                    <th class="px-6 py-4 text-left">Date</th>
-                    <th class="px-6 py-4 text-left">Actions</th>
+                    <th class="px-6 py-4 text-left"><?= __('admin_order_id') ?></th>
+                    <th class="px-6 py-4 text-left"><?= __('admin_customer') ?></th>
+                    <th class="px-6 py-4 text-left"><?= __('admin_amount') ?></th>
+                    <th class="px-6 py-4 text-left"><?= __('order_shipping') ?></th>
+                    <th class="px-6 py-4 text-left"><?= __('order_payment') ?></th>
+                    <th class="px-6 py-4 text-left"><?= __('admin_status') ?></th>
+                    <th class="px-6 py-4 text-left"><?= __('admin_date') ?></th>
+                    <th class="px-6 py-4 text-left"><?= __('admin_actions') ?></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50" id="ordersTableBody">
             <?php if (empty($orders)): ?>
                 <tr><td colspan="8" class="px-6 py-16 text-center text-gray-400">
                     <p class="text-4xl mb-3">📋</p>
-                    No orders found
+                    <?= __('order_no_orders') ?>
                 </td></tr>
             <?php else: ?>
             <?php foreach ($orders as $order): ?>
@@ -185,16 +186,22 @@ $statusColors = [
                         </div>
                     </div>
                 </td>
-                <td class="px-6 py-4 font-semibold text-gray-700 text-sm"><?= number_format($order['total_amount']) ?> MMK</td>
-                <td class="px-6 py-4 text-sm text-gray-600 capitalize"><?= $order['shipping_method'] ?></td>
+                <td class="px-6 py-4 font-semibold text-gray-700 text-sm"><?= number_format($order['total_amount']) ?> <?= __('admin_mmk') ?></td>
+                <td class="px-6 py-4 text-sm text-gray-600 capitalize"><?= match($order['shipping_method']) {
+                    'standard' => __('order_ship_standard'),
+                    'express'  => __('order_ship_express'),
+                    'pickup'   => __('order_ship_pickup'),
+                    'free'     => __('order_ship_free'),
+                    default    => ucfirst($order['shipping_method']),
+                } ?></td>
                 <td class="px-6 py-4 text-sm">
-                    <p class="text-gray-600"><?= htmlspecialchars($order['payment_name'] ?? 'N/A') ?></p>
+                    <p class="text-gray-600"><?= htmlspecialchars($order['payment_name'] ?? __('admin_n_a')) ?></p>
                     <?php if ($order['pay_status']): ?>
                     <span class="text-xs font-semibold px-2 py-0.5 rounded-full inline-block mt-1
                         <?= $order['pay_status'] === 'approved' ? 'bg-green-100 text-green-700' : '' ?>
                         <?= $order['pay_status'] === 'pending' ? 'bg-amber-100 text-amber-700' : '' ?>
                         <?= $order['pay_status'] === 'rejected' ? 'bg-red-100 text-red-700' : '' ?>">
-                        <?= ucfirst($order['pay_status']) ?>
+                        <?= ucfirst(__("status_{$order['pay_status']}")) ?>
                     </span>
                     <?php endif; ?>
                 </td>
@@ -203,7 +210,7 @@ $statusColors = [
                         class="text-xs font-semibold px-3 py-1.5 rounded-full border cursor-pointer focus:outline-none focus:ring-2 focus:ring-rose-300 transition-colors
                         <?= $statusColors[$order['status']] ?? 'bg-gray-100 text-gray-600' ?>">
                         <?php foreach (['pending','processing','shipped','delivered','cancelled'] as $s): ?>
-                        <option value="<?= $s ?>" <?= $order['status'] === $s ? 'selected' : '' ?>><?= ucfirst($s) ?></option>
+                        <option value="<?= $s ?>" <?= $order['status'] === $s ? 'selected' : '' ?>><?= ucfirst(__("status_$s")) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </td>
@@ -212,14 +219,14 @@ $statusColors = [
                     <button onclick="toggleItems(<?= $order['id'] ?>)"
                         class="text-sm text-rose-500 hover:text-rose-600 font-medium flex items-center gap-1">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                        Items
+                        <?= __('order_items') ?>
                     </button>
                 </td>
             </tr>
             <tr id="items-<?= $order['id'] ?>" class="hidden bg-rose-50/30">
                 <td colspan="8" class="px-8 py-4">
                     <div class="order-items-content" data-order-id="<?= $order['id'] ?>">
-                        <p class="text-gray-400 text-sm italic">Loading items...</p>
+                        <p class="text-gray-400 text-sm italic"><?= __('order_loading_items') ?></p>
                     </div>
                     <?php if ($order['shipping_address']): ?>
                     <p class="text-xs text-gray-500 mt-2">
@@ -233,12 +240,12 @@ $statusColors = [
                     
                     <?php if ($order['payment_name']): ?>
                     <div class="mt-3 pt-3 border-t border-stone-200">
-                        <p class="text-xs font-semibold text-stone-600 mb-2">💳 Payment Details</p>
-                        <p class="text-xs text-gray-500">Method: <?= htmlspecialchars($order['payment_name']) ?></p>
+                        <p class="text-xs font-semibold text-stone-600 mb-2">💳 <?= __('order_payment_details') ?></p>
+                        <p class="text-xs text-gray-500"><?= __('order_method') ?> <?= htmlspecialchars($order['payment_name']) ?></p>
                         
                         <?php if (!empty($order['screenshot'])): ?>
                         <div class="mt-2">
-                            <p class="text-xs text-gray-500 mb-1">Receipt screenshot:</p>
+                            <p class="text-xs text-gray-500 mb-1"><?= __('order_receipt_screenshot') ?></p>
                             <a href="/sweetheaven/<?= htmlspecialchars($order['screenshot']) ?>" target="_blank">
                                 <img src="/sweetheaven/<?= htmlspecialchars($order['screenshot']) ?>"
                                      class="w-24 h-24 object-cover rounded-lg border border-stone-200">
@@ -250,18 +257,18 @@ $statusColors = [
                             <?php if ($order['pay_status'] === 'pending' && !empty($order['screenshot'])): ?>
                             <button onclick="updatePayment(<?= $order['id'] ?>, 'approve')"
                                 class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors">
-                                Approve Payment
+                                <?= __('order_approve_payment') ?>
                             </button>
                             <button onclick="updatePayment(<?= $order['id'] ?>, 'reject')"
                                 class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors">
-                                Reject Payment
+                                <?= __('order_reject_payment') ?>
                             </button>
                             <?php elseif ($order['pay_status'] === 'approved'): ?>
-                            <span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-green-100 text-green-700">Payment Approved ✅</span>
+                            <span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-green-100 text-green-700"><?= __('order_payment_approved') ?></span>
                             <?php elseif ($order['pay_status'] === 'rejected'): ?>
-                            <span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-100 text-red-700">Payment Rejected ❌</span>
+                            <span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-100 text-red-700"><?= __('order_payment_rejected') ?></span>
                             <?php else: ?>
-                            <span class="text-xs text-gray-400 italic">Awaiting receipt upload</span>
+                            <span class="text-xs text-gray-400 italic"><?= __('order_awaiting_receipt') ?></span>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -275,16 +282,16 @@ $statusColors = [
     </div>
     <?php if ($totalPages > 1): ?>
     <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-        <p class="text-sm text-gray-400">Page <?= $page ?> of <?= $totalPages ?></p>
+        <p class="text-sm text-gray-400"><?= sprintf(__('admin_page_of'), $page, $totalPages) ?></p>
         <div class="flex items-center gap-1">
             <?php if ($page > 1): ?>
-            <a href="?status=<?= urlencode($statusFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← Prev</a>
+            <a href="?status=<?= urlencode($statusFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← <?= __('admin_prev') ?></a>
             <?php endif; ?>
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
             <a href="?status=<?= urlencode($statusFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors <?= $i === $page ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>"><?= $i ?></a>
             <?php endfor; ?>
             <?php if ($page < $totalPages): ?>
-            <a href="?status=<?= urlencode($statusFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">Next →</a>
+            <a href="?status=<?= urlencode($statusFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"><?= __('admin_next') ?> →</a>
             <?php endif; ?>
         </div>
     </div>
@@ -302,13 +309,13 @@ function updatePayment(orderId, action) {
     .then(r => r.json())
     .then(data => {
         if (data.success) {
-            showToast('Payment ' + action + 'd!');
+            showToast(action === 'approve' ? '<?= __("order_toast_approved") ?>' : '<?= __("order_toast_rejected") ?>');
             document.getElementById('paymentActions-' + orderId).innerHTML =
-                `<span class="text-xs font-semibold px-3 py-1.5 rounded-lg ${action === 'approve' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">Payment ${action === 'approve' ? 'Approved' : 'Rejected'} ${action === 'approve' ? '✅' : '❌'}</span>`;
+                `<span class="text-xs font-semibold px-3 py-1.5 rounded-lg ${action === 'approve' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${action === 'approve' ? '<?= __("order_payment_approved") ?>' : '<?= __("order_payment_rejected") ?>'}</span>`;
             // Update the badge in the main table too
             const row = document.querySelector(`#order-row-${orderId} td:nth-child(5) span`);
             if (row) {
-                row.textContent = action === 'approve' ? 'Approved' : 'Rejected';
+                row.textContent = action === 'approve' ? '<?= __("status_approved") ?>' : '<?= __("status_rejected") ?>';
                 row.className = `text-xs font-semibold px-2 py-0.5 rounded-full inline-block mt-1 ${action === 'approve' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
             }
         }
@@ -335,7 +342,7 @@ function updateStatus(orderId, newStatus, selectEl) {
             selectEl.className = selectEl.className.replace(/bg-\w+-100 text-\w+-700 border-\w+-200/g, '');
             selectEl.className += ' ' + (colors[newStatus] || 'bg-gray-100 text-gray-600');
             selectEl.dataset.original = newStatus;
-            showToast('Order status updated!');
+            showToast('<?= __("order_toast_updated") ?>');
         }
     });
 }
@@ -349,12 +356,12 @@ function toggleItems(orderId) {
         fetch(`/sweetheaven/api/order_items.php?order_id=${orderId}`)
             .then(r => r.json())
             .then(items => {
-                if (!items.length) { content.innerHTML = '<p class="text-gray-400 text-sm">No items</p>'; return; }
+                if (!items.length) { content.innerHTML = '<p class="text-gray-400 text-sm"><?= __("order_no_items") ?></p>'; return; }
                 content.innerHTML = `<div class="flex flex-wrap gap-3">${items.map(i =>
                     `<div class="bg-white rounded-xl px-4 py-2 border border-stone-100 text-sm">
                         <span class="font-semibold text-gray-700">${i.product_name}</span>
                         <span class="text-gray-400 ml-2">x${i.quantity}</span>
-                        <span class="text-rose-500 font-bold ml-2">${Number(i.price * i.quantity).toLocaleString()} MMK</span>
+                        <span class="text-rose-500 font-bold ml-2">${Number(i.price * i.quantity).toLocaleString()} <?= __('admin_mmk') ?></span>
                     </div>`
                 ).join('')}</div>`;
             });

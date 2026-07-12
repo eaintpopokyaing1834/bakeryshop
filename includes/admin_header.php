@@ -4,6 +4,7 @@ if (session_status() === PHP_SESSION_NONE)
     session_start();
 $currentPage = basename($_SERVER['PHP_SELF'], '.php');
 
+require_once __DIR__ . '/lang.php';
 require_once __DIR__ . '/../config/db.php';
 $db = getDB();
 $newOrdersCount = (int) $db->query("SELECT COUNT(*) FROM notifications WHERE (type='new_order' OR type='customize_request') AND is_seen=0")->fetchColumn();
@@ -53,6 +54,80 @@ $pendingReviewsCount = (int) $db->query("SELECT COUNT(*) FROM customer_reviews W
             background: #475569;
             border-radius: 3px;
         }
+
+        /* Language dropdown */
+        .lang-dropdown-wrap {
+            position: relative;
+        }
+
+        .lang-globe-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid rgba(244, 63, 94, .18);
+            background: rgba(255, 255, 255, .7);
+            color: #78716c;
+            cursor: pointer;
+            transition: background .2s, border-color .2s, color .2s;
+        }
+
+        .lang-globe-btn:hover {
+            background: rgba(255, 255, 255, .95);
+            border-color: rgba(244, 63, 94, .4);
+            color: #e11d48;
+        }
+
+        .lang-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            min-width: 120px;
+            background: #fff;
+            border: 1px solid #f1e3e6;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(180, 60, 80, .12);
+            overflow: hidden;
+            z-index: 200;
+        }
+
+        .lang-menu.open {
+            display: block;
+        }
+
+        .lang-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 9px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #57534e;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            transition: background .15s, color .15s;
+            font-family: inherit;
+        }
+
+        .lang-menu-item:hover {
+            background: #fff0f3;
+            color: #e11d48;
+        }
+
+        .lang-menu-item.active {
+            color: #e11d48;
+            font-weight: 700;
+        }
+
+        .lang-menu-item+.lang-menu-item {
+            border-top: 1px solid #fce7eb;
+        }
     </style>
 </head>
 
@@ -83,12 +158,33 @@ $pendingReviewsCount = (int) $db->query("SELECT COUNT(*) FROM customer_reviews W
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <a href="">
-                    <div
-                        class="w-9 h-9 bg-rose-500/20 rounded-full flex items-center justify-center text-rose-400 font-bold text-sm shrink-0">
-                        <?= strtoupper(substr($_SESSION['name'] ?? 'A', 0, 1)) ?>
+                <!-- Language Selector -->
+                <form method="POST" action="" id="adminLangForm" style="display:none">
+                    <input type="hidden" name="redirect" value="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>">
+                    <input type="hidden" name="set_lang" id="adminLangInput" value="<?= htmlspecialchars(currentLang()) ?>">
+                </form>
+
+                <div class="lang-dropdown-wrap" id="adminLangDropdownWrap">
+                    <button type="button" class="lang-globe-btn" id="adminLangGlobeBtn"
+                        onclick="toggleAdminLangMenu()" aria-haspopup="true" aria-expanded="false"
+                        title="Select language">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                                d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                        </svg>
+                    </button>
+
+                    <div class="lang-menu" id="adminLangMenu" role="menu">
+                        <button type="button" class="lang-menu-item <?= currentLang() === 'en' ? 'active' : '' ?>"
+                            onclick="setAdminLang('en')" role="menuitem">
+                            <span>🌐</span> ENG
+                        </button>
+                        <button type="button" class="lang-menu-item <?= currentLang() === 'my' ? 'active' : '' ?>"
+                            onclick="setAdminLang('my')" role="menuitem">
+                            <span>🌐</span> မြန်မာ
+                        </button>
                     </div>
-                </a>
+                </div>
 
                 <!-- Notification Bell -->
                 <div class="relative" id="notifWrapper">
@@ -110,12 +206,12 @@ $pendingReviewsCount = (int) $db->query("SELECT COUNT(*) FROM customer_reviews W
                     <div id="notifDropdown"
                         class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-stone-100 z-50 overflow-hidden">
                         <div class="flex items-center justify-between px-4 py-3 border-b border-stone-100">
-                            <h4 class="font-bold text-stone-800 text-sm">Notifications</h4>
+                            <h4 class="font-bold text-stone-800 text-sm"><?= __('admin_notifications') ?></h4>
                             <button onclick="markAllSeen()"
-                                class="text-xs text-rose-500 hover:text-rose-600 font-semibold">Mark all read</button>
+                                class="text-xs text-rose-500 hover:text-rose-600 font-semibold"><?= __('admin_mark_all_read') ?></button>
                         </div>
                         <div id="notifList" class="max-h-80 overflow-y-auto">
-                            <p class="text-center text-stone-400 text-sm py-6">Loading...</p>
+                            <p class="text-center text-stone-400 text-sm py-6"><?= __('admin_loading') ?></p>
                         </div>
                     </div>
                 </div>

@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../middleware/admin_check.php';
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../includes/lang.php';
 
 $db = getDB();
 
@@ -46,7 +47,7 @@ $statusCounts = $db->query("
 ")->fetchAll();
 $statusLabels = $statusData = [];
 foreach ($statusCounts as $s) {
-    $statusLabels[] = ucfirst($s['status']);
+    $statusLabels[] = ucfirst(__("status_{$s['status']}"));
     $statusData[]   = (int)$s['cnt'];
 }
 
@@ -68,7 +69,7 @@ $lowStockProducts = $db->query("
     ORDER BY p.stock ASC LIMIT 5
 ")->fetchAll();
 
-$pageTitle = 'Dashboard';
+$pageTitle = __('admin_nav_dashboard');
 require_once __DIR__ . '/../includes/admin_header.php';
 
 $statusColors = [
@@ -88,10 +89,10 @@ $statusColors = [
             <div class="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center">
                 <svg class="w-6 h-6 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
-            <span class="text-green-600 bg-green-50 text-xs font-semibold px-2 py-1 rounded-full">Revenue</span>
+            <span class="text-green-600 bg-green-50 text-xs font-semibold px-2 py-1 rounded-full"><?= __('admin_revenue') ?></span>
         </div>
-        <p class="text-2xl font-bold text-gray-800"><?= number_format($totalRevenue) ?> MMK</p>
-        <p class="text-sm text-gray-400 mt-1">Total Sales Revenue</p>
+        <p class="text-2xl font-bold text-gray-800"><?= number_format($totalRevenue) ?> <?= __('admin_mmk') ?></p>
+        <p class="text-sm text-gray-400 mt-1"><?= __('admin_total_sales_revenue') ?></p>
     </div>
 
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
@@ -99,10 +100,10 @@ $statusColors = [
             <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center">
                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
             </div>
-            <span class="text-amber-600 bg-amber-50 text-xs font-semibold px-2 py-1 rounded-full"><?= $pendingOrders ?> Pending</span>
+            <span class="text-amber-600 bg-amber-50 text-xs font-semibold px-2 py-1 rounded-full"><?= $pendingOrders ?> <?= __('admin_pending') ?></span>
         </div>
         <p class="text-2xl font-bold text-gray-800"><?= $totalOrders ?></p>
-        <p class="text-sm text-gray-400 mt-1">Total Orders</p>
+        <p class="text-sm text-gray-400 mt-1"><?= __('admin_total_orders') ?></p>
     </div>
 
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
@@ -112,7 +113,7 @@ $statusColors = [
             </div>
         </div>
         <p class="text-2xl font-bold text-gray-800"><?= $totalUsers ?></p>
-        <p class="text-sm text-gray-400 mt-1">Registered Customers</p>
+        <p class="text-sm text-gray-400 mt-1"><?= __('admin_registered_customers') ?></p>
     </div>
 
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow <?= $lowStock > 0 ? 'border-l-4 border-l-red-500' : '' ?>">
@@ -121,11 +122,11 @@ $statusColors = [
                 <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
             </div>
             <?php if ($lowStock > 0): ?>
-            <span class="text-red-600 bg-red-50 text-xs font-semibold px-2 py-1 rounded-full animate-pulse">Alert</span>
+            <span class="text-red-600 bg-red-50 text-xs font-semibold px-2 py-1 rounded-full animate-pulse"><?= __('admin_alert') ?></span>
             <?php endif; ?>
         </div>
         <p class="text-2xl font-bold text-gray-800"><?= $lowStock ?></p>
-        <p class="text-sm text-gray-400 mt-1">Low Stock Products</p>
+        <p class="text-sm text-gray-400 mt-1"><?= __('admin_low_stock_products') ?></p>
     </div>
 </div>
 
@@ -139,7 +140,7 @@ $statusColors = [
             </div>
         </div>
         <p class="text-2xl font-bold text-gray-800"><?= $totalProducts ?></p>
-        <p class="text-sm text-gray-400 mt-1">Total Products</p>
+        <p class="text-sm text-gray-400 mt-1"><?= __('admin_total_products') ?></p>
     </div>
 
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
@@ -149,7 +150,7 @@ $statusColors = [
             </div>
         </div>
         <p class="text-2xl font-bold text-gray-800"><?= $pendingOrders ?></p>
-        <p class="text-sm text-gray-400 mt-1">Pending Orders</p>
+        <p class="text-sm text-gray-400 mt-1"><?= __('admin_pending_orders') ?></p>
     </div>
 
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
@@ -159,7 +160,7 @@ $statusColors = [
             </div>
         </div>
         <p class="text-2xl font-bold text-gray-800"><?= $completedOrders ?></p>
-        <p class="text-sm text-gray-400 mt-1">Completed Orders</p>
+        <p class="text-sm text-gray-400 mt-1"><?= __('admin_completed_orders') ?></p>
     </div>
 
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
@@ -169,7 +170,7 @@ $statusColors = [
             </div>
         </div>
         <p class="text-2xl font-bold text-gray-800"><?= $totalUsers ?></p>
-        <p class="text-sm text-gray-400 mt-1">Total Customers</p>
+        <p class="text-sm text-gray-400 mt-1"><?= __('admin_total_customers') ?></p>
     </div>
 </div>
 
@@ -180,8 +181,8 @@ $statusColors = [
     <div class="xl:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
         <div class="flex items-center justify-between mb-6">
             <div>
-                <h3 class="text-lg font-bold text-gray-800">Monthly Revenue</h3>
-                <p class="text-sm text-gray-400"><?= date('Y') ?> overview</p>
+                <h3 class="text-lg font-bold text-gray-800"><?= __('admin_monthly_revenue') ?></h3>
+                <p class="text-sm text-gray-400"><?= sprintf(__('admin_overview'), date('Y')) ?></p>
             </div>
         </div>
         <div id="revenueChart"></div>
@@ -189,10 +190,10 @@ $statusColors = [
 
     <!-- Status Donut -->
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 class="text-lg font-bold text-gray-800 mb-1">Orders by Status</h3>
-        <p class="text-sm text-gray-400 mb-6">Current distribution</p>
+        <h3 class="text-lg font-bold text-gray-800 mb-1"><?= __('admin_orders_by_status') ?></h3>
+        <p class="text-sm text-gray-400 mb-6"><?= __('admin_current_distribution') ?></p>
         <?php if (empty($statusData)): ?>
-            <div class="h-48 flex items-center justify-center text-gray-400 text-sm">No orders yet</div>
+            <div class="h-48 flex items-center justify-center text-gray-400 text-sm"><?= __('admin_no_orders_yet') ?></div>
         <?php else: ?>
             <div id="statusChart"></div>
         <?php endif; ?>
@@ -204,12 +205,12 @@ $statusColors = [
     <div class="xl:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
         <div class="flex items-center justify-between mb-6">
             <div>
-                <h3 class="text-lg font-bold text-gray-800">Best-Selling Products</h3>
-                <p class="text-sm text-gray-400">Top 5 by quantity sold</p>
+                <h3 class="text-lg font-bold text-gray-800"><?= __('admin_best_selling') ?></h3>
+                <p class="text-sm text-gray-400"><?= __('admin_top_5_by_qty') ?></p>
             </div>
         </div>
         <?php if (empty($bestSellingProducts)): ?>
-            <div class="h-48 flex items-center justify-center text-gray-400 text-sm">No sales data yet</div>
+            <div class="h-48 flex items-center justify-center text-gray-400 text-sm"><?= __('admin_no_sales_data') ?></div>
         <?php else: ?>
             <div id="bestSellingChart"></div>
         <?php endif; ?>
@@ -218,12 +219,12 @@ $statusColors = [
     <!-- Top Product Quick Stats -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-6 py-5 border-b border-gray-100">
-            <h3 class="text-lg font-bold text-gray-800">Top Products</h3>
-            <p class="text-sm text-gray-400">By units sold</p>
+            <h3 class="text-lg font-bold text-gray-800"><?= __('admin_top_products') ?></h3>
+            <p class="text-sm text-gray-400"><?= __('admin_by_units_sold') ?></p>
         </div>
         <div class="p-4 space-y-3">
             <?php if (empty($bestSellingProducts)): ?>
-            <div class="py-8 text-center text-gray-400 text-sm">No sales data yet</div>
+            <div class="py-8 text-center text-gray-400 text-sm"><?= __('admin_no_sales_data') ?></div>
             <?php else: ?>
             <?php foreach ($bestSellingProducts as $i => $product): ?>
             <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
@@ -232,7 +233,7 @@ $statusColors = [
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-semibold text-gray-700 truncate"><?= htmlspecialchars($product['name']) ?></p>
-                    <p class="text-xs text-gray-400"><?= $product['total_sold'] ?> sold</p>
+                    <p class="text-xs text-gray-400"><?= sprintf(__('admin_sold'), $product['total_sold']) ?></p>
                 </div>
             </div>
             <?php endforeach; ?>
@@ -247,23 +248,23 @@ $statusColors = [
     <!-- Recent Orders -->
     <div class="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-            <h3 class="text-lg font-bold text-gray-800">Recent Orders</h3>
-            <a href="/sweetheaven/admin/order.php" class="text-rose-500 text-sm font-medium hover:underline">View all →</a>
+            <h3 class="text-lg font-bold text-gray-800"><?= __('admin_recent_orders') ?></h3>
+            <a href="/sweetheaven/admin/order.php" class="text-rose-500 text-sm font-medium hover:underline"><?= __('admin_view_all') ?></a>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
                     <tr>
-                        <th class="px-6 py-3 text-left">Order ID</th>
-                        <th class="px-6 py-3 text-left">Customer</th>
-                        <th class="px-6 py-3 text-left">Amount</th>
-                        <th class="px-6 py-3 text-left">Status</th>
-                        <th class="px-6 py-3 text-left">Date</th>
+                        <th class="px-6 py-3 text-left"><?= __('admin_order_id') ?></th>
+                        <th class="px-6 py-3 text-left"><?= __('admin_customer') ?></th>
+                        <th class="px-6 py-3 text-left"><?= __('admin_amount') ?></th>
+                        <th class="px-6 py-3 text-left"><?= __('admin_status') ?></th>
+                        <th class="px-6 py-3 text-left"><?= __('admin_date') ?></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                     <?php if (empty($recentOrders)): ?>
-                    <tr><td colspan="5" class="px-6 py-10 text-center text-gray-400">No orders yet</td></tr>
+                    <tr><td colspan="5" class="px-6 py-10 text-center text-gray-400"><?= __('admin_no_orders_yet') ?></td></tr>
                     <?php else: ?>
                     <?php foreach ($recentOrders as $order): ?>
                     <tr class="hover:bg-gray-50 transition-colors">
@@ -276,10 +277,10 @@ $statusColors = [
                                 <span class="text-sm font-medium text-gray-700"><?= htmlspecialchars($order['name']) ?></span>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-sm font-semibold text-gray-700"><?= number_format($order['total_amount']) ?> MMK</td>
+                        <td class="px-6 py-4 text-sm font-semibold text-gray-700"><?= number_format($order['total_amount']) ?> <?= __('admin_mmk') ?></td>
                         <td class="px-6 py-4">
                             <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold <?= $statusColors[$order['status']] ?? 'bg-gray-100 text-gray-600' ?>">
-                                <?= ucfirst($order['status']) ?>
+                                <?= ucfirst(__("status_{$order['status']}")) ?>
                             </span>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-400"><?= date('M j', strtotime($order['order_date'])) ?></td>
@@ -294,14 +295,14 @@ $statusColors = [
     <!-- Low Stock Alert -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-            <h3 class="text-lg font-bold text-gray-800">⚠️ Low Stock</h3>
-            <a href="/sweetheaven/admin/product.php" class="text-rose-500 text-sm font-medium hover:underline">Manage →</a>
+            <h3 class="text-lg font-bold text-gray-800"><?= __('admin_low_stock') ?></h3>
+            <a href="/sweetheaven/admin/product.php" class="text-rose-500 text-sm font-medium hover:underline"><?= __('admin_manage') ?></a>
         </div>
         <div class="p-4 space-y-3">
             <?php if (empty($lowStockProducts)): ?>
             <div class="py-8 text-center text-gray-400 text-sm">
                 <p class="text-3xl mb-2">✅</p>
-                All products are well stocked!
+                <?= __('admin_all_stocked') ?>
             </div>
             <?php else: ?>
             <?php foreach ($lowStockProducts as $product): ?>
@@ -311,7 +312,7 @@ $statusColors = [
                     <p class="text-xs text-gray-400"><?= htmlspecialchars($product['category']) ?></p>
                 </div>
                 <span class="<?= $product['stock'] == 0 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700' ?> text-xs font-bold px-2.5 py-1 rounded-full">
-                    <?= $product['stock'] ?> left
+                    <?= sprintf(__('admin_left'), $product['stock']) ?>
                 </span>
             </div>
             <?php endforeach; ?>
@@ -321,14 +322,14 @@ $statusColors = [
     <!-- Customer Reviews -->
     <div class="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-            <h3 class="text-lg font-bold text-gray-800">⭐ Customer Reviews</h3>
-            <a href="/sweetheaven/admin/review.php" class="text-rose-500 text-sm font-medium hover:underline">Manage →</a>
+            <h3 class="text-lg font-bold text-gray-800"><?= __('admin_customer_reviews') ?></h3>
+            <a href="/sweetheaven/admin/review.php" class="text-rose-500 text-sm font-medium hover:underline"><?= __('admin_manage') ?></a>
         </div>
         <div class="p-5 grid md:grid-cols-2 gap-5">
             <?php if (empty($customerReviews)): ?>
                 <div class="md:col-span-2 text-center text-gray-400 py-8">
                     <p class="text-4xl mb-3">💬</p>
-                    <p class="text-sm">No approved reviews yet.</p>
+                    <p class="text-sm"><?= __('admin_no_approved_reviews') ?></p>
                 </div>
             <?php else: ?>
                 <?php foreach ($customerReviews as $r): ?>
@@ -354,14 +355,14 @@ $statusColors = [
 <script>
 const revenueData   = <?= json_encode(array_values($revenueData)) ?>;
 const monthLabels   = <?= json_encode($monthLabels) ?>;
-const statusLabels  = <?= json_encode($statusLabels ?: ['No Data']) ?>;
+const statusLabels  = <?= json_encode($statusLabels ?: [__('admin_no_sales_data')]) ?>;
 const statusData    = <?= json_encode($statusData ?: [1]) ?>;
 const bestLabels    = <?= json_encode($bestSellingLabels) ?>;
 const bestData      = <?= json_encode($bestSellingData) ?>;
 
 // Revenue Chart
 new ApexCharts(document.querySelector('#revenueChart'), {
-    series: [{ name: 'Revenue (MMK)', data: revenueData }],
+    series: [{ name: '<?= __('admin_revenue') ?> (<?= __('admin_mmk') ?>)', data: revenueData }],
     chart: { type: 'area', height: 280, toolbar: { show: false }, fontFamily: 'Poppins, sans-serif' },
     xaxis: { categories: monthLabels },
     yaxis: { labels: { formatter: v => (v/1000).toFixed(0) + 'K' } },
@@ -370,7 +371,7 @@ new ApexCharts(document.querySelector('#revenueChart'), {
     stroke: { curve: 'smooth', width: 3 },
     dataLabels: { enabled: false },
     grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
-    tooltip: { y: { formatter: v => v.toLocaleString() + ' MMK' } }
+    tooltip: { y: { formatter: v => v.toLocaleString() + ' <?= __('admin_mmk') ?>' } }
 }).render();
 
 // Status Donut Chart
@@ -389,7 +390,7 @@ if (document.querySelector('#statusChart')) {
 // Best-Selling Products Chart
 if (document.querySelector('#bestSellingChart') && bestLabels.length > 0) {
     new ApexCharts(document.querySelector('#bestSellingChart'), {
-        series: [{ name: 'Units Sold', data: bestData }],
+        series: [{ name: '<?= __('reports_units_sold') ?>', data: bestData }],
         chart: { type: 'bar', height: 280, toolbar: { show: false }, fontFamily: 'Poppins, sans-serif' },
         plotOptions: { bar: { horizontal: true, borderRadius: 4, dataLabels: { position: 'top' } } },
         xaxis: { categories: bestLabels },
@@ -397,7 +398,7 @@ if (document.querySelector('#bestSellingChart') && bestLabels.length > 0) {
         colors: ['#f43f5e'],
         dataLabels: { enabled: true, offsetX: 20, style: { fontSize: '12px', colors: ['#333'] } },
         grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
-        tooltip: { y: { formatter: v => v + ' units' } }
+        tooltip: { y: { formatter: v => v + ' <?= __('reports_units') ?>' } }
     }).render();
 }
 </script>

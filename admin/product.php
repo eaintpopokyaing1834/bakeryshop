@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../middleware/admin_check.php';
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../includes/lang.php';
 
 $db = getDB();
 $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
@@ -164,7 +165,7 @@ $products = $stmt->fetchAll();
 $categories = $db->query("SELECT * FROM categories ORDER BY name")->fetchAll();
 $discounts  = $db->query("SELECT * FROM discounts WHERE status=1 ORDER BY name")->fetchAll();
 
-$pageTitle = 'Product Management';
+$pageTitle = __('product_page_title');
 require_once __DIR__ . '/../includes/admin_header.php';
 ?>
 
@@ -180,12 +181,12 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <a href="?tab=products"
         class="px-6 py-2.5 rounded-xl font-semibold text-sm transition-colors
         <?= $activeTab === 'products' ? 'bg-rose-500 text-white shadow-md shadow-rose-100' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50' ?>">
-        📦 Products
+        📦 <?= __('product_tab_products') ?>
     </a>
     <a href="?tab=categories"
         class="px-6 py-2.5 rounded-xl font-semibold text-sm transition-colors
         <?= $activeTab === 'categories' ? 'bg-rose-500 text-white shadow-md shadow-rose-100' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50' ?>">
-        🏷️ Categories
+        🏷️ <?= __('product_tab_categories') ?>
     </a>
 </div>
 
@@ -194,7 +195,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 <?php if ($activeTab === 'products'): ?>
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden ">
         <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between ">
-            <h3 class="font-bold text-gray-800">All Products <span
+            <h3 class="font-bold text-gray-800"><?= __('product_all_products') ?> <span
                     class="text-gray-400 font-normal text-sm ml-2">(<?= $totalProducts ?> total)</span></h3>
             <?php if ($isAdmin): ?>
             <button onclick="openProductModal()"
@@ -202,7 +203,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                Add Product
+                <?= __('product_add') ?>
             </button>
             <?php endif; ?>
         </div>
@@ -210,12 +211,12 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <table class="w-full">
                 <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
                     <tr>
-                        <th class="px-6 py-4 text-left">Product</th>
-                        <th class="px-6 py-4 text-left">Category</th>
-                        <th class="px-6 py-4 text-left">Price</th>
-                        <th class="px-6 py-4 text-left">Discount</th>
-                        <th class="px-6 py-4 text-left">Stock</th>
-                        <th class="px-6 py-4 text-left">Actions</th>
+                        <th class="px-6 py-4 text-left"><?= __('product_col_product') ?></th>
+                        <th class="px-6 py-4 text-left"><?= __('product_col_category') ?></th>
+                        <th class="px-6 py-4 text-left"><?= __('product_col_price') ?></th>
+                        <th class="px-6 py-4 text-left"><?= __('product_col_discount') ?></th>
+                        <th class="px-6 py-4 text-left"><?= __('product_col_stock') ?></th>
+                        <th class="px-6 py-4 text-left"><?= __('admin_actions') ?></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -240,7 +241,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-600"><?= htmlspecialchars($p['category_name']) ?></td>
-                            <td class="px-6 py-4 font-bold text-gray-700 text-sm"><?= number_format($p['price']) ?> MMK</td>
+                            <td class="px-6 py-4 font-bold text-gray-700 text-sm"><?= number_format($p['price']) ?> <?= __('admin_mmk') ?></td>
                             <td class="px-6 py-4">
                                 <?php if ($p['discount_name']): ?>
                                     <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-700">
@@ -261,15 +262,15 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                 <div class="flex items-center gap-2">
                                     <button onclick="editProduct(<?= htmlspecialchars(json_encode($p)) ?>)"
                                         class="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1.5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-                                        Edit
+                                        <?= __('admin_edit') ?>
                                     </button>
                                     <button onclick="deleteProduct(<?= $p['id'] ?>, '<?= addslashes($p['name']) ?>')"
                                         class="text-red-600 hover:text-red-800 text-sm font-medium px-3 py-1.5 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
-                                        Delete
+                                        <?= __('admin_delete') ?>
                                     </button>
                                 </div>
                                 <?php else: ?>
-                                <span class="text-xs text-gray-400">View only</span>
+                                <span class="text-xs text-gray-400"><?= __('product_view_only') ?></span>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -279,16 +280,16 @@ require_once __DIR__ . '/../includes/admin_header.php';
         </div>
         <?php if ($totalPages > 1): ?>
         <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-            <p class="text-sm text-gray-400">Page <?= $page ?> of <?= $totalPages ?></p>
+            <p class="text-sm text-gray-400"><?= __('admin_page_of') ?> <?= $page ?> / <?= $totalPages ?></p>
             <div class="flex items-center gap-1">
                 <?php if ($page > 1): ?>
-                <a href="?tab=products&page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← Prev</a>
+                <a href="?tab=products&page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← <?= __('admin_prev') ?></a>
                 <?php endif; ?>
                 <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                 <a href="?tab=products&page=<?= $i ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors <?= $i === $page ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>"><?= $i ?></a>
                 <?php endfor; ?>
                 <?php if ($page < $totalPages): ?>
-                <a href="?tab=products&page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">Next →</a>
+                <a href="?tab=products&page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"><?= __('admin_next') ?> →</a>
                 <?php endif; ?>
             </div>
         </div>
@@ -298,7 +299,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 <?php else: // CATEGORIES TAB ?>
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h3 class="font-bold text-gray-800">All Categories <span
+            <h3 class="font-bold text-gray-800"><?= __('product_all_categories') ?> <span
                     class="text-gray-400 font-normal text-sm ml-2">(<?= count($categories) ?>)</span></h3>
             <?php if ($isAdmin): ?>
             <button onclick="openCategoryModal()"
@@ -306,7 +307,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                Add Category
+                <?= __('product_add_category') ?>
             </button>
             <?php endif; ?>
         </div>
@@ -314,10 +315,10 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <table class="w-full">
                 <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
                     <tr>
-                        <th class="px-6 py-4 text-left">ID</th>
-                        <th class="px-6 py-4 text-left">Name</th>
-                        <th class="px-6 py-4 text-left">Description</th>
-                        <th class="px-6 py-4 text-left">Actions</th>
+                        <th class="px-6 py-4 text-left"><?= __('product_col_id') ?></th>
+                        <th class="px-6 py-4 text-left"><?= __('product_col_name') ?></th>
+                        <th class="px-6 py-4 text-left"><?= __('product_label_desc') ?></th>
+                        <th class="px-6 py-4 text-left"><?= __('admin_actions') ?></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -332,12 +333,12 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                 <div class="flex items-center gap-2">
                                     <button
                                         onclick="editCategory(<?= $cat['id'] ?>, '<?= addslashes($cat['name']) ?>', '<?= addslashes($cat['description'] ?? '') ?>')"
-                                        class="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1.5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">Edit</button>
+                                        class="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1.5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"><?= __('admin_edit') ?></button>
                                     <button onclick="deleteCategory(<?= $cat['id'] ?>, '<?= addslashes($cat['name']) ?>')"
-                                        class="text-red-600 hover:text-red-800 text-sm font-medium px-3 py-1.5 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">Delete</button>
+                                        class="text-red-600 hover:text-red-800 text-sm font-medium px-3 py-1.5 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"><?= __('admin_delete') ?></button>
                                 </div>
                                 <?php else: ?>
-                                <span class="text-xs text-gray-400">View only</span>
+                                <span class="text-xs text-gray-400"><?= __('product_view_only') ?></span>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -353,7 +354,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
     class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-sm w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div class="p-6 border-b border-gray-100 flex items-center justify-between">
-            <h3 class="text-lg font-bold text-gray-800" id="productModalTitle">Add Product</h3>
+            <h3 class="text-lg font-bold text-gray-800" id="productModalTitle"><?= __('product_add_title') ?></h3>
             <button onclick="closeModal('productModal')" class="text-gray-400 hover:text-gray-600 transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -365,12 +366,12 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <input type="hidden" name="product_id" id="productId" value="0">
             <div class="grid grid-cols-2 gap-4">
                 <div class="col-span-2">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Product Name *</label>
-                    <input type="text" name="name" id="productName" required placeholder="e.g. Chocolate Birthday Cake"
+                    <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_name') ?> *</label>
+                    <input type="text" name="name" id="productName" required placeholder="<?= __('product_ph_name') ?>"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Category *</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_category') ?> *</label>
                     <select name="category_id" id="productCategory" required
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                         <?php foreach ($categories as $cat): ?>
@@ -379,45 +380,44 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Price (MMK) *</label>
-                    <input type="text" name="price" id="productPrice" required min="0" step="100" placeholder="5000"
+                    <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_price') ?> *</label>
+                    <input type="text" name="price" id="productPrice" required min="0" step="100" placeholder="<?= __('product_ph_price') ?>"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Discount</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_discount') ?></label>
                     <select name="discount_id" id="productDiscount"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
-                        <option value="">No Discount</option>
+                        <option value=""><?= __('product_no_discount') ?></option>
                         <?php foreach ($discounts as $d): ?>
                             <option value="<?= $d['id'] ?>"><?= htmlspecialchars($d['name']) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Stock Quantity *</label>
-                    <input type="number" name="stock" id="productStock" required min="0" placeholder="50"
+                    <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_stock') ?> *</label>
+                    <input type="number" name="stock" id="productStock" required min="0" placeholder="<?= __('product_ph_stock') ?>"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                 </div>
                 <div class="col-span-2">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-                    <textarea name="description" id="productDescription" rows="3" placeholder="Describe the product..."
+                    <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_desc') ?></label>
+                    <textarea name="description" id="productDescription" rows="3" placeholder="<?= __('product_ph_desc') ?>"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"></textarea>
                 </div>
                 <div class="col-span-2" id="existingImagesSection" style="display:none;">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Current Images</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_current') ?></label>
                     <div id="existingImages" class="flex flex-wrap gap-3"></div>
                 </div>
                 <div class="col-span-2">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Product Images</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_images') ?></label>
                     <input type="file" name="images[]" id="productImages" multiple accept="image/*"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-rose-50 file:text-rose-600 hover:file:bg-rose-50">
-                    <p class="text-xs text-gray-400 mt-1">Upload new images to replace existing ones. First image will be primary.</p>
+                    <p class="text-xs text-gray-400 mt-1"><?= __('product_image_help') ?></p>
                 </div>
             </div>
             <div class="flex gap-3 pt-2">
                 <button type="submit"
-                    class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold py-3 rounded-xl transition-colors">Save
-                    Product</button>
+                    class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold py-3 rounded-xl transition-colors"><?= __('product_save') ?></button>
                 <button type="button" onclick="closeModal('productModal')"
                     class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold rounded-xl transition-colors">Cancel</button>
             </div>
@@ -430,7 +430,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
     class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-sm w-full max-w-md">
         <div class="p-6 border-b border-gray-100 flex items-center justify-between">
-            <h3 class="text-lg font-bold text-gray-800" id="categoryModalTitle">Add Category</h3>
+            <h3 class="text-lg font-bold text-gray-800" id="categoryModalTitle"><?= __('product_cat_add_title') ?></h3>
             <button onclick="closeModal('categoryModal')" class="text-gray-400 hover:text-gray-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -441,19 +441,18 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <input type="hidden" name="save_category" value="1">
             <input type="hidden" name="category_id" id="categoryId" value="0">
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Category Name *</label>
-                <input type="text" name="name" id="categoryName" required placeholder="e.g. Cupcakes"
+                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_cat_label_name') ?> *</label>
+                <input type="text" name="name" id="categoryName" required placeholder="<?= __('product_cat_ph_name') ?>"
                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
             </div>
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-                <textarea name="description" id="categoryDescription" rows="3" placeholder="Brief description..."
+                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_desc') ?></label>
+                <textarea name="description" id="categoryDescription" rows="3" placeholder="<?= __('product_cat_ph_desc') ?>"
                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"></textarea>
             </div>
             <div class="flex gap-3 pt-2">
                 <button type="submit"
-                    class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold py-3 rounded-xl transition-colors">Save
-                    Category</button>
+                    class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold py-3 rounded-xl transition-colors"><?= __('product_cat_save') ?></button>
                 <button type="button" onclick="closeModal('categoryModal')"
                     class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold rounded-xl transition-colors">Cancel</button>
             </div>
@@ -462,6 +461,19 @@ require_once __DIR__ . '/../includes/admin_header.php';
 </div>
 
 <script>
+    const T = <?= json_encode([
+        'editProduct' => __('product_edit_title'),
+        'addProduct' => __('product_add_title'),
+        'addCategory' => __('product_cat_add_title'),
+        'editCategory' => __('product_cat_edit_title'),
+        'confirmDelete' => __('product_confirm_delete'),
+        'confirmCatDelete' => __('product_confirm_cat_delete'),
+        'confirmDeleteImage' => __('product_delete_image'),
+        'primary' => __('product_primary'),
+        'setPrimary' => __('product_set_primary'),
+        'deleteImage' => __('product_delete_image'),
+    ]) ?>;
+
     function openProductModal(data = null) {
         document.getElementById('productId').value = data ? data.id : 0;
         document.getElementById('productName').value = data ? data.name : '';
@@ -470,7 +482,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         document.getElementById('productStock').value = data ? data.stock : '';
         document.getElementById('productDiscount').value = data ? (data.discount_id || '') : '';
         document.getElementById('productDescription').value = data ? (data.description || '') : '';
-        document.getElementById('productModalTitle').textContent = data ? 'Edit Product' : 'Add Product';
+        document.getElementById('productModalTitle').textContent = data ? T.editProduct : T.addProduct;
         document.getElementById('productModal').classList.remove('hidden');
     }
     function editProduct(data) { openProductModal(data); }
@@ -478,20 +490,20 @@ require_once __DIR__ . '/../includes/admin_header.php';
         document.getElementById('categoryId').value = 0;
         document.getElementById('categoryName').value = '';
         document.getElementById('categoryDescription').value = '';
-        document.getElementById('categoryModalTitle').textContent = 'Add Category';
+        document.getElementById('categoryModalTitle').textContent = T.addCategory;
         document.getElementById('categoryModal').classList.remove('hidden');
     }
     function editCategory(id, name, desc) {
         document.getElementById('categoryId').value = id;
         document.getElementById('categoryName').value = name;
         document.getElementById('categoryDescription').value = desc;
-        document.getElementById('categoryModalTitle').textContent = 'Edit Category';
+        document.getElementById('categoryModalTitle').textContent = T.editCategory;
         document.getElementById('categoryModal').classList.remove('hidden');
     }
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
     function deleteProduct(id, name) {
-        if (!confirm(`Delete product "${name}"? This cannot be undone.`)) return;
+        if (!confirm(T.confirmDelete.replace('{name}', name))) return;
         fetch('/sweetheaven/admin/product.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -500,7 +512,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
     }
 
     function deleteCategory(id, name) {
-        if (!confirm(`Delete category "${name}"? All products in this category will also be deleted.`)) return;
+        if (!confirm(T.confirmCatDelete.replace('{name}', name))) return;
         fetch('/sweetheaven/admin/product.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -523,14 +535,14 @@ require_once __DIR__ . '/../includes/admin_header.php';
             container.innerHTML = images.map(img => {
                 let badge = '', actions = '';
                 if (img.is_primary == 1) {
-                    badge = '<span class="absolute top-0 left-0 bg-rose-500 text-white text-[10px] px-1.5 py-0.5 rounded-tl-lg rounded-br-lg font-semibold">Primary</span>';
+                    badge = `<span class="absolute top-0 left-0 bg-rose-500 text-white text-[10px] px-1.5 py-0.5 rounded-tl-lg rounded-br-lg font-semibold">${T.primary}</span>`;
                 } else {
-                    actions = `<button type="button" onclick="setPrimaryImage(${img.id}, ${productId})" class="absolute -bottom-2 -right-2 w-6 h-6 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm" title="Set as primary">★</button>`;
+                    actions = `<button type="button" onclick="setPrimaryImage(${img.id}, ${productId})" class="absolute -bottom-2 -right-2 w-6 h-6 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm" title="${T.setPrimary}">★</button>`;
                 }
                 return `<div class="relative group">
                     <img src="/sweetheaven/${img.image_url}" class="w-20 h-20 object-cover rounded-lg border-2 ${img.is_primary == 1 ? 'border-rose-500' : 'border-gray-200'}">
                     ${badge}
-                    <button type="button" onclick="deleteProductImage(${img.id})" class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm" title="Delete image">×</button>
+                    <button type="button" onclick="deleteProductImage(${img.id})" class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm" title="${T.deleteImage}">×</button>
                     ${actions}
                 </div>`;
             }).join('');
@@ -538,7 +550,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
     }
 
     function deleteProductImage(imageId) {
-        if (!confirm('Delete this image?')) return;
+        if (!confirm(T.confirmDeleteImage)) return;
         fetch('/sweetheaven/admin/product.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

@@ -63,8 +63,8 @@ require_once __DIR__ . '/../includes/admin_header.php';
 <div class="max-w-xl mx-auto">
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100">
-            <h3 class="font-bold text-gray-800">Edit Profile</h3>
-            <p class="text-sm text-gray-400 mt-1">Update your account details</p>
+            <h3 class="font-bold text-gray-800"><?= __('profile_edit_heading') ?></h3>
+            <p class="text-sm text-gray-400 mt-1"><?= __('profile_edit_subtitle') ?></p>
         </div>
 
         <?php if ($profileMsg): ?>
@@ -96,41 +96,41 @@ require_once __DIR__ . '/../includes/admin_header.php';
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Name</label>
+                <label class="block text-sm font-semibold text-gray-700 mb-1"><?= __('profile_edit_label_name') ?></label>
                 <input type="text" name="name" required value="<?= htmlspecialchars($user['name']) ?>"
                     class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+                <label class="block text-sm font-semibold text-gray-700 mb-1"><?= __('profile_edit_label_email') ?></label>
                 <input type="email" name="email" required value="<?= htmlspecialchars($user['email']) ?>"
                     class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
             </div>
 
             <div class="border-t border-gray-100 pt-4 mt-4">
-                <p class="text-sm font-semibold text-gray-700 mb-3">Change Password <span class="font-normal text-gray-400">(optional)</span></p>
+                <p class="text-sm font-semibold text-gray-700 mb-3"><?= __('profile_edit_change_pass') ?> <span class="font-normal text-gray-400">(<?= __('profile_edit_hint') ?>)</span></p>
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Current Password</label>
-                <input type="password" name="current_password" placeholder="Enter current password"
+                <label class="block text-sm font-semibold text-gray-700 mb-1"><?= __('profile_edit_cur_pass') ?></label>
+                <input type="password" name="current_password" placeholder="<?= __('profile_edit_ph_cur_pass') ?>"
                     class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">New Password</label>
-                <input type="password" name="new_password" minlength="6" placeholder="Min. 6 characters"
+                <label class="block text-sm font-semibold text-gray-700 mb-1"><?= __('profile_edit_new_pass') ?></label>
+                <input type="password" name="new_password" minlength="6" placeholder="<?= __('profile_edit_ph_new_pass') ?>"
                     class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
             </div>
 
             <div class="flex gap-3 pt-2">
                 <button type="submit"
                     class="flex-1 px-4 py-2.5 rounded-xl bg-rose-500 text-white text-sm font-semibold hover:bg-rose-600 transition-colors">
-                    Save Changes
+                    <?= __('profile_edit_save') ?>
                 </button>
                 <a href="/sweetheaven/admin/dashboard.php"
                     class="px-6 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors text-center">
-                    Cancel
+                    <?= __('profile_edit_cancel') ?>
                 </a>
             </div>
         </form>

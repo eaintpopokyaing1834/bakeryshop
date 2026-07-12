@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../middleware/admin_only_check.php';
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../includes/lang.php';
 
 $db = getDB();
 
@@ -124,7 +125,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_delete'])) {
 // Fetch cashiers for display
 $cashiers = $db->query("SELECT * FROM users WHERE role='cashier' ORDER BY created_at DESC")->fetchAll();
 
-$pageTitle = 'Manage Cashiers';
+$pageTitle = __('cashier_page_title');
+
+// Translation strings for JavaScript
+$_js = [
+    'adding'     => __('user_btn_adding'),
+    'saving'     => __('user_btn_saving'),
+    'addBtn'     => __('cashier_btn_add'),
+    'saveBtn'    => __('user_btn_save'),
+    'errorGeneric' => __('cashier_error_generic'),
+    'errorRequest' => __('cashier_error_request'),
+    'confirmDelete' => __('cashier_confirm_delete'),
+];
 require_once __DIR__ . '/../includes/admin_header.php';
 ?>
 
@@ -136,7 +148,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         </div>
         <div>
             <p class="text-2xl font-bold text-gray-800"><?= count($cashiers) ?></p>
-            <p class="text-sm text-gray-400">Total Cashiers</p>
+            <p class="text-sm text-gray-400"><?= __('cashier_total') ?></p>
         </div>
     </div>
     <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
@@ -145,7 +157,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         </div>
         <div>
             <p class="text-2xl font-bold text-gray-800"><?= count(array_filter($cashiers, fn($c) => $c['status'] === 'active')) ?></p>
-            <p class="text-sm text-gray-400">Active</p>
+            <p class="text-sm text-gray-400"><?= __('admin_active') ?></p>
         </div>
     </div>
     <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
@@ -154,7 +166,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         </div>
         <div>
             <p class="text-2xl font-bold text-gray-800"><?= count(array_filter($cashiers, fn($c) => $c['status'] !== 'active')) ?></p>
-            <p class="text-sm text-gray-400">Inactive</p>
+            <p class="text-sm text-gray-400"><?= __('admin_inactive') ?></p>
         </div>
     </div>
 </div>
@@ -163,23 +175,23 @@ require_once __DIR__ . '/../includes/admin_header.php';
 <section class="px-4">
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="flex justify-between px-6 py-4 border-b border-gray-100">
-        <h3 class="font-bold text-gray-800">Cashiers <span class="text-gray-400 font-normal text-sm ml-2">(<?= count($cashiers) ?> total)</span></h3>
-        <button onclick="openAddModal()" class="p-2 bg-rose-500 text-center text-white font-semibold rounded-xl">+ Add New Cashier</button>
+        <h3 class="font-bold text-gray-800"><?= __('cashier_heading') ?> <span class="text-gray-400 font-normal text-sm ml-2">(<?= count($cashiers) ?> total)</span></h3>
+        <button onclick="openAddModal()" class="p-2 bg-rose-500 text-center text-white font-semibold rounded-xl">+ <?= __('cashier_add') ?></button>
     </div>
     <div class="overflow-x-auto">
         <table class="w-full">
             <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
                 <tr>
-                    <th class="px-6 py-4 text-left">Cashier</th>
-                    <th class="px-6 py-4 text-left">Email</th>
-                    <th class="px-6 py-4 text-left">Joined</th>
-                    <th class="px-6 py-4 text-left">Status</th>
-                    <th class="px-6 py-4 text-right">Actions</th>
+                    <th class="px-6 py-4 text-left"><?= __('cashier_heading') ?></th>
+                    <th class="px-6 py-4 text-left"><?= __('admin_email') ?></th>
+                    <th class="px-6 py-4 text-left"><?= __('admin_joined') ?></th>
+                    <th class="px-6 py-4 text-left"><?= __('user_col_status') ?></th>
+                    <th class="px-6 py-4 text-right"><?= __('admin_actions') ?></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
             <?php if (empty($cashiers)): ?>
-                <tr><td colspan="5" class="px-6 py-16 text-center text-gray-400">No cashiers found</td></tr>
+                <tr><td colspan="5" class="px-6 py-16 text-center text-gray-400"><?= __('cashier_no_cashiers') ?></td></tr>
             <?php else: ?>
             <?php foreach ($cashiers as $c): ?>
             <tr class="hover:bg-gray-50/50 transition-colors" id="cashier-row-<?= $c['id'] ?>">
@@ -190,7 +202,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                         </div>
                         <div>
                             <p class="font-semibold text-gray-700 text-sm"><?= htmlspecialchars($c['name']) ?></p>
-                            <p class="text-xs text-gray-400">ID: #<?= $c['id'] ?></p>
+                            <p class="text-xs text-gray-400"><?= __('user_id_prefix') ?><?= $c['id'] ?></p>
                         </div>
                     </div>
                 </td>
@@ -199,19 +211,19 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 <td class="px-6 py-4">
                     <select onchange="toggleStatus(<?= $c['id'] ?>, this.value, this)"
                         class="text-xs font-medium px-3 py-1.5 rounded-lg border-0 focus:ring-2 focus:ring-rose-300 cursor-pointer <?= ($c['status'] ?? 'active') === 'active' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600' ?>">
-                        <option value="active" <?= ($c['status'] ?? 'active') === 'active' ? 'selected' : '' ?>>Active</option>
-                        <option value="inactive" <?= ($c['status'] ?? 'active') === 'inactive' ? 'selected' : '' ?>>Inactive</option>
+                        <option value="active" <?= ($c['status'] ?? 'active') === 'active' ? 'selected' : '' ?>><?= __('admin_active') ?></option>
+                        <option value="inactive" <?= ($c['status'] ?? 'active') === 'inactive' ? 'selected' : '' ?>><?= __('admin_inactive') ?></option>
                     </select>
                 </td>
                 <td class="px-6 py-4 text-right">
                     <div class="flex items-center justify-end gap-2">
                         <button onclick='openEditModal(<?= json_encode(["id" => $c["id"], "name" => $c["name"], "email" => $c["email"]]) ?>)'
                             class="text-xs font-medium px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors">
-                            Edit
+                            <?= __('admin_edit') ?>
                         </button>
                         <button onclick="deleteCashier(<?= $c['id'] ?>, '<?= htmlspecialchars($c['name'], ENT_QUOTES) ?>')"
                             class="text-xs font-medium px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors">
-                            Delete
+                            <?= __('admin_delete') ?>
                         </button>
                     </div>
                 </td>
@@ -230,36 +242,36 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md relative">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                <h3 class="font-bold text-gray-800">Add New Cashier</h3>
+                <h3 class="font-bold text-gray-800"><?= __('cashier_add_title') ?></h3>
                 <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
             <form id="addCashierForm" class="px-6 py-5 space-y-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Name</label>
-                    <input type="text" name="name" required placeholder="Full name"
+                    <label class="block text-sm font-semibold text-gray-700 mb-1"><?= __('user_label_name') ?></label>
+                    <input type="text" name="name" required placeholder="<?= __('user_ph_name') ?>"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-                    <input type="email" name="email" required placeholder="cashier@example.com"
+                    <label class="block text-sm font-semibold text-gray-700 mb-1"><?= __('user_label_email') ?></label>
+                    <input type="email" name="email" required placeholder="<?= __('cashier_ph_email') ?>"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
-                    <input type="password" name="password" required minlength="6" placeholder="Min. 6 characters"
+                    <label class="block text-sm font-semibold text-gray-700 mb-1"><?= __('user_label_password') ?></label>
+                    <input type="password" name="password" required minlength="6" placeholder="<?= __('user_ph_password') ?>"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
                 </div>
                 <div id="addError" class="text-red-500 text-sm hidden"></div>
                 <div class="flex gap-3 pt-2">
                     <button type="button" onclick="closeAddModal()"
                         class="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
-                        Cancel
+                        <?= __('admin_cancel') ?>
                     </button>
                     <button type="submit" id="addBtn"
                         class="flex-1 px-4 py-2.5 rounded-xl bg-rose-500 text-white text-sm font-semibold hover:bg-rose-600 transition-colors">
-                        Add Cashier
+                        <?= __('cashier_btn_add') ?>
                     </button>
                 </div>
             </form>
@@ -273,7 +285,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md relative">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                <h3 class="font-bold text-gray-800">Edit Cashier</h3>
+                <h3 class="font-bold text-gray-800"><?= __('cashier_edit_title') ?></h3>
                 <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
@@ -281,29 +293,29 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <form id="editCashierForm" class="px-6 py-5 space-y-4">
                 <input type="hidden" name="user_id" id="editUserId">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Name</label>
-                    <input type="text" name="name" id="editName" required placeholder="Full name"
+                    <label class="block text-sm font-semibold text-gray-700 mb-1"><?= __('user_label_name') ?></label>
+                    <input type="text" name="name" id="editName" required placeholder="<?= __('user_ph_name') ?>"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-                    <input type="email" name="email" id="editEmail" required placeholder="cashier@example.com"
+                    <label class="block text-sm font-semibold text-gray-700 mb-1"><?= __('user_label_email') ?></label>
+                    <input type="email" name="email" id="editEmail" required placeholder="<?= __('cashier_ph_email') ?>"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Password <span class="font-normal text-gray-400">(leave blank to keep current)</span></label>
-                    <input type="password" name="password" id="editPassword" minlength="6" placeholder="Min. 6 characters"
+                    <label class="block text-sm font-semibold text-gray-700 mb-1"><?= __('user_label_password') ?> <span class="font-normal text-gray-400">(<?= __('user_hint_blank') ?>)</span></label>
+                    <input type="password" name="password" id="editPassword" minlength="6" placeholder="<?= __('user_ph_password') ?>"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
                 </div>
                 <div id="editError" class="text-red-500 text-sm hidden"></div>
                 <div class="flex gap-3 pt-2">
                     <button type="button" onclick="closeEditModal()"
                         class="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
-                        Cancel
+                        <?= __('admin_cancel') ?>
                     </button>
                     <button type="submit" id="editBtn"
                         class="flex-1 px-4 py-2.5 rounded-xl bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors">
-                        Save Changes
+                        <?= __('user_btn_save') ?>
                     </button>
                 </div>
             </form>
@@ -328,7 +340,7 @@ document.getElementById('addCashierForm').addEventListener('submit', function(e)
     const errDiv = document.getElementById('addError');
     const form = new FormData(this);
     form.append('ajax_add_cashier', '1');
-    btn.textContent = 'Adding...';
+    btn.textContent = <?= json_encode($_js['adding']) ?>;
     btn.disabled = true;
 
     fetch('/sweetheaven/admin/manage_cashiers.php', { method: 'POST', body: form, credentials: 'same-origin' })
@@ -337,8 +349,8 @@ document.getElementById('addCashierForm').addEventListener('submit', function(e)
         if (d.success) { closeAddModal(); location.reload(); }
         else { errDiv.textContent = d.msg; errDiv.classList.remove('hidden'); }
     })
-    .catch(() => { errDiv.textContent = 'Something went wrong.'; errDiv.classList.remove('hidden'); })
-    .finally(() => { btn.textContent = 'Add Cashier'; btn.disabled = false; });
+    .catch(() => { errDiv.textContent = <?= json_encode($_js['errorGeneric']) ?>; errDiv.classList.remove('hidden'); })
+    .finally(() => { btn.textContent = <?= json_encode($_js['addBtn']) ?>; btn.disabled = false; });
 });
 
 /* ---- Edit Cashier ---- */
@@ -360,7 +372,7 @@ document.getElementById('editCashierForm').addEventListener('submit', function(e
     const errDiv = document.getElementById('editError');
     const form = new FormData(this);
     form.append('ajax_edit_cashier', '1');
-    btn.textContent = 'Saving...';
+    btn.textContent = <?= json_encode($_js['saving']) ?>;
     btn.disabled = true;
 
     fetch('/sweetheaven/admin/manage_cashiers.php', { method: 'POST', body: form, credentials: 'same-origin' })
@@ -369,8 +381,8 @@ document.getElementById('editCashierForm').addEventListener('submit', function(e
         if (d.success) { closeEditModal(); location.reload(); }
         else { errDiv.textContent = d.msg; errDiv.classList.remove('hidden'); }
     })
-    .catch(() => { errDiv.textContent = 'Something went wrong.'; errDiv.classList.remove('hidden'); })
-    .finally(() => { btn.textContent = 'Save Changes'; btn.disabled = false; });
+    .catch(() => { errDiv.textContent = <?= json_encode($_js['errorGeneric']) ?>; errDiv.classList.remove('hidden'); })
+    .finally(() => { btn.textContent = <?= json_encode($_js['saveBtn']) ?>; btn.disabled = false; });
 });
 
 /* ---- Status Toggle ---- */
@@ -388,14 +400,14 @@ function toggleStatus(userId, newStatus, selectEl) {
             selectEl.value = newStatus === 'active' ? 'inactive' : 'active';
         }
     }).catch(() => {
-        alert('Request failed.');
+        alert(<?= json_encode($_js['errorRequest']) ?>);
         selectEl.value = newStatus === 'active' ? 'inactive' : 'active';
     });
 }
 
 /* ---- Delete Cashier ---- */
 function deleteCashier(userId, name) {
-    if (!confirm(`Delete cashier "${name}"? This action cannot be undone.`)) return;
+    if (!confirm(`${<?= json_encode($_js['confirmDelete']) ?>} "${name}"?`)) return;
     fetch('/sweetheaven/admin/manage_cashiers.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
