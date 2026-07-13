@@ -303,8 +303,8 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                     <div><img src="../images/balloon.png" class="absolute -top-14 -left-36 w-72 h-70 opacity-50">
                     </div>
 
-                    <div><img src="../images/ribbon.png" class="absolute -bottom-20 -left-40 w-60 h-60 opacity-70">
-                    </div>
+                    <!-- <div><img src="../images/ribbon.png" class="absolute -bottom-20 -left-40 w-60 h-60 opacity-70">
+                    </div> -->
 
                 <div class="relative z-10 grid grid-cols-2 gap-4">
                     <img src="../images/heropincake.jpg" alt="Beautiful cake"
@@ -726,7 +726,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
             <div class="grid md:grid-cols-2 gap-12 items-center">
                 <div class="relative">
                     <div class="rounded-3xl overflow-hidden shadow-xl">
-                        <img src="/sweetheaven/images/bow.jpg" alt="Customize your cake"
+                        <img src="/sweetheaven/images/customize4.jpg" alt="Customize your cake"
                             class="w-full h-96 object-cover">
                     </div>
                     <div class="absolute -bottom-5 -right-5 bg-white rounded-full shadow-lg px-6 py-4 hidden md:block">
@@ -1285,7 +1285,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid md:grid-cols-2 gap-12 items-center">
                 <div class="rounded-3xl overflow-hidden shadow-lg fade-up">
-                    <img src="../images/about.jpg" alt="About Sweet Heaven Bakery" class="w-full h-96 object-cover">
+                    <img src="../images/aboutus.jpg" alt="About Sweet Heaven Bakery" class="w-full h-96 object-cover">
                 </div>
                 <div class="fade-up fade-up-d2">
                     <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;">
@@ -1668,10 +1668,11 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
             <!-- Brand header -->
             <div class="auth-header">
                 <div class="auth-logo-ring">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c97878" stroke-width="1.6">
+                    <!-- <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c97878" stroke-width="1.6">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18z" />
-                    </svg>
+                    </svg> -->
+                    <img src="../images/cake.png" class="w-5 h-5">
                 </div>
                 <div>
                     <h2 id="authModalTitle" class="auth-title">Welcome back</h2>
@@ -1731,11 +1732,11 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                         </button>
                     </form>
 
-                    <div class="auth-demo-box">
+                    <!-- <div class="auth-demo-box">
                         <p class="auth-demo-title">&#10022; Demo Credentials</p>
                         <p>Admin: admin@sweetheaven.com <span class="auth-demo-sep">/</span> admin123</p>
                         <p>Customer: customer@sweetheaven.com <span class="auth-demo-sep">/</span> customer123</p>
-                    </div>
+                    </div> -->
 
                     <p class="auth-switch-text">
                         Don't have an account?

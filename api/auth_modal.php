@@ -29,7 +29,7 @@ if ($action === 'login') {
         $_SESSION['name']    = $user['name'];
         $_SESSION['cart']    = $_SESSION['cart'] ?? [];
 
-        $redirect = ($user['role'] === 'admin')
+        $redirect = in_array($user['role'], ['admin', 'cashier'])
             ? '/sweetheaven/admin/dashboard.php'
             : '/sweetheaven/user/index.php';
 

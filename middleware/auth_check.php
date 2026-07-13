@@ -3,6 +3,12 @@
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 if (!isset($_SESSION['user_id'])) {
-    header('Location: /sweetheaven/auth/login.php');
+    // Detect if this is an admin/cashier page or a customer page
+    $currentPath = $_SERVER['REQUEST_URI'] ?? '';
+    if (strpos($currentPath, '/admin/') !== false || strpos($currentPath, '/cashier/') !== false) {
+        header('Location: /sweetheaven/admin/login.php');
+    } else {
+        header('Location: /sweetheaven/auth/login.php');
+    }
     exit;
 }

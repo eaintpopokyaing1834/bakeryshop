@@ -29,8 +29,8 @@ CREATE TABLE IF NOT EXISTS notifications (id INT AUTO_INCREMENT PRIMARY KEY, use
 
 CREATE TABLE IF NOT EXISTS customize_requests (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, size VARCHAR(50) NOT NULL, flavor VARCHAR(100) NOT NULL, color VARCHAR(100) DEFAULT NULL, cake_message TEXT DEFAULT NULL, reference_image VARCHAR(255) DEFAULT NULL, delivery_date DATE NOT NULL, additional_notes TEXT DEFAULT NULL, status ENUM('pending','approved','rejected','ordered') DEFAULT 'pending', admin_price DECIMAL(10,2) DEFAULT NULL, admin_note TEXT DEFAULT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE);
 
-INSERT IGNORE INTO users (name, email, password, role) VALUES ('Admin', 'admin@sweetheaven.com', '\\\.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
-INSERT IGNORE INTO users (name, email, password, role) VALUES ('Ma Aye', 'customer@sweetheaven.com', '\\\.PJy4cUH0.2w7j1OeivX.BoFxWxHXNAuPJ0eE.iDN4XkZi', 'customer');
+INSERT IGNORE INTO users (name, email, password, role) VALUES ('Admin', 'admin@sweetheaven.com', '$2y$10$RNmAunjZMJ/zJRqmr.oCdOibv9w2LkwcmVnh5.30EYv23HoLkRhY.', 'admin');
+INSERT IGNORE INTO users (name, email, password, role) VALUES ('Ma Aye', 'customer@sweetheaven.com', '$2y$10$YePnUK1w7c30DOlrrtq2zuSFKCqCPu8Y94Q6kpef/QvFOUoAGk40e', 'customer');
 
 INSERT IGNORE INTO categories (id, name, description, image) VALUES (1,'Ceremony Cakes','Beautiful cakes for weddings and celebrations','../images/ceremony.jpg'),(2,'Slice Cakes','Individual cake slices in various flavors','../images/slicecake.jpg'),(3,'Cup Cakes','Freshly baked cupcakes with frosting','../images/cupcake1.jpg'),(4,'Breads','Artisan breads baked fresh every morning','../images/bread1.jpg'),(5,'Pastries','Flaky and buttery pastries','../images/pastry.jpg'),(6,'Donuts','Glazed and filled donuts','../images/donut4.jpg'),(7,'Savory Items','Savory baked goods','../images/pizza2.jpg'),(8,'Desserts','Sweet desserts and puddings','../images/pudd.jpg');
 

@@ -171,21 +171,32 @@ $activeClass = "bg-white/60 text-rose-400 font-semibold sidebar-link-active";
 
     <!-- User Info -->
     <div class="p-4 border-t border-slate-800">
-        <a href="/sweetheaven/admin/profile_edit.php"
-            class="text-slate-500 hover:text-rose-400 transition-colors shrink-0" title="<?= __('admin_edit_profile') ?>">
-            <div class="flex items-center gap-3 bg-rose-400/30 rounded-xl p-3">
-                <div
-                    class="w-9 h-9 bg-pink-500 rounded-full flex items-center justify-center text-rose-800 font-bold text-sm shrink-0">
+        <div class="flex items-center gap-3 bg-rose-400/30 rounded-xl p-3">
+
+            <!-- Avatar + name → links to Edit Profile -->
+            <a href="/sweetheaven/admin/profile_edit.php"
+               class="flex items-center gap-3 flex-1 min-w-0 text-slate-500 hover:text-rose-400 transition-colors"
+               title="<?= __('admin_edit_profile') ?>">
+                <div class="w-9 h-9 bg-pink-500 rounded-full flex items-center justify-center text-rose-800 font-bold text-sm shrink-0">
                     <?= strtoupper(substr($_SESSION['name'] ?? 'A', 0, 1)) ?>
                 </div>
-                <div class="flex-1 min-w-0">
+                <div class="min-w-0">
                     <p class="text-pink-700 text-lg font-semibold truncate">
                         <?= htmlspecialchars($_SESSION['name'] ?? 'User') ?>
                     </p>
                     <p class="text-slate-500 text-sm"><?= $role === 'cashier' ? __('admin_cashier') : __('admin_administrator') ?></p>
                 </div>
-                <img src="../images/log.png" class="w-6 h-6">
-            </div>
-        </a>
+            </a>
+
+            <!-- Logout button — completely separate from the profile link -->
+            <form method="POST" action="/sweetheaven/auth/logout.php" class="shrink-0">
+                <button type="submit"
+                        title="Log Out"
+                        class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-rose-500/20 text-slate-500 hover:text-rose-600 transition-colors">
+                    <img src="../images/log.png" class="w-6 h-6" alt="Log Out">
+                </button>
+            </form>
+
+        </div>
     </div>
 </aside>
