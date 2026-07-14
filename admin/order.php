@@ -14,8 +14,14 @@ try {
     $db->exec("ALTER TABLE payment MODIFY COLUMN status ENUM('pending','approved','rejected') DEFAULT 'pending'");
 } catch (Exception $e) {}
 
-// Handle payment approve/reject
+$isAdmin = ($_SESSION['role'] ?? '') === 'admin';
+
+// Handle payment approve/reject (cashier only)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payment_action'])) {
+    if ($isAdmin) {
+        echo json_encode(['success' => false, 'error' => 'View-only access']);
+        exit;
+    }
     $orderId  = (int)$_POST['order_id'];
     $newStatus = $_POST['payment_action'] === 'approve' ? 'approved' : 'rejected';
     $db->prepare("UPDATE payment SET status=? WHERE order_id=?")->execute([$newStatus, $orderId]);
@@ -23,8 +29,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payment_action'])) {
     exit;
 }
 
-// ── Handle AJAX Status Update ────────────────────────
+// ── Handle AJAX Status Update (cashier only) ────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_status'])) {
+    if ($isAdmin) {
+        echo json_encode(['success' => false, 'error' => 'View-only access']);
+        exit;
+    }
     $orderId   = (int)$_POST['order_id'];
     $newStatus = $_POST['status'];
     $allowed   = ['pending','processing','shipped','delivered','cancelled'];
@@ -206,13 +216,19 @@ $statusColors = [
                     <?php endif; ?>
                 </td>
                 <td class="px-6 py-4">
-                    <select onchange="updateStatus(<?= $order['id'] ?>, this.value, this)"
-                        class="text-xs font-semibold px-3 py-1.5 rounded-full border cursor-pointer focus:outline-none focus:ring-2 focus:ring-rose-300 transition-colors
-                        <?= $statusColors[$order['status']] ?? 'bg-gray-100 text-gray-600' ?>">
-                        <?php foreach (['pending','processing','shipped','delivered','cancelled'] as $s): ?>
-                        <option value="<?= $s ?>" <?= $order['status'] === $s ? 'selected' : '' ?>><?= ucfirst(__("status_$s")) ?></option>
-                        <?php endforeach; ?>
-                    </select>
+                    <?php if ($isAdmin): ?>
+                        <span class="text-xs font-semibold px-3 py-1.5 rounded-full <?= $statusColors[$order['status']] ?? 'bg-gray-100 text-gray-600' ?>">
+                            <?= ucfirst(__("status_{$order['status']}")) ?>
+                        </span>
+                    <?php else: ?>
+                        <select onchange="updateStatus(<?= $order['id'] ?>, this.value, this)"
+                            class="text-xs font-semibold px-3 py-1.5 rounded-full border cursor-pointer focus:outline-none focus:ring-2 focus:ring-rose-300 transition-colors
+                            <?= $statusColors[$order['status']] ?? 'bg-gray-100 text-gray-600' ?>">
+                            <?php foreach (['pending','processing','shipped','delivered','cancelled'] as $s): ?>
+                            <option value="<?= $s ?>" <?= $order['status'] === $s ? 'selected' : '' ?>><?= ucfirst(__("status_$s")) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    <?php endif; ?>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-400"><?= date('M j, Y', strtotime($order['order_date'])) ?></td>
                 <td class="px-6 py-4">
@@ -254,21 +270,31 @@ $statusColors = [
                         <?php endif; ?>
 
                         <div class="mt-2 flex gap-2" id="paymentActions-<?= $order['id'] ?>">
-                            <?php if ($order['pay_status'] === 'pending' && !empty($order['screenshot'])): ?>
-                            <button onclick="updatePayment(<?= $order['id'] ?>, 'approve')"
-                                class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors">
-                                <?= __('order_approve_payment') ?>
-                            </button>
-                            <button onclick="updatePayment(<?= $order['id'] ?>, 'reject')"
-                                class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors">
-                                <?= __('order_reject_payment') ?>
-                            </button>
-                            <?php elseif ($order['pay_status'] === 'approved'): ?>
-                            <span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-green-100 text-green-700"><?= __('order_payment_approved') ?></span>
-                            <?php elseif ($order['pay_status'] === 'rejected'): ?>
-                            <span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-100 text-red-700"><?= __('order_payment_rejected') ?></span>
+                            <?php if ($isAdmin): ?>
+                                <?php if ($order['pay_status'] === 'approved'): ?>
+                                    <span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-green-100 text-green-700"><?= __('order_payment_approved') ?></span>
+                                <?php elseif ($order['pay_status'] === 'rejected'): ?>
+                                    <span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-100 text-red-700"><?= __('order_payment_rejected') ?></span>
+                                <?php elseif ($order['pay_status'] === 'pending'): ?>
+                                    <span class="text-xs text-gray-400 italic"><?= __('order_awaiting_receipt') ?></span>
+                                <?php endif; ?>
                             <?php else: ?>
-                            <span class="text-xs text-gray-400 italic"><?= __('order_awaiting_receipt') ?></span>
+                                <?php if ($order['pay_status'] === 'pending' && !empty($order['screenshot'])): ?>
+                                <button onclick="updatePayment(<?= $order['id'] ?>, 'approve')"
+                                    class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors">
+                                    <?= __('order_approve_payment') ?>
+                                </button>
+                                <button onclick="updatePayment(<?= $order['id'] ?>, 'reject')"
+                                    class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors">
+                                    <?= __('order_reject_payment') ?>
+                                </button>
+                                <?php elseif ($order['pay_status'] === 'approved'): ?>
+                                <span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-green-100 text-green-700"><?= __('order_payment_approved') ?></span>
+                                <?php elseif ($order['pay_status'] === 'rejected'): ?>
+                                <span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-100 text-red-700"><?= __('order_payment_rejected') ?></span>
+                                <?php else: ?>
+                                <span class="text-xs text-gray-400 italic"><?= __('order_awaiting_receipt') ?></span>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </div>
                     </div>

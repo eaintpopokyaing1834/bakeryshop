@@ -3,6 +3,7 @@ require_once __DIR__ . '/../middleware/admin_check.php';
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/lang.php';
 $db = getDB();
+$isAdmin = ($_SESSION['role'] ?? '') === 'admin';
 
 // Create table if not exists
 $db->exec("CREATE TABLE IF NOT EXISTS customer_reviews (
@@ -14,21 +15,33 @@ $db->exec("CREATE TABLE IF NOT EXISTS customer_reviews (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
-// Handle actions
+// Handle actions (cashier only)
 $action = $_GET['action'] ?? '';
 $reviewId = (int) ($_GET['id'] ?? 0);
 
 if ($action === 'approve' && $reviewId) {
+    if ($isAdmin) {
+        header('Location: /sweetheaven/admin/review.php?msg=View-only+access');
+        exit;
+    }
     $db->prepare("UPDATE customer_reviews SET status='approved' WHERE id=?")->execute([$reviewId]);
     header('Location: /sweetheaven/admin/review.php?msg=Approved');
     exit;
 }
 if ($action === 'reject' && $reviewId) {
+    if ($isAdmin) {
+        header('Location: /sweetheaven/admin/review.php?msg=View-only+access');
+        exit;
+    }
     $db->prepare("UPDATE customer_reviews SET status='rejected' WHERE id=?")->execute([$reviewId]);
     header('Location: /sweetheaven/admin/review.php?msg=Rejected');
     exit;
 }
 if ($action === 'delete' && $reviewId) {
+    if ($isAdmin) {
+        header('Location: /sweetheaven/admin/review.php?msg=View-only+access');
+        exit;
+    }
     $db->prepare("DELETE FROM customer_reviews WHERE id=?")->execute([$reviewId]);
     header('Location: /sweetheaven/admin/review.php?msg=Deleted');
     exit;
@@ -134,6 +147,9 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                 </span>
                             </td>
                             <td class="px-6 py-4">
+                                <?php if ($isAdmin): ?>
+                                    <span class="text-xs text-gray-400 italic">View only</span>
+                                <?php else: ?>
                                 <div class="flex gap-2">
                                     <?php if ($r['status'] !== 'approved'): ?>
                                         <a href="?action=approve&id=<?= $r['id'] ?>"
@@ -146,6 +162,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                     <a href="?action=delete&id=<?= $r['id'] ?>" onclick="return confirm('Delete this review?')"
                                         class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors"><?= __('review_action_delete') ?></a>
                                 </div>
+                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>

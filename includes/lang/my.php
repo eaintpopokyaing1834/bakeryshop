@@ -745,6 +745,7 @@ return [
     'customize_reject_reason'   => 'အကြောင်းရင်း:',
     'customize_reject_default'  => 'လက်ရှိတွင် ဒီဒီဇိုင်းကို လက်ခံနိုင်ခြင်း မရှိပါ။',
     'customize_price_error'     => 'ကျေးဇူးပြု၍ ကိတ်မုန့်အတွက် ဈေးနှုန်း သတ်မှတ်ပါ။',
+    'customize_no_action_view_only' => 'Admin မှာ ကြည့်ရုံသာ ခွင့်ပြုပါသည်။ လက်ခံရန် သို့မဟုတ် ငြင်းပယ်ရန် cashier ကို ဆက်သွယ်ပါ။',
 
     // ── Admin Reviews Page ────────────────────────────────
     'review_page_title'         => 'သုံးသပ်ချက် စီမံခန့်ခွဲမှု',

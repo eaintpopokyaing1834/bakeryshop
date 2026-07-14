@@ -3,12 +3,19 @@ require_once __DIR__ . '/../middleware/admin_check.php';
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/lang.php';
 $db = getDB();
+$isAdmin = ($_SESSION['role'] ?? '') === 'admin';
 
 $msg     = '';
 $msgType = 'success';
 
+// Block cashiers from any write actions
+if (!$isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $msg = 'Cashiers do not have permission to modify payment methods.';
+    $msgType = 'error';
+}
+
 // ── CREATE ────────────────────────────────────────────────────────────────────
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create') {
+if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create') {
     $name    = trim($_POST['payment_name'] ?? '');
     $accName = trim($_POST['acc_name'] ?? '');
     $accNo   = trim($_POST['acc_no'] ?? '');
@@ -38,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
 }
 
 // ── UPDATE ────────────────────────────────────────────────────────────────────
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update') {
+if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update') {
     $pmId    = (int)($_POST['payment_method_id'] ?? 0);
     $name    = trim($_POST['payment_name'] ?? '');
     $accName = trim($_POST['acc_name'] ?? '');
@@ -68,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
 }
 
 // ── DELETE ────────────────────────────────────────────────────────────────────
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
+if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
     $pmId = (int)($_POST['payment_method_id'] ?? 0);
     if ($pmId) {
         $row = $db->prepare("SELECT qr_image FROM payment_methods WHERE id=?");
@@ -97,6 +104,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         <h2 class="text-xl font-bold text-gray-800"><?= __('payment_heading') ?></h2>
         <p class="text-sm text-gray-400 mt-0.5"><?= sprintf(__('payment_methods_count'), count($paymentMethods)) ?></p>
     </div>
+    <?php if ($isAdmin): ?>
     <button onclick="openAddModal()"
         class="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-all shadow-sm hover:shadow-md active:scale-95">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,6 +112,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         </svg>
         <?= __('payment_add') ?>
     </button>
+    <?php endif; ?>
 </div>
 
 <!-- Payment Cards Grid -->
@@ -122,6 +131,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 </div>
                 <h3 class="font-bold text-gray-800"><?= htmlspecialchars($pm['payment_name']) ?></h3>
             </div>
+            <?php if ($isAdmin): ?>
             <form method="POST" onsubmit="return confirm('<?= sprintf(__('admin_confirm_delete'), htmlspecialchars(addslashes($pm['payment_name']))) ?>');">
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="payment_method_id" value="<?= $pm['id'] ?>">
@@ -133,9 +143,11 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     </svg>
                 </button>
             </form>
+            <?php endif; ?>
         </div>
 
-        <!-- Update Form -->
+        <!-- Payment Details -->
+        <?php if ($isAdmin): ?>
         <form method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
             <input type="hidden" name="action" value="update">
             <input type="hidden" name="payment_method_id" value="<?= $pm['id'] ?>">
@@ -184,6 +196,32 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 <?= __('payment_save') ?>
             </button>
         </form>
+        <?php else: ?>
+        <div class="p-6 space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5"><?= __('payment_label_method') ?></label>
+                <p class="text-sm text-gray-700"><?= htmlspecialchars($pm['payment_name'] ?? '') ?></p>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5"><?= __('payment_label_account') ?></label>
+                    <p class="text-sm text-gray-700"><?= htmlspecialchars($pm['acc_name'] ?? '') ?></p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5"><?= __('payment_label_phone') ?></label>
+                    <p class="text-sm text-gray-700"><?= htmlspecialchars($pm['acc_no'] ?? '') ?></p>
+                </div>
+            </div>
+            <?php if (!empty($pm['qr_image'])): ?>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5"><?= __('payment_label_qr') ?></label>
+                <img src="/sweetheaven/<?= htmlspecialchars($pm['qr_image']) ?>"
+                    class="w-24 h-24 object-contain border border-gray-200 rounded-xl bg-gray-50" alt="QR">
+            </div>
+            <?php endif; ?>
+            <p class="text-xs text-gray-400 italic"><?= __('product_view_only') ?></p>
+        </div>
+        <?php endif; ?>
     </div>
     <?php endforeach; ?>
 

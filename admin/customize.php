@@ -4,9 +4,14 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/lang.php';
 
 $db = getDB();
+$isAdmin = ($_SESSION['role'] ?? '') === 'admin';
 
-// Handle approve/reject with price and note
+// Handle approve/reject with price and note (cashier only)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    if ($isAdmin) {
+        echo json_encode(['success' => false, 'error' => 'View-only access']);
+        exit;
+    }
     $requestId = (int)$_POST['request_id'];
     $action = $_POST['action'];
     $adminPrice = !empty($_POST['admin_price']) ? (float)$_POST['admin_price'] : null;
@@ -215,6 +220,12 @@ $statusColors = [
                                         <?php endif; ?>
 
                                         <?php if ($req['status'] === 'pending'): ?>
+                                            <?php if ($isAdmin): ?>
+                                                <div class="mt-4 p-4 bg-amber-50 rounded-xl border border-amber-200">
+                                                    <p class="text-sm font-semibold text-amber-700">⏳ <?= __('status_pending') ?></p>
+                                                    <p class="text-xs text-amber-600 mt-1"><?= __('customize_no_action_view_only') ?></p>
+                                                </div>
+                                            <?php else: ?>
                                             <div class="mt-4 p-4 bg-white rounded-xl border border-stone-200">
                                                 <h4 class="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wider"><?= __('customize_review_request') ?></h4>
                                                 <div class="space-y-3">
@@ -240,6 +251,7 @@ $statusColors = [
                                                     </div>
                                                 </div>
                                             </div>
+                                            <?php endif; ?>
                                         <?php elseif ($req['status'] === 'approved'): ?>
                                             <div class="mt-4 p-4 bg-green-50 rounded-xl border border-green-200">
                                                 <p class="text-sm font-semibold text-green-700">✅ <?= __('status_approved') ?></p>

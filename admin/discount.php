@@ -4,12 +4,20 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/lang.php';
 
 $db = getDB();
+$isAdmin = ($_SESSION['role'] ?? '') === 'admin';
 $message = $error = '';
 $activeTab = $_GET['tab'] ?? 'discounts';
 
 if (isset($_SESSION['flash_message'])) {
     $message = $_SESSION['flash_message'];
     unset($_SESSION['flash_message']);
+}
+
+// Block cashiers from any write actions
+if (!$isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'msg' => 'Cashiers do not have permission to modify discounts.']);
+    exit;
 }
 
 // AJAX
@@ -61,11 +69,13 @@ require_once __DIR__ . '/../includes/admin_header.php';
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
         <h3 class="font-bold text-gray-800"><?= __('discount_heading') ?> <span class="text-gray-400 font-normal text-sm ml-2">(<?= count($discounts) ?>)</span></h3>
+        <?php if ($isAdmin): ?>
         <button onclick="openDiscountModal()"
             class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             <?= __('discount_add') ?>
         </button>
+        <?php endif; ?>
     </div>
     <div class="overflow-x-auto">
         <table class="w-full">
@@ -100,12 +110,16 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-500"><?= $d['product_count'] ?></td>
                     <td class="px-6 py-4">
+                        <?php if ($isAdmin): ?>
                         <div class="flex items-center gap-2">
                             <button onclick="editDiscount(<?= htmlspecialchars(json_encode($d)) ?>)"
                                 class="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1.5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"><?= __('admin_edit') ?></button>
                             <button onclick="deleteDiscount(<?= $d['id'] ?>, '<?= addslashes($d['name']) ?>')"
                                 class="text-red-600 hover:text-red-800 text-sm font-medium px-3 py-1.5 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"><?= __('admin_delete') ?></button>
                         </div>
+                        <?php else: ?>
+                        <span class="text-xs text-gray-400"><?= __('product_view_only') ?></span>
+                        <?php endif; ?>
                     </td>
                 </tr>
                 <?php endforeach; ?>

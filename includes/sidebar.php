@@ -123,26 +123,6 @@ $activeClass = "bg-white/60 text-rose-400 font-semibold sidebar-link-active";
             <span><?= __('admin_nav_cashiers') ?></span>
         </a>
 
-        <!-- Discounts — admin only -->
-        <a href="/sweetheaven/admin/discount.php"
-            class="<?= $baseClass ?> <?= $currentPage === 'discount' ? $activeClass : '' ?>">
-            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
-            </svg>
-            <span><?= __('admin_nav_discounts') ?></span>
-        </a>
-
-        <!-- Payments — admin only -->
-        <a href="/sweetheaven/admin/payment_settings.php"
-            class="<?= $baseClass ?> <?= $currentPage === 'payment_settings' ? $activeClass : '' ?>">
-            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-            </svg>
-            <span><?= __('admin_nav_payments') ?></span>
-        </a>
-
         <!-- Reports — admin only -->
         <a href="/sweetheaven/admin/reports.php"
             class="<?= $baseClass ?> <?= $currentPage === 'reports' ? $activeClass : '' ?>">
@@ -153,6 +133,26 @@ $activeClass = "bg-white/60 text-rose-400 font-semibold sidebar-link-active";
             <span><?= __('admin_nav_reports') ?></span>
         </a>
         <?php endif; ?>
+
+        <!-- Discounts — both roles (view-only for cashier) -->
+        <a href="/sweetheaven/admin/discount.php"
+            class="<?= $baseClass ?> <?= $currentPage === 'discount' ? $activeClass : '' ?>">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+            <span><?= __('admin_nav_discounts') ?></span>
+        </a>
+
+        <!-- Payments — both roles (view-only for cashier) -->
+        <a href="/sweetheaven/admin/payment_settings.php"
+            class="<?= $baseClass ?> <?= $currentPage === 'payment_settings' ? $activeClass : '' ?>">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+            <span><?= __('admin_nav_payments') ?></span>
+        </a>
     </nav>
 
     <!-- View Store — both roles -->
@@ -174,7 +174,7 @@ $activeClass = "bg-white/60 text-rose-400 font-semibold sidebar-link-active";
         <div class="flex items-center gap-3 bg-rose-400/30 rounded-xl p-3">
 
             <!-- Avatar + name → links to Edit Profile -->
-            <a href="/sweetheaven/admin/profile_edit.php"
+            <a href="/sweetheaven/auth/logout.php"
                class="flex items-center gap-3 flex-1 min-w-0 text-slate-500 hover:text-rose-400 transition-colors"
                title="<?= __('admin_edit_profile') ?>">
                 <div class="w-9 h-9 bg-pink-500 rounded-full flex items-center justify-center text-rose-800 font-bold text-sm shrink-0">
@@ -188,14 +188,13 @@ $activeClass = "bg-white/60 text-rose-400 font-semibold sidebar-link-active";
                 </div>
             </a>
 
-            <!-- Logout button — completely separate from the profile link -->
-            <form method="POST" action="/sweetheaven/auth/logout.php" class="shrink-0">
-                <button type="submit"
-                        title="Log Out"
-                        class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-rose-500/20 text-slate-500 hover:text-rose-600 transition-colors">
-                    <img src="../images/log.png" class="w-6 h-6" alt="Log Out">
-                </button>
-            </form>
+            <!-- Logout button — standalone button with JS navigation to prevent event bubbling to profile link -->
+            <button type="button"
+                    title="Log Out"
+                    class="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-rose-500/20 text-slate-500 hover:text-rose-600 transition-colors"
+                    onclick="event.stopPropagation(); event.preventDefault(); if(confirm('Are you sure you want to log out?')){ window.location.href='/sweetheaven/auth/logout.php'; }">
+                <img src="/sweetheaven/images/log.png" class="w-6 h-6" alt="Log Out">
+            </button>
 
         </div>
     </div>

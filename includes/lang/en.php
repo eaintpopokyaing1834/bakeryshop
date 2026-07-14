@@ -762,6 +762,7 @@ return [
     'customize_reject_reason'   => 'Reason:',
     'customize_reject_default'  => 'Unfortunately, we cannot accommodate this design at this time.',
     'customize_price_error'     => 'Please set a price for the cake.',
+    'customize_no_action_view_only' => 'Admin has view-only access. Contact a cashier to approve or reject this request.',
 
     // ── Admin Reviews Page ────────────────────────────────
     'review_page_title'         => 'Review Management',
