@@ -265,7 +265,7 @@ $relatedProducts = $relatedProducts->fetchAll();
             <?php elseif (!isset($_SESSION['user_id'])): ?>
                 <div class="bg-gray-50 rounded-2xl p-6 mb-8 text-center">
                     <p class="text-gray-500 mb-3">Please log in to leave a review.</p>
-                    <a href="/sweetheaven/auth/login.php"
+                    <a href="/sweetheaven/user/index.php?show_login=1"
                         class="bg-rose-500 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-rose-600 transition-colors">Login</a>
                 </div>
             <?php endif; ?>
@@ -382,7 +382,7 @@ $relatedProducts = $relatedProducts->fetchAll();
                     showToast('Added to cart!');
                     const badge = document.getElementById('cartBadge');
                     if (badge) { badge.textContent = data.cart_count; badge.classList.remove('hidden'); }
-                } else if (data.redirect) window.location.href = '/sweetheaven/auth/login.php';
+                } else if (data.redirect) window.location.href = '/sweetheaven/user/index.php?show_login=1';
             });
         }
 
@@ -402,7 +402,7 @@ $relatedProducts = $relatedProducts->fetchAll();
                     btn.classList.toggle('text-gray-400', !data.is_wishlisted);
                     showToast(data.is_wishlisted ? '❤️ ' + (data.message || 'Added to wishlist') : '💔 Removed from wishlist');
                     if (typeof updateWishlistBadge === 'function') updateWishlistBadge(data.wishlist_count);
-                } else if (data.redirect) window.location.href = '/sweetheaven/auth/login.php';
+                } else if (data.redirect) window.location.href = '/sweetheaven/user/index.php?show_login=1';
             });
         }
 

@@ -82,157 +82,40 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
     <link
         href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['DM Serif Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --cream: #fdf8f3;
-            --rose: #e8746a;
-            --rose-light: #fdf0ee;
-            --rose-mid: #f5c3be;
-        }
-
-        * {
-            font-family: 'Inter', sans-serif;
-        }
-
-        .serif {
-            font-family: 'DM Serif Display', serif;
-        }
-
-        body {
-            background: var(--cream);
-        }
-
-        /* Fade-in on scroll feel */
         @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(22px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(22px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        .fade-up {
-            animation: fadeUp 0.7s ease both;
-        }
-
-        .fade-up-d1 {
-            animation-delay: .1s;
-        }
-
-        .fade-up-d2 {
-            animation-delay: .2s;
-        }
-
-        .fade-up-d3 {
-            animation-delay: .3s;
-        }
-
-        /* Category card */
-        .cat-card:hover {
-            box-shadow: 0 8px 32px rgba(232, 116, 106, .12);
-            transform: translateY(-2px);
-        }
-
-        .cat-card {
-            transition: all .25s ease;
-        }
-
-        /* Hero image collage */
-        .collage-img {
-            border-radius: 20px;
-            object-fit: cover;
-        }
-
-        /* Subtle pill badge */
-        .pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #fff;
-            border: 1px solid var(--rose-mid);
-            color: #c45c55;
-            padding: 5px 14px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: .06em;
-            text-transform: uppercase;
-        }
-
-        .pill-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #e8746a;
-            animation: pulse 2s infinite;
-        }
-
         @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-
-            50% {
-                opacity: .6;
-                transform: scale(1.3);
-            }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .6; transform: scale(1.3); }
         }
-
-        /* Promo card hover */
-        .promo-card {
-            transition: transform .2s ease, box-shadow .2s ease;
-        }
-
-        .promo-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 36px rgba(0, 0, 0, .07);
-        }
-
-        /* --- ၁။ Pulse Effect (ကြီးလိုက်သေးလိုက်) --- */
         @keyframes pulseEffect {
-            0% {
-                transform: scale(1);
-            }
-
-            30% {
-                transform: scale(1.05);
-            }
-
-            /* ၅% ပိုကြီးလာမယ် */
-            60% {
-                transform: scale(1);
-            }
+            0% { transform: scale(1); }
+            30% { transform: scale(1.05); }
+            60% { transform: scale(1); }
         }
-
-        .animated-pulse {
-            animation: pulseEffect 3s infinite ease-in-out;
-        }
-
-        /* --- ၃။ Float Effect (ရေပေါ်မျောသလို အပေါ်အောက် ငြိမ့်ငြိမ့်လေး လှုပ်မယ်) --- */
         @keyframes floatEffect {
-            0% {
-                transform: translateY(0px);
-            }
-
-            50% {
-                transform: translateY(-10px);
-            }
-
-            /* အပေါ်ကို 10px တက်မယ် */
-            80% {
-                transform: translateY(0px);
-            }
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            80% { transform: translateY(0); }
         }
-
-        .animated-float {
-            animation: floatEffect 3s infinite ease-in-out;
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(32px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
     </style>
 </head>
@@ -254,19 +137,18 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
 
 
             <!-- Left: Text -->
-            <div class="fade-up z-10 fade-up-d2  relative hidden md:block">
+            <div class="animate-[fadeUp_0.7s_ease_both] z-10 [animation-delay:.2s] relative hidden md:block">
                 <div><img src="../images/spot2.png" class="absolute -top-28 -left-36 w-80 h-80 opacity-80">
                     </div>
 
-                    <div class="absolute z-[-1] top-1/2 -left-20 -translate-x-1/2  w-80 h-80 opacity-20 rounded-full "
-                    style="background:var(--rose);"></div>
+                    <div class="absolute z-[-1] top-1/2 -left-20 -translate-x-1/2  w-80 h-80 opacity-20 rounded-full bg-[#e8746a]"></div>
 
-                <span class="pill mb-6">
-                    <span class="pill-dot"></span>
+                <span class="inline-flex items-center gap-1.5 bg-white border border-[#f5c3be] text-[#c45c55] px-3.5 py-[5px] rounded-full text-[11px] font-semibold tracking-[.06em] uppercase mb-6">
+                    <span class="w-[7px] h-[7px] rounded-full bg-[#e8746a] animate-[pulse_2s_infinite]"></span>
                     <?= __('hero_pill') ?>
                 </span>
 
-                <h1 class="serif text-5xl md:text-[3.8rem] leading-[1.1] text-gray-800 mt-5 mb-5">
+                <h1 class="font-display text-5xl md:text-[3.8rem] leading-[1.1] text-gray-800 mt-5 mb-5">
                     <?= __('hero_title') ?>
                 </h1>
 
@@ -275,8 +157,8 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                 </p>
 
                 <div class="flex flex-wrap gap-3 mb-10">
-                    <a href="/sweetheaven/user/products.php" style="background:#e8746a;"
-                        class="inline-flex items-center gap-2 text-white px-7 py-3.5 rounded-full font-semibold text-sm hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200 shadow-md shadow-rose-200">
+                    <a href="/sweetheaven/user/products.php"
+                        class="inline-flex items-center gap-2 text-white px-7 py-3.5 rounded-full font-semibold text-sm hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200 shadow-md shadow-rose-200 bg-[#e8746a]">
                         <?= __('hero_shop_now') ?>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -296,10 +178,9 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
             </div>
 
             <!-- Right: Photo Collage -->
-            <div class="fade-up fade-up-d2 relative hidden md:block">
+            <div class="animate-[fadeUp_0.7s_ease_both] [animation-delay:.2s] relative hidden md:block">
                 <!-- Decorative circle -->
-                <div class="absolute -top-8 -right-8 w-72 h-72 rounded-full"
-                    style="background:var(--rose-light);z-index:0;"></div>
+                <div class="absolute -top-8 -right-8 w-72 h-72 rounded-full bg-[#fdf0ee] z-0"></div>
                     <div><img src="../images/balloon.png" class="absolute -top-14 -left-36 w-72 h-70 opacity-50">
                     </div>
 
@@ -308,20 +189,20 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
 
                 <div class="relative z-10 grid grid-cols-2 gap-4">
                     <img src="../images/heropincake.jpg" alt="Beautiful cake"
-                        class="animated-pulse collage-img w-full h-52 shadow-md">
+                        class="animate-[pulseEffect_3s_infinite_ease-in-out] rounded-[20px] object-cover w-full h-52 shadow-md">
                     <img src="../images/donutgrop.jpg" alt="Croissant"
-                        class="animated-float collage-img w-full h-52 shadow-md mt-8">
+                        class="animate-[floatEffect_3s_infinite_ease-in-out] rounded-[20px] object-cover w-full h-52 shadow-md mt-8">
                     <img src="../images/cro.jpg" alt="Cupcakes"
-                        class="animated-float collage-img w-full h-52 shadow-md">
+                        class="animate-[floatEffect_3s_infinite_ease-in-out] rounded-[20px] object-cover w-full h-52 shadow-md">
                     <img src="../images/minicake.jpg" alt="Fresh bread"
-                        class="animated-pulse collage-img w-full h-52 shadow-md mt-8">
+                        class="animate-[pulseEffect_3s_infinite_ease-in-out] rounded-[20px] object-cover w-full h-52 shadow-md mt-8">
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ═════════════════════════ FEATURE BAR ═════════════════════════ -->
-    <section class="bg-white border-y border-gray-100 py-7">
+    <section class="bg-[#fdf8f3] border-y border-gray-100 py-7">
         <div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6">
             <?php foreach ([
                 ['🌿', __('feature_natural'), __('feature_natural_sub')],
@@ -330,8 +211,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                 ['💝', __('feature_love'), __('feature_love_sub')],
             ] as $f): ?>
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
-                        style="background:var(--rose-light);">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0 bg-[#fdf0ee]">
                         <?= $f[0] ?>
                     </div>
                     <div>
@@ -346,29 +226,28 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
     <!-- ═════════════════════════ CATEGORIES CAROUSEL ═════════════════════════ -->
     <section id="categories" class="py-20 bg-[#fdf8f3]">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="flex  items-center justify-center mb-10 fade-up">
+            <div class="flex  items-center justify-center mb-10 animate-[fadeUp_0.7s_ease_both]">
                 <div class="text-center">
-                    <p class="text-md font-semibold uppercase tracking-widest mb-1" style="color:#e8746a;">
+                    <p class="text-md font-semibold uppercase tracking-widest mb-1 text-[#e8746a]">
                         <?= __('cat_what_we_offer') ?>
                     </p>
-                    <h2 class="serif text-4xl text-gray-800"><?= __('cat_our_categories') ?></h2>
+                    <h2 class="font-display text-4xl text-gray-800"><?= __('cat_our_categories') ?></h2>
                 </div>
 
             </div>
 
             <div class="relative">
                 <div class="overflow-hidden rounded-2xl">
-                    <div class="flex transition-transform duration-500 ease-in-out" id="categoryTrack">
+                    <div class="flex transition-transform duration-500 ease-in-out [will-change:transform]" id="categoryTrack">
                         <?php foreach ($categories as $cat): ?>
                             <?php
                             $catImg = $cat['image'] ?? '';
                             $catImg = ltrim(str_replace('../', '', $catImg), '/');
                             ?>
-                            <div class="category-card-wrapper flex-shrink-0 px-2">
+                            <div class="flex-shrink-0 px-2 [transition:width_0.3s_ease]">
                                 <a href="/sweetheaven/user/products.php?category_id=<?= $cat['id'] ?>"
-                                    class="cat-card group bg-white border border-gray-100 rounded-2xl p-5 text-center shadow-sm block">
-                                    <div class="w-20 h-20 mx-auto rounded-2xl overflow-hidden mb-3 group-hover:scale-105 transition-transform duration-300"
-                                        style="background:var(--rose-light);">
+                                    class="group bg-white border border-gray-100 rounded-2xl p-5 text-center shadow-sm block transition-all duration-[250ms] ease-in-out hover:shadow-[0_8px_32px_rgba(232,116,106,.12)] hover:-translate-y-0.5">
+                                    <div class="w-20 h-20 mx-auto rounded-2xl overflow-hidden mb-3 group-hover:scale-105 transition-transform duration-300 bg-[#fdf0ee]">
                                         <?php if ($catImg): ?>
                                             <img src="/sweetheaven/<?= htmlspecialchars($catImg) ?>"
                                                 class="w-full h-full object-cover" alt="<?= htmlspecialchars($cat['name']) ?>"
@@ -405,43 +284,6 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
         </div>
     </section>
 
-    <style>
-        #categoryTrack {
-            will-change: transform;
-        }
-
-        .category-card-wrapper {
-            transition: width 0.3s ease;
-        }
-
-        #catDots button {
-            transition: all 0.3s ease;
-        }
-
-        #catDots button.active {
-            background: #f43f5e;
-            width: 24px;
-            border-radius: 999px;
-        }
-
-        #reviewTrack {
-            will-change: transform;
-        }
-
-        .review-card-wrapper {
-            transition: width 0.3s ease;
-        }
-
-        #reviewDots button {
-            transition: all 0.3s ease;
-        }
-
-        #reviewDots button.active {
-            background: #e8746a;
-            width: 24px;
-            border-radius: 999px;
-        }
-    </style>
 
     <script>
         (function () {
@@ -548,8 +390,8 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                 dotsContainer.innerHTML = '';
                 for (let i = 0; i < totalPages; i++) {
                     const dot = document.createElement('button');
-                    dot.className = 'w-2.5 h-2.5 rounded-full bg-stone-300 hover:bg-rose-300';
-                    if (i === currentPage) dot.classList.add('active');
+                    dot.className = 'w-2.5 h-2.5 rounded-full bg-stone-300 hover:bg-rose-300 transition-all duration-300';
+                    if (i === currentPage) { dot.style.background = '#f43f5e'; dot.style.width = '24px'; dot.style.borderRadius = '999px'; }
                     dot.setAttribute('aria-label', `Go to page ${i + 1}`);
                     dot.addEventListener('click', () => {
                         const targetIndex = startIndex + i * ipv;
@@ -609,12 +451,12 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
     <!-- ═════════════════════════ BEST SELLERS ═════════════════════════ -->
     <section class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="flex flex-col items-center justify-center mb-10 fade-up space-y-4">
+            <div class="flex flex-col items-center justify-center mb-10 animate-[fadeUp_0.7s_ease_both] space-y-4">
                 <div>
-                    <p class="text-md text-center font-semibold uppercase tracking-widest mb-1" style="color:#e8746a;">
+                    <p class="text-md text-center font-semibold uppercase tracking-widest mb-1" text-[#e8746a]">
                         <?= __('bestsellers_subtitle') ?>
                     </p>
-                    <h2 class="serif text-4xl text-gray-800"><?= __('bestsellers_title') ?></h2>
+                    <h2 class="font-display text-4xl text-gray-800"><?= __('bestsellers_title') ?></h2>
                 </div>
 
             </div>
@@ -688,7 +530,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                                 <div class="flex gap-2">
                                     <a href="/sweetheaven/user/product_detail.php?id=<?= $product['id'] ?>"
                                         class="flex-1 text-center border py-2 rounded-xl text-xs font-semibold hover:bg-rose-50 transition-colors"
-                                        style="border-color:#e8746a; color:#e8746a;">
+                                        border-[#e8746a] text-[#e8746a]">
                                         <?= __('common_view') ?>
                                     </a>
                                     <?php if (!$isAdmin): ?>
@@ -737,10 +579,10 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                 </div>
                 <div class="space-y-6">
                     <div>
-                        <p class="text-md font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;">
+                        <p class="text-md font-semibold uppercase tracking-widest mb-2" text-[#e8746a]">
                             <?= __('customize_label') ?>
                         </p>
-                        <h2 class="serif text-4xl text-gray-800"><?= __('customize_title') ?></h2>
+                        <h2 class="font-display text-4xl text-gray-800"><?= __('customize_title') ?></h2>
                     </div>
                     <p class="text-gray-500 leading-relaxed text-lg">
                         <?= __('customize_desc') ?>
@@ -794,15 +636,13 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
 
                 <div class="flex flex-col gap-6">
                     <div class="text-3xl font-semibold text-center"><?= __('promo_special') ?></div>
-                    <div class="promo-card rounded-2xl overflow-hidden flex flex-col md:flex-row border border-rose-100"
-                        style="background:var(--rose-light);">
+                    <div class="rounded-2xl transition-all duration-200 ease-in-out hover:-translate-y-[3px] hover:shadow-[0_12px_36px_rgba(0,0,0,.07)] overflow-hidden flex flex-col md:flex-row border border-rose-100 bg-[#fdf0ee]">
                         <div class="p-12 flex-1">
                             <span class="text-3xl mb-3 block">🎉</span>
                             <h3 class="font-bold text-gray-800 text-xl mb-2"><?= __('promo_first_order') ?></h3>
                             <p class="text-gray-500 text-sm leading-relaxed mb-5"><?= __('promo_first_desc') ?></p>
                             <a href="/sweetheaven/auth/register.php"
-                                class="inline-block text-white font-semibold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity"
-                                style="background:#e8746a;">
+                                class="inline-block text-white font-semibold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity bg-[#e8746a]">
                                 <?= __('promo_claim') ?>
                             </a>
                         </div>
@@ -813,15 +653,15 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                     </div>
 
                     <!-- Promo 2 -->
-                    <div class="promo-card rounded-2xl overflow-hidden flex flex-col md:flex-row border border-amber-100"
-                        style="background:#fffbf0;">
+                    <div class="rounded-2xl transition-all duration-200 ease-in-out hover:-translate-y-[3px] hover:shadow-[0_12px_36px_rgba(0,0,0,.07)] overflow-hidden flex flex-col md:flex-row border border-amber-100"
+                        bg-[#fffbf0]">
                         <div class="p-12 flex-1">
                             <span class="text-3xl mb-3 block">🎁</span>
                             <h3 class="font-bold text-gray-800 text-xl mb-2"><?= __('promo_free_gift_title') ?></h3>
                             <p class="text-gray-500 text-sm leading-relaxed mb-5"><?= __('promo_free_gift_desc') ?></p>
                             <a href="/sweetheaven/user/products.php"
                                 class="inline-block text-white font-semibold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity"
-                                style="background:#f59e0b;">
+                                bg-amber-500">
                                 <?= __('promo_shop_now') ?>
                             </a>
                         </div>
@@ -833,7 +673,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                 </div>
                 <article class="flex flex-col gap-6">
                     <div class="text-center text-3xl font-semibold"><?= __('promo_latest_products') ?></div>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4" style="background:#fffbf0;">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4" bg-[#fffbf0]">
                         <?php foreach ($latestProducts as $product): ?>
                             <?php
                             $imgSrc = $product['primary_image']
@@ -870,20 +710,19 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
             <div class="text-center mb-10">
                 <div class="flex items-center justify-center gap-3 mb-3">
                     <span class="h-px w-10 bg-rose-300 inline-block"></span>
-                    <span class="text-xs font-bold uppercase tracking-[.2em]" style="color:#e8746a;">
+                    <span class="text-xs font-bold uppercase tracking-[.2em]" text-[#e8746a]">
                         <?= __('discount_section_label') ?>
                     </span>
                     <span class="h-px w-10 bg-rose-300 inline-block"></span>
                 </div>
-                <h2 class="serif text-4xl md:text-5xl font-extrabold text-gray-800 mb-2">
+                <h2 class="font-display text-4xl md:text-5xl font-extrabold text-gray-800 mb-2">
                     <?= __('discount_section_title') ?>
                 </h2>
                 <p class="text-gray-400 text-sm"><?= __('discount_section_desc') ?></p>
             </div>
 
             <!-- ── Big Pink Banner ── -->
-            <div class="relative rounded-3xl overflow-hidden mb-12 shadow-2xl"
-                style="background: linear-gradient(130deg, #ffe4ef 0%, #ffc2d9 45%, #ffaac8 100%); min-height: 320px;">
+            <div class="relative rounded-3xl overflow-hidden mb-12 shadow-2xl bg-gradient-to-br from-[#ffe4ef] from-0% via-[#ffc2d9] via-45% to-[#ffaac8] to-100% min-h-[320px]">
 
 
                 <!-- Confetti / decorative specks -->
@@ -902,7 +741,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                     <div class="absolute top-0 right-1/3 w-px h-20 bg-rose-300/35 -rotate-12"></div>
                     <!-- large soft circle glow right -->
                     <div class="absolute -right-20 top-1/2 -translate-y-1/2 w-72 h-72 rounded-full opacity-10"
-                        style="background:radial-gradient(circle,#fff,transparent);"></div>
+                        class="absolute -right-20 top-1/2 -translate-y-1/2 w-72 h-72 rounded-full opacity-10 bg-[radial-gradient(circle,#fff,transparent)]"></div>
                 </div>
 
                 <!--
@@ -922,8 +761,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
 
                         <!-- "Limited Time Offer" pill -->
                         <span class="inline-flex self-start items-center gap-1.5 mb-5 px-4 py-1.5 rounded-full
-                                     text-xs font-extrabold uppercase tracking-widest text-white shadow"
-                            style="background:#e8746a;">
+                                     text-xs font-extrabold uppercase tracking-widest text-white shadow bg-[#e8746a]">
                             <?= __('discount_limited_offer') ?>
                         </span>
 
@@ -933,9 +771,9 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                             <span
                                 class="block text-gray-700 text-xl font-bold leading-none"><?= __('discount_up_to') ?></span>
                             <span class="block font-black"
-                                style="font-size: clamp(4rem,8vw,6rem); color:#e8746a; line-height:1;">15%</span>
+                                class="block font-black text-[clamp(4rem,8vw,6rem)] text-[#e8746a] leading-none">15%</span>
                             <span class="block text-gray-700 font-black tracking-tight"
-                                style="font-size: clamp(1.5rem,3vw,2rem); line-height:1.1;"><?= __('discount_off') ?></span>
+                                class="block text-[clamp(1.5rem,3vw,2rem)] leading-[1.1]"><?= __('discount_off') ?></span>
                         </div>
 
                         <p class="font-extrabold text-gray-600 uppercase tracking-widest text-xs mt-1 mb-6">
@@ -968,7 +806,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                     <div class="hidden md:flex items-center justify-center pl-4 overflow-visible">
                         <img src="/sweetheaven/images/removepink.png" alt="Featured Discount Cake"
                             class="w-auto drop-shadow-2xl"
-                            style="max-height:500px; margin-bottom:-2px; object-fit:contain;">
+                            class="max-h-[500px] mb-[-2px] object-contain">
                     </div>
 
                     <!-- ③ Stacked accessory images (plain, no card) ── -->
@@ -979,7 +817,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                             class="w-full object-contain drop-shadow-xl" style="max-height:300px;"> -->
                         <img src="/sweetheaven/images/ballon3.png" alt="Featured Discount Cake"
                             class="w-auto drop-shadow-2xl"
-                            style="max-height:500px; margin-bottom:-2px; object-fit:contain;">
+                            class="max-h-[500px] mb-[-2px] object-contain">
 
                     </div>
 
@@ -988,15 +826,14 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                     <div class="flex flex-col items-center justify-center gap-5 p-6 md:pr-8">
 
                         <!-- Circle badge -->
-                        <div class="relative flex items-center justify-center w-36 h-36 rounded-full shadow-xl flex-shrink-0"
-                            style="background:#e8746a;">
+                        <div class="relative flex items-center justify-center w-36 h-36 rounded-full shadow-xl flex-shrink-0 bg-[#e8746a]">
                             <div class="absolute inset-2 rounded-full border-2 border-white/40"></div>
                             <div class="text-center text-white px-2 z-10 space-y-0.5">
                                 <p class="text-[9px] font-bold uppercase tracking-wider leading-none">
                                     <?= __('discount_badge_week') ?>
                                 </p>
                                 <p class="text-[10px] font-semibold leading-snug"><?= __('discount_badge_save') ?></p>
-                                <p class="serif text-xl font-black leading-none"><?= __('discount_badge_cakes') ?></p>
+                                <p class="font-display text-xl font-black leading-none"><?= __('discount_badge_cakes') ?></p>
                                 <span class="text-base">❤️</span>
                             </div>
                         </div>
@@ -1004,8 +841,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                         <!-- Shop Now -->
                         <a href="/sweetheaven/user/products.php?discounted=1"
                             class="inline-flex items-center gap-1.5 font-extrabold px-6 py-3 rounded-full text-xs shadow-lg
-                                  hover:-translate-y-0.5 transition-all duration-200 uppercase tracking-widest whitespace-nowrap"
-                            style="background:#e8746a; color:#fff;">
+                                  hover:-translate-y-0.5 transition-all duration-200 uppercase tracking-widest whitespace-nowrap bg-[#e8746a] text-white">
                             <?= __('discount_shop_now') ?>
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -1022,7 +858,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                     <svg class="w-4 h-4 text-rose-400" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
                     </svg>
-                    <h3 class="serif text-3xl font-bold text-gray-800"><?= __('discount_shop_the_deals') ?></h3>
+                    <h3 class="font-display text-3xl font-bold text-gray-800"><?= __('discount_shop_the_deals') ?></h3>
                     <svg class="w-4 h-4 text-rose-400" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
                     </svg>
@@ -1034,13 +870,12 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
             <?php if (empty($discountedProducts)): ?>
                 <div class="text-center py-20">
                     <div class="text-6xl mb-5">🏷️</div>
-                    <h3 class="serif text-2xl text-gray-700 mb-3"><?= __('discount_no_products') ?></h3>
+                    <h3 class="font-display text-2xl text-gray-700 mb-3"><?= __('discount_no_products') ?></h3>
                     <p class="text-gray-400 text-sm max-w-sm mx-auto leading-relaxed">
                         <?= __('discount_no_products_desc') ?>
                     </p>
                     <a href="/sweetheaven/user/products.php"
-                        class="inline-flex items-center gap-2 mt-8 text-white font-semibold px-7 py-3.5 rounded-full text-sm hover:opacity-90 transition-all duration-200 shadow-md"
-                        style="background:#e8746a;">
+                        class="inline-flex items-center gap-2 mt-8 text-white font-semibold px-7 py-3.5 rounded-full text-sm hover:opacity-90 transition-all duration-200 shadow-md bg-[#e8746a]">
                         <?= __('discount_browse_all') ?>
                     </a>
                 </div>
@@ -1060,13 +895,11 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                         <div
                             class="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-pink-100">
                             <!-- Image area -->
-                            <div class="relative bg-pink-50 flex items-center justify-center"
-                                style="height:180px; overflow:hidden;">
+                            <div class="relative bg-pink-50 flex items-center justify-center h-[180px] overflow-hidden">
                                 <img src="<?= htmlspecialchars($dpImgSrc) ?>" alt="<?= htmlspecialchars($dp['name']) ?>"
                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                                 <!-- Discount badge -->
-                                <div class="absolute top-0 left-0 px-3 py-1.5 text-xs font-extrabold text-white rounded-br-xl shadow"
-                                    style="background:#e8746a;">
+                                <div class="absolute top-0 left-0 px-3 py-1.5 text-xs font-extrabold text-white rounded-br-xl shadow bg-[#e8746a]">
                                     <?= htmlspecialchars($dpBadgeLabel) ?>
                                 </div>
                                 <!-- Wishlist -->
@@ -1093,7 +926,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                                     <span class="text-xs line-through text-gray-400">
                                         <?= number_format($dp['price']) ?>         <?= __('common_mmk') ?>
                                     </span>
-                                    <span class="font-extrabold text-base" style="color:#e8746a;">
+                                    <span class="font-extrabold text-base" text-[#e8746a]">
                                         <?= number_format($dpFinalPrice) ?> <span
                                             class="text-xs font-normal text-gray-400"><?= __('common_mmk') ?></span>
                                     </span>
@@ -1101,13 +934,12 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                                 <div class="flex gap-2">
                                     <a href="/sweetheaven/user/product_detail.php?id=<?= $dp['id'] ?>"
                                         class="flex-1 text-center border py-2 rounded-xl text-xs font-semibold hover:bg-rose-50 transition-colors"
-                                        style="border-color:#e8746a; color:#e8746a;">
+                                        border-[#e8746a] text-[#e8746a]">
                                         <?= __('discount_view') ?>
                                     </a>
                                     <?php if (!$isAdmin): ?>
                                         <button onclick="addToCart(<?= $dp['id'] ?>, '<?= addslashes($dp['name']) ?>')"
-                                            class="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-bold text-white transition-all duration-200 hover:opacity-90 shadow"
-                                            style="background:#e8746a;">
+                                            class="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-bold text-white transition-all duration-200 hover:opacity-90 shadow bg-[#e8746a]">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 7H19M9 21a1 1 0 100-2 1 1 0 000 2zm10 0a1 1 0 100-2 1 1 0 000 2z" />
@@ -1125,7 +957,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                 <div class="flex justify-center mt-10">
                     <a href="/sweetheaven/user/products.php?discounted=1"
                         class="inline-flex items-center gap-2 border-2 font-bold px-8 py-3 rounded-full text-sm hover:bg-rose-50 transition-all duration-200 uppercase tracking-wide"
-                        style="border-color:#e8746a; color:#e8746a;">
+                        border-[#e8746a] text-[#e8746a]">
                         <?= __('discount_view_all_offers') ?>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
@@ -1143,15 +975,15 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
     <section class="py-20 bg-[#fdf8f3]">
         <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
             <!-- Image -->
-            <div class="rounded-3xl overflow-hidden shadow-lg fade-up">
+            <div class="rounded-3xl overflow-hidden shadow-lg animate-[fadeUp_0.7s_ease_both]">
                 <img src="../images/onegirl.jpg" alt="Baker at work" class="w-full h-80 object-cover">
             </div>
             <!-- Text -->
-            <div class="fade-up fade-up-d2">
-                <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;">
+            <div class="animate-[fadeUp_0.7s_ease_both] [animation-delay:.2s]">
+                <p class="text-xs font-semibold uppercase tracking-widest mb-2" text-[#e8746a]">
                     <?= __('story_label') ?>
                 </p>
-                <h2 class="serif text-3xl text-gray-800 mb-5"><?= __('story_title') ?></h2>
+                <h2 class="font-display text-3xl text-gray-800 mb-5"><?= __('story_title') ?></h2>
                 <p class="text-gray-500 text-[15px] leading-7 mb-6">
                     <?= __('story_desc') ?>
                 </p>
@@ -1174,12 +1006,12 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
     <!-- ═════════════════════════ REVIEWS DISPLAY ═════════════════════════ -->
     <section id="reviews-display" class="py-20 bg-[#fdf8f3]">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="flex items-center justify-center mb-10 fade-up">
+            <div class="flex items-center justify-center mb-10 animate-[fadeUp_0.7s_ease_both]">
                 <div class="text-center">
-                    <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;">
+                    <p class="text-xs font-semibold uppercase tracking-widest mb-2" text-[#e8746a]>
                         <?= __('review_display_label') ?>
                     </p>
-                    <h2 class="serif text-3xl text-gray-800"><?= __('review_display_title') ?></h2>
+                    <h2 class="font-display text-3xl text-gray-800"><?= __('review_display_title') ?></h2>
                     <p class="text-gray-400 text-sm mt-2"><?= __('review_display_desc') ?></p>
                 </div>
             </div>
@@ -1192,9 +1024,9 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
             <?php else: ?>
                 <div class="relative">
                     <div class="overflow-hidden rounded-2xl">
-                        <div class="flex transition-transform duration-500 ease-in-out" id="reviewTrack">
+                        <div class="flex transition-transform duration-500 ease-in-out [will-change:transform]" id="reviewTrack">
                             <?php foreach ($customerReviews as $r): ?>
-                                <div class="review-card-wrapper flex-shrink-0 px-2">
+                                <div class="flex-shrink-0 px-2 [transition:width_0.3s_ease]">
                                     <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm h-full text-left">
                                         <div class="flex items-center gap-3 mb-4">
                                             <div
@@ -1239,9 +1071,9 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
     <!-- ═════════════════════════ REVIEW FORM ═════════════════════════ -->
     <?php if (isset($_SESSION['user_id']) && !in_array($_SESSION['role'] ?? '', ['admin', 'cashier'])): ?>
         <section id="review-form" class="pb-20 bg-[#fdf8f3]">
-            <div class="max-w-2xl mx-auto px-6">
+            <div class="max-w-7xl mx-auto px-6">
                 <div class="border-t border-gray-200 pt-16">
-                    <div class="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm">
+                    <div class="bg-pink-200 border border-gray-100 rounded-2xl p-8 shadow-sm">
                         <h3 class="font-bold text-gray-800 text-lg mb-2"><?= __('review_form_title') ?></h3>
                         <p class="text-gray-400 text-sm mb-6"><?= __('review_form_desc') ?></p>
                         <form id="reviewForm" class="space-y-4">
@@ -1284,14 +1116,14 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
     <section class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid md:grid-cols-2 gap-12 items-center">
-                <div class="rounded-3xl overflow-hidden shadow-lg fade-up">
+                <div class="rounded-3xl overflow-hidden shadow-lg animate-[fadeUp_0.7s_ease_both]">
                     <img src="../images/aboutus.jpg" alt="About Sweet Heaven Bakery" class="w-full h-96 object-cover">
                 </div>
-                <div class="fade-up fade-up-d2">
-                    <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:#e8746a;">
+                <div class="animate-[fadeUp_0.7s_ease_both] [animation-delay:.2s]">
+                    <p class="text-xs font-semibold uppercase tracking-widest mb-2" text-[#e8746a]">
                         <?= __('about_label') ?>
                     </p>
-                    <h2 class="serif text-4xl text-gray-800 mb-6"><?= __('about_title') ?></h2>
+                    <h2 class="font-display text-4xl text-gray-800 mb-6"><?= __('about_title') ?></h2>
                     <p class="text-gray-500 text-[15px] leading-7 mb-6">
                         <?= __('about_desc') ?>
                     </p>
@@ -1456,8 +1288,8 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                 dotsContainer.innerHTML = '';
                 for (let i = 0; i < totalPages; i++) {
                     const dot = document.createElement('button');
-                    dot.className = 'w-2.5 h-2.5 rounded-full bg-stone-300 hover:bg-rose-300';
-                    if (i === currentPage) dot.classList.add('active');
+                    dot.className = 'w-2.5 h-2.5 rounded-full bg-stone-300 hover:bg-rose-300 transition-all duration-300';
+                    if (i === currentPage) { dot.style.background = '#f43f5e'; dot.style.width = '24px'; dot.style.borderRadius = '999px'; }
                     dot.setAttribute('aria-label', `Go to page ${i + 1}`);
                     dot.addEventListener('click', () => {
                         const targetIndex = startIndex + i * ipv;
@@ -1512,8 +1344,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
 
     <!-- Toast -->
     <div id="toast"
-        class="hidden fixed bottom-6 right-6 text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium z-50 flex items-center gap-2"
-        style="background:#e8746a;">
+        class="hidden fixed bottom-6 right-6 text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium z-50 flex items-center gap-2 bg-[#e8746a]">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
         </svg>
@@ -1655,19 +1486,19 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
         <div id="authBackdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeAuthModal()"></div>
 
         <!-- Card -->
-        <div class="relative w-full max-w-md overflow-hidden auth-card"
+        <div class="relative w-full max-w-md overflow-hidden bg-[#fff9f9] rounded-[28px] shadow-[0_24px_64px_rgba(180,80,80,.14),0_4px_16px_rgba(200,100,100,.08)] border border-[#f5dede]"
             style="animation: modalSlideIn 0.38s cubic-bezier(0.34,1.46,0.64,1) both">
 
             <!-- Close button -->
-            <button onclick="closeAuthModal()" id="authCloseBtn" class="auth-close-btn" aria-label="Close">
+            <button onclick="closeAuthModal()" id="authCloseBtn" class="absolute top-[18px] right-[18px] w-8 h-8 rounded-full bg-[#fce8e8] text-[#b87070] border-none cursor-pointer flex items-center justify-center transition-all duration-200 hover:bg-[#f9d4d4] hover:text-[#9a4f4f] hover:scale-110 z-10" aria-label="Close">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                     <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
                 </svg>
             </button>
 
             <!-- Brand header -->
-            <div class="auth-header">
-                <div class="auth-logo-ring">
+            <div class="flex items-center gap-[14px] px-[30px] pt-[30px] pb-0">
+                <div class="w-[52px] h-[52px] rounded-2xl shrink-0 bg-gradient-to-br from-[#fce8e8] to-[#fdf0f0] border border-[#f5d5d5] flex items-center justify-center">
                     <!-- <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c97878" stroke-width="1.6">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18z" />
@@ -1675,16 +1506,16 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                     <img src="../images/cake.png" class="w-5 h-5">
                 </div>
                 <div>
-                    <h2 id="authModalTitle" class="auth-title">Welcome back</h2>
-                    <p id="authModalSubtitle" class="auth-subtitle">Sign in to your Sweet Heaven account</p>
+                    <h2 id="authModalTitle" class="text-xl font-bold text-[#3d2020] leading-[1.3] m-0">Welcome back</h2>
+                    <p id="authModalSubtitle" class="text-[.78rem] text-[#b08080] mt-[3px] mb-0 mx-0">Sign in to your Sweet Heaven account</p>
                 </div>
             </div>
 
-            <div class="auth-body">
+            <div class="px-[30px] pt-[22px] pb-[28px]">
 
                 <!-- LOGIN PANEL -->
                 <div id="loginPanel">
-                    <div id="loginError" class="auth-alert auth-alert-error hidden">
+                    <div id="loginError" class="flex items-start gap-[9px] px-3.5 py-[11px] rounded-xl text-[.8rem] leading-[1.45] mb-2.5 bg-[#fff0f0] border border-[#f5c8c8] text-[#a85050] hidden">
                         <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" class="shrink-0">
                             <path fill-rule="evenodd"
                                 d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -1693,28 +1524,28 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                         <span id="loginErrorMsg"></span>
                     </div>
 
-                    <form id="modalLoginForm" class="auth-form" onsubmit="submitLogin(event)">
-                        <div class="auth-field">
-                            <span class="auth-field-icon">
+                    <form id="modalLoginForm" class="flex flex-col gap-3 mt-1" onsubmit="submitLogin(event)">
+                        <div class="relative flex items-center">
+                            <span class="absolute left-[13px] text-[#d4a0a0] pointer-events-none flex transition-colors duration-200 peer-focus:text-[#c97878]">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
                                         d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
                             </span>
                             <input type="email" id="modalEmail" name="email" required autocomplete="email"
-                                placeholder="Email address" class="auth-input">
+                                placeholder="Email address" class="w-full py-3 pl-10 pr-3.5 rounded-[14px] border-[1.5px] border-[#f0d8d8] bg-white text-[.855rem] text-[#3d2020] outline-none font-inherit transition-all duration-200 placeholder:text-[#d4adad] focus:border-[#e8a0a0] focus:shadow-[0_0_0_3.5px_rgba(220,130,130,.14)] focus:bg-[#fffbfb] peer">
                         </div>
-                        <div class="auth-field">
-                            <span class="auth-field-icon">
+                        <div class="relative flex items-center">
+                            <span class="absolute left-[13px] text-[#d4a0a0] pointer-events-none flex transition-colors duration-200 peer-focus:text-[#c97878]">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
                                         d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
                             </span>
                             <input type="password" id="modalPassword" name="password" required
-                                autocomplete="current-password" placeholder="Password" class="auth-input auth-input-pr">
+                                autocomplete="current-password" placeholder="Password" class="w-full py-3 pl-10 pr-[42px] rounded-[14px] border-[1.5px] border-[#f0d8d8] bg-white text-[.855rem] text-[#3d2020] outline-none font-inherit transition-all duration-200 placeholder:text-[#d4adad] focus:border-[#e8a0a0] focus:shadow-[0_0_0_3.5px_rgba(220,130,130,.14)] focus:bg-[#fffbfb] peer">
                             <button type="button" onclick="toggleModalPassword('modalPassword',this)"
-                                class="auth-eye-btn" tabindex="-1">
+                                class="absolute right-[13px] bg-transparent border-none cursor-pointer text-[#d4a0a0] p-0.5 flex transition-colors duration-200 hover:text-[#c97878]" tabindex="-1">
                                 <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
                                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -1723,7 +1554,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                                 </svg>
                             </button>
                         </div>
-                        <button type="submit" id="loginSubmitBtn" class="auth-btn">
+                        <button type="submit" id="loginSubmitBtn" class="w-full py-3 px-5 rounded-[14px] bg-gradient-to-br from-[#e8918a] to-[#d97070] text-white text-[.9rem] font-semibold border-none cursor-pointer flex items-center justify-center gap-2 mt-1 font-inherit tracking-[.01em] transition-all duration-200 shadow-[0_4px_16px_rgba(210,100,100,.25)] hover:opacity-[.92] hover:-translate-y-px hover:shadow-[0_8px_22px_rgba(210,100,100,.3)] active:scale-[.98] disabled:opacity-[.65] disabled:cursor-not-allowed disabled:transform-none">
                             <span id="loginBtnText">Sign In</span>
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1738,15 +1569,15 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                         <p>Customer: customer@sweetheaven.com <span class="auth-demo-sep">/</span> customer123</p>
                     </div> -->
 
-                    <p class="auth-switch-text">
+                    <p class="text-center text-[.8rem] text-[#b08080] mt-[18px]">
                         Don't have an account?
-                        <button onclick="switchTab('register')" class="auth-switch-link">Create one free</button>
+                        <button onclick="switchTab('register')" class="bg-transparent border-none cursor-pointer font-bold text-[#d97070] text-inherit font-inherit p-0 ml-[3px] transition-colors duration-200 hover:text-[#b85555] hover:underline">Create one free</button>
                     </p>
                 </div>
 
                 <!-- REGISTER PANEL -->
                 <div id="registerPanel" class="hidden">
-                    <div id="registerError" class="auth-alert auth-alert-error hidden">
+                    <div id="registerError" class="flex items-start gap-[9px] px-3.5 py-[11px] rounded-xl text-[.8rem] leading-[1.45] mb-2.5 bg-[#fff0f0] border border-[#f5c8c8] text-[#a85050] hidden">
                         <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" class="shrink-0">
                             <path fill-rule="evenodd"
                                 d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -1754,7 +1585,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                         </svg>
                         <span id="registerErrorMsg"></span>
                     </div>
-                    <div id="registerSuccess" class="auth-alert auth-alert-success hidden">
+                    <div id="registerSuccess" class="flex items-start gap-[9px] px-3.5 py-[11px] rounded-xl text-[.8rem] leading-[1.45] mb-2.5 bg-[#f0faf4] border border-[#b8e6c8] text-[#3a7a55] hidden">
                         <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" class="shrink-0">
                             <path fill-rule="evenodd"
                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -1763,37 +1594,37 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                         <span id="registerSuccessMsg"></span>
                     </div>
 
-                    <form id="modalRegisterForm" class="auth-form" onsubmit="submitRegister(event)">
-                        <div class="auth-field">
-                            <span class="auth-field-icon">
+                    <form id="modalRegisterForm" class="flex flex-col gap-3 mt-1" onsubmit="submitRegister(event)">
+                        <div class="relative flex items-center">
+                            <span class="absolute left-[13px] text-[#d4a0a0] pointer-events-none flex transition-colors duration-200 peer-focus:text-[#c97878]">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                             </span>
                             <input type="text" id="regName" name="name" required autocomplete="name"
-                                placeholder="Full name" class="auth-input">
+                                placeholder="Full name" class="w-full py-3 pl-10 pr-3.5 rounded-[14px] border-[1.5px] border-[#f0d8d8] bg-white text-[.855rem] text-[#3d2020] outline-none font-inherit transition-all duration-200 placeholder:text-[#d4adad] focus:border-[#e8a0a0] focus:shadow-[0_0_0_3.5px_rgba(220,130,130,.14)] focus:bg-[#fffbfb] peer">
                         </div>
-                        <div class="auth-field">
-                            <span class="auth-field-icon">
+                        <div class="relative flex items-center">
+                            <span class="absolute left-[13px] text-[#d4a0a0] pointer-events-none flex transition-colors duration-200 peer-focus:text-[#c97878]">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
                                         d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
                             </span>
                             <input type="email" id="regEmail" name="email" required autocomplete="email"
-                                placeholder="Email address" class="auth-input">
+                                placeholder="Email address" class="w-full py-3 pl-10 pr-3.5 rounded-[14px] border-[1.5px] border-[#f0d8d8] bg-white text-[.855rem] text-[#3d2020] outline-none font-inherit transition-all duration-200 placeholder:text-[#d4adad] focus:border-[#e8a0a0] focus:shadow-[0_0_0_3.5px_rgba(220,130,130,.14)] focus:bg-[#fffbfb] peer">
                         </div>
-                        <div class="auth-field">
-                            <span class="auth-field-icon">
+                        <div class="relative flex items-center">
+                            <span class="absolute left-[13px] text-[#d4a0a0] pointer-events-none flex transition-colors duration-200 peer-focus:text-[#c97878]">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
                                         d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
                             </span>
                             <input type="password" id="regPassword" name="password" required autocomplete="new-password"
-                                placeholder="Password (min 6 chars)" class="auth-input auth-input-pr">
-                            <button type="button" onclick="toggleModalPassword('regPassword',this)" class="auth-eye-btn"
+                                placeholder="Password (min 6 chars)" class="w-full py-3 pl-10 pr-[42px] rounded-[14px] border-[1.5px] border-[#f0d8d8] bg-white text-[.855rem] text-[#3d2020] outline-none font-inherit transition-all duration-200 placeholder:text-[#d4adad] focus:border-[#e8a0a0] focus:shadow-[0_0_0_3.5px_rgba(220,130,130,.14)] focus:bg-[#fffbfb] peer">
+                            <button type="button" onclick="toggleModalPassword('regPassword',this)" class="absolute right-[13px] bg-transparent border-none cursor-pointer text-[#d4a0a0] p-0.5 flex transition-colors duration-200 hover:text-[#c97878]">
                                 tabindex="-1">
                                 <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
@@ -1803,17 +1634,17 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                                 </svg>
                             </button>
                         </div>
-                        <div class="auth-field">
-                            <span class="auth-field-icon">
+                        <div class="relative flex items-center">
+                            <span class="absolute left-[13px] text-[#d4a0a0] pointer-events-none flex transition-colors duration-200 peer-focus:text-[#c97878]">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
                                         d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                 </svg>
                             </span>
                             <input type="password" id="regConfirm" name="confirm_password" required
-                                autocomplete="new-password" placeholder="Confirm password" class="auth-input">
+                                autocomplete="new-password" placeholder="Confirm password" class="w-full py-3 pl-10 pr-3.5 rounded-[14px] border-[1.5px] border-[#f0d8d8] bg-white text-[.855rem] text-[#3d2020] outline-none font-inherit transition-all duration-200 placeholder:text-[#d4adad] focus:border-[#e8a0a0] focus:shadow-[0_0_0_3.5px_rgba(220,130,130,.14)] focus:bg-[#fffbfb] peer">
                         </div>
-                        <button type="submit" id="registerSubmitBtn" class="auth-btn">
+                        <button type="submit" id="registerSubmitBtn" class="w-full py-3 px-5 rounded-[14px] bg-gradient-to-br from-[#e8918a] to-[#d97070] text-white text-[.9rem] font-semibold border-none cursor-pointer flex items-center justify-center gap-2 mt-1 font-inherit tracking-[.01em] transition-all duration-200 shadow-[0_4px_16px_rgba(210,100,100,.25)] hover:opacity-[.92] hover:-translate-y-px hover:shadow-[0_8px_22px_rgba(210,100,100,.3)] active:scale-[.98] disabled:opacity-[.65] disabled:cursor-not-allowed disabled:transform-none">
                             <span id="registerBtnText">Create Account</span>
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1822,9 +1653,9 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                         </button>
                     </form>
 
-                    <p class="auth-switch-text">
+                    <p class="text-center text-[.8rem] text-[#b08080] mt-[18px]">
                         Already have an account?
-                        <button onclick="switchTab('login')" class="auth-switch-link">Sign in</button>
+                        <button onclick="switchTab('login')" class="bg-transparent border-none cursor-pointer font-bold text-[#d97070] text-inherit font-inherit p-0 ml-[3px] transition-colors duration-200 hover:text-[#b85555] hover:underline">Sign in</button>
                     </p>
                 </div>
 
@@ -1832,267 +1663,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
         </div>
     </div>
 
-    <style>
-        .auth-card {
-            background: #fff9f9;
-            border-radius: 28px;
-            box-shadow: 0 24px 64px rgba(180, 80, 80, .14), 0 4px 16px rgba(200, 100, 100, .08);
-            border: 1px solid #f5dede;
-        }
 
-        .auth-close-btn {
-            position: absolute;
-            top: 18px;
-            right: 18px;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: #fce8e8;
-            color: #b87070;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background .2s, color .2s, transform .15s;
-            z-index: 10;
-        }
-
-        .auth-close-btn:hover {
-            background: #f9d4d4;
-            color: #9a4f4f;
-            transform: scale(1.1);
-        }
-
-        .auth-header {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 30px 30px 0;
-        }
-
-        .auth-logo-ring {
-            width: 52px;
-            height: 52px;
-            border-radius: 16px;
-            flex-shrink: 0;
-            background: linear-gradient(135deg, #fce8e8, #fdf0f0);
-            border: 1px solid #f5d5d5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .auth-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #3d2020;
-            line-height: 1.3;
-            margin: 0;
-        }
-
-        .auth-subtitle {
-            font-size: .78rem;
-            color: #b08080;
-            margin: 3px 0 0;
-        }
-
-        .auth-body {
-            padding: 22px 30px 28px;
-        }
-
-        .auth-form {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 4px;
-        }
-
-        .auth-field {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .auth-field-icon {
-            position: absolute;
-            left: 13px;
-            color: #d4a0a0;
-            pointer-events: none;
-            display: flex;
-            transition: color .2s;
-        }
-
-        .auth-field:focus-within .auth-field-icon {
-            color: #c97878;
-        }
-
-        .auth-input {
-            width: 100%;
-            padding: 12px 14px 12px 40px;
-            border-radius: 14px;
-            border: 1.5px solid #f0d8d8;
-            background: #fff;
-            font-size: .855rem;
-            color: #3d2020;
-            outline: none;
-            font-family: inherit;
-            transition: border-color .22s, box-shadow .22s, background .22s;
-        }
-
-        .auth-input-pr {
-            padding-right: 42px;
-        }
-
-        .auth-input::placeholder {
-            color: #d4adad;
-        }
-
-        .auth-input:focus {
-            border-color: #e8a0a0;
-            box-shadow: 0 0 0 3.5px rgba(220, 130, 130, .14);
-            background: #fffbfb;
-        }
-
-        .auth-eye-btn {
-            position: absolute;
-            right: 13px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #d4a0a0;
-            padding: 2px;
-            display: flex;
-            transition: color .2s;
-        }
-
-        .auth-eye-btn:hover {
-            color: #c97878;
-        }
-
-        .auth-btn {
-            width: 100%;
-            padding: 13px 20px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #e8918a, #d97070);
-            color: #fff;
-            font-size: .9rem;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 4px;
-            font-family: inherit;
-            letter-spacing: .01em;
-            transition: opacity .2s, transform .15s, box-shadow .2s;
-            box-shadow: 0 4px 16px rgba(210, 100, 100, .25);
-        }
-
-        .auth-btn:hover {
-            opacity: .92;
-            transform: translateY(-1px);
-            box-shadow: 0 8px 22px rgba(210, 100, 100, .3);
-        }
-
-        .auth-btn:active {
-            transform: scale(.98);
-        }
-
-        .auth-btn:disabled {
-            opacity: .65;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .auth-alert {
-            display: none;        /* hidden by default — JS removes .hidden to show */
-            align-items: flex-start;
-            gap: 9px;
-            padding: 11px 14px;
-            border-radius: 12px;
-            font-size: .8rem;
-            line-height: 1.45;
-            margin-bottom: 10px;
-        }
-        /* When .hidden is removed by JS, flex layout kicks in */
-        .auth-alert:not(.hidden) {
-            display: flex;
-        }
-
-        .auth-alert-error {
-            background: #fff0f0;
-            border: 1px solid #f5c8c8;
-            color: #a85050;
-        }
-
-        .auth-alert-success {
-            background: #f0faf4;
-            border: 1px solid #b8e6c8;
-            color: #3a7a55;
-        }
-
-        .auth-demo-box {
-            margin-top: 14px;
-            padding: 11px 14px;
-            border-radius: 13px;
-            background: linear-gradient(135deg, #fdf3f3, #fce8e8);
-            border: 1px solid #f5d8d8;
-            font-size: .72rem;
-            color: #a07070;
-            line-height: 1.7;
-        }
-
-        .auth-demo-title {
-            font-weight: 700;
-            color: #c97878;
-            margin-bottom: 3px;
-        }
-
-        .auth-demo-sep {
-            opacity: .5;
-            margin: 0 3px;
-        }
-
-        .auth-switch-text {
-            text-align: center;
-            font-size: .8rem;
-            color: #b08080;
-            margin-top: 18px;
-        }
-
-        .auth-switch-link {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 700;
-            color: #d97070;
-            font-size: inherit;
-            font-family: inherit;
-            padding: 0;
-            margin-left: 3px;
-            transition: color .18s;
-        }
-
-        .auth-switch-link:hover {
-            color: #b85555;
-            text-decoration: underline;
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(32px) scale(0.96);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-    </style>
 
     <script>
         /* ── Auth Modal ── */
@@ -2260,6 +1831,13 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') closeAuthModal();
         });
+
+        // Auto-open login modal when redirected from auth middleware
+        if (new URLSearchParams(window.location.search).get('show_login') === '1') {
+            openAuthModal('login');
+            // Clean the query param from URL without reload
+            window.history.replaceState({}, '', window.location.pathname);
+        }
     </script>
 </body>
 

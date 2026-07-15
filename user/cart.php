@@ -212,7 +212,7 @@ $grandTotal = $subtotal - $firstOrderDiscount;
                         <?= __('cart_checkout_btn') ?>
                     </a>
                     <?php else: ?>
-                    <a href="/sweetheaven/auth/login.php"
+                    <a href="/sweetheaven/user/index.php?show_login=1"
                        class="block w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 rounded-2xl text-center transition-colors shadow-sm shadow-rose-100">
                         <?= __('cart_login_checkout') ?>
                     </a>

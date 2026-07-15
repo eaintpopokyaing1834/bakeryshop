@@ -282,7 +282,7 @@ function addToCart(productId, name) {
             showToast(`${name} added to cart!`);
             const badge = document.getElementById('cartBadge');
             if (badge) { badge.textContent = data.cart_count; badge.classList.remove('hidden'); }
-        } else if (data.redirect) window.location.href='/sweetheaven/auth/login.php';
+        } else if (data.redirect) window.location.href='/sweetheaven/user/index.php?show_login=1';
     });
 }
 
@@ -301,7 +301,7 @@ function toggleWishlist(productId, btn) {
             svg.setAttribute('fill', data.is_wishlisted ? 'currentColor' : 'none');
             showToast(data.is_wishlisted ? '❤️ ' + (data.message || 'Added to wishlist') : '💔 Removed from wishlist');
             if (typeof updateWishlistBadge === 'function') updateWishlistBadge(data.wishlist_count);
-        } else if (data.redirect) window.location.href='/sweetheaven/auth/login.php';
+        } else if (data.redirect) window.location.href='/sweetheaven/user/index.php?show_login=1';
     });
 }
 

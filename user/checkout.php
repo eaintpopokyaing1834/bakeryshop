@@ -281,7 +281,7 @@ if ($customizeRequest) {
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_phone') ?></label>
-                                <input type="tel" name="phone" required placeholder="<?= __('checkout_phone_ph') ?>"
+                                <input type="number" name="phone" required placeholder="<?= __('checkout_phone_ph') ?>"
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                             </div>
                             <div>
@@ -381,16 +381,17 @@ if ($customizeRequest) {
                                 $colorClass = 'peer-checked:border-rose-400 peer-checked:bg-rose-50'; // Default fallback
                             
                                 if (strpos($methodKey, 'kbz') !== false) {
-                                    $colorClass = 'peer-checked:border-blue-800 peer-checked:bg-blue-100';
+                                    $colorClass = 'peer-checked:border-blue-200 peer-checked:bg-blue-200';
                                 } elseif (strpos($methodKey, 'wave') !== false) {
-                                    $colorClass = 'peer-checked:border-yellow-800 peer-checked:bg-yellow-100';
+                                    $colorClass = 'peer-checked:border-yellow-200 peer-checked:bg-yellow-200';
                                 }
                                 ?>
-                                <label class="cursor-pointer payment-method-label" data-method-id="<?= $pm['id'] ?>">
+                                <label class="cursor-pointer payment-method-label" data-method-id="<?= $pm['id'] ?>" data-method-type="<?= $methodKey ?>">
                                     <input type="radio" name="payment_method_id" value="<?= $pm['id'] ?>" <?= $index === 0 ? 'checked' : '' ?> required class="sr-only peer">
-                                    <!-- 3. Inject the dynamic $colorClass here -->
-                                    <div class="border-2 border-gray-200 <?= $colorClass ?> rounded-2xl p-5 transition-all">
-                                        <p class="font-bold text-slate-500">
+                                    <div class="flex gap-3 border-2 border-gray-200 <?= $colorClass ?> rounded-2xl p-5 transition-all">
+                                        <img src="../images/kbz.png" class="w-8 h-8 hidden" data-logo="kbz">
+                                        <img src="../images/wave.png" class="w-8 h-8 hidden" data-logo="wave">
+                                        <p class="font-bold text-slate-800">
                                             <?= htmlspecialchars($pm['payment_name']) ?>
                                         </p>
                                     </div>
@@ -534,14 +535,42 @@ if ($customizeRequest) {
             const uploadSection = document.getElementById('screenshotUploadSection');
             const pm = paymentMethods.find(p => p.id == methodId);
             if (!pm) { details.classList.add('hidden'); uploadSection.classList.add('hidden'); return; }
+
+            const methodKey = pm.payment_name.toLowerCase().trim();
+            const isKbz = methodKey.includes('kbz');
+            const isWave = methodKey.includes('wave');
+
+            // Toggle logos on payment cards
+            document.querySelectorAll('.payment-method-label').forEach(label => {
+                const type = label.dataset.methodType || '';
+                const kbzLogo = label.querySelector('[data-logo="kbz"]');
+                const waveLogo = label.querySelector('[data-logo="wave"]');
+                if (kbzLogo) kbzLogo.classList.toggle('hidden', !type.includes('kbz'));
+                if (waveLogo) waveLogo.classList.toggle('hidden', !type.includes('wave'));
+            });
+
+            // Update "Transfer to" background and text colors
+            if (isKbz) {
+                details.className = 'bg-blue-200 border border-blue-200 rounded-2xl p-5 mb-5';
+                details.querySelector('p').className = 'font-bold text-blue-800 mb-3';
+            } else if (isWave) {
+                details.className = 'bg-yellow-100 border border-yellow-200 rounded-2xl p-5 mb-5';
+                details.querySelector('p').className = 'font-bold text-yellow-800 mb-3';
+            } else {
+                details.className = 'bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-5';
+                details.querySelector('p').className = 'font-bold text-amber-800 mb-3';
+            }
+
+            const accentClass = isKbz ? 'text-blue' : isWave ? 'text-yellow' : 'text-amber';
             let html = `
-                <p class="text-sm font-bold text-amber-800">${pm.payment_name}</p>
-                <p class="text-sm text-amber-700 mt-1"><?= __('checkout_account_name') ?> <strong>${pm.acc_name || '<?= __('checkout_na') ?>'}</strong></p>
-                <p class="text-sm text-amber-700"><?= __('checkout_phone_number') ?> <strong>${pm.acc_no || '<?= __('checkout_na') ?>'}</strong></p>
+                <p class="text-sm font-bold ${isKbz ? 'text-blue-800' : isWave ? 'text-yellow-800' : 'text-amber-800'}">${pm.payment_name}</p>
+                <p class="text-sm ${isKbz ? 'text-blue-700' : isWave ? 'text-yellow-700' : 'text-amber-700'} mt-1"><?= __('checkout_account_name') ?> <strong>${pm.acc_name || '<?= __('checkout_na') ?>'}</strong></p>
+                <p class="text-sm ${isKbz ? 'text-blue-700' : isWave ? 'text-yellow-700' : 'text-amber-700'}"><?= __('checkout_phone_number') ?> <strong>${pm.acc_no || '<?= __('checkout_na') ?>'}</strong></p>
             `;
             if (pm.qr_image) {
+                const borderColor = isKbz ? 'border-blue-200' : isWave ? 'border-yellow-200' : 'border-amber-200';
                 html += `<div class="mt-3 flex justify-center">
-                    <img src="/sweetheaven/${pm.qr_image}" class="w-36 h-36 object-contain border border-amber-200 rounded-xl bg-white" alt="${pm.payment_name} <?= __('checkout_qr_alt') ?>">
+                    <img src="/sweetheaven/${pm.qr_image}" class="w-36 h-36 object-contain border ${borderColor} rounded-xl bg-white" alt="${pm.payment_name} <?= __('checkout_qr_alt') ?>">
                 </div>`;
             }
             content.innerHTML = html;

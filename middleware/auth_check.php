@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id'])) {
     if (strpos($currentPath, '/admin/') !== false || strpos($currentPath, '/cashier/') !== false) {
         header('Location: /sweetheaven/admin/login.php');
     } else {
-        header('Location: /sweetheaven/auth/login.php');
+        header('Location: /sweetheaven/user/index.php?show_login=1');
     }
     exit;
 }
