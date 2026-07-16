@@ -176,7 +176,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="flex justify-between px-6 py-4 border-b border-gray-100">
         <h3 class="font-bold text-gray-800"><?= __('cashier_heading') ?> <span class="text-gray-400 font-normal text-sm ml-2">(<?= count($cashiers) ?> total)</span></h3>
-        <button onclick="openAddModal()" class="p-2 bg-rose-500 text-center text-white font-semibold rounded-xl">+ <?= __('cashier_add') ?></button>
+        <button onclick="openAddModal()" class="p-2 bg-rose-500 text-center text-white font-semibold rounded-xl"> <?= __('cashier_add') ?></button>
     </div>
     <div class="overflow-x-auto">
         <table class="w-full">

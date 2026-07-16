@@ -22,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     $name    = trim($_POST['name'] ?? '');
     $email   = trim($_POST['email'] ?? '');
     $passNew = $_POST['new_password'] ?? '';
+    $passConf = $_POST['confirm_password'] ?? '';
     $passCur = $_POST['current_password'] ?? '';
 
     if (empty($name) || empty($email)) {
@@ -38,6 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             $profileError = 'Current password is incorrect.';
         } elseif ($passNew && strlen($passNew) < 6) {
             $profileError = 'New password must be at least 6 characters.';
+        } elseif ($passNew && $passNew !== $passConf) {
+            $profileError = 'New password and confirmation do not match.';
         } else {
             if ($passNew) {
                 $hashed = password_hash($passNew, PASSWORD_BCRYPT);
@@ -120,6 +123,12 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1"><?= __('profile_edit_new_pass') ?></label>
                 <input type="password" name="new_password" minlength="6" placeholder="<?= __('profile_edit_ph_new_pass') ?>"
+                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1"><?= __('profile_edit_confirm_pass') ?></label>
+                <input type="password" name="confirm_password" minlength="6" placeholder="<?= __('profile_edit_ph_confirm_pass') ?>"
                     class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
             </div>
 

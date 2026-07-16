@@ -5,13 +5,66 @@ require_once __DIR__ . '/../includes/lang.php';
 $db = getDB();
 $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
 
-$msg     = '';
-$msgType = 'success';
+// ── Flash message helpers ─────────────────────────────────────────────────────
+function setFlash($msg, $type = 'success') {
+    $_SESSION['payment_flash'] = ['msg' => $msg, 'type' => $type];
+}
+function getFlash() {
+    if (!empty($_SESSION['payment_flash'])) {
+        $flash = $_SESSION['payment_flash'];
+        unset($_SESSION['payment_flash']);
+        return $flash;
+    }
+    return null;
+}
 
-// Block cashiers from any write actions
+// ── Block cashiers from any write actions ─────────────────────────────────────
 if (!$isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $msg = 'Cashiers do not have permission to modify payment methods.';
-    $msgType = 'error';
+    setFlash('Cashiers do not have permission to modify payment methods.', 'error');
+    header('Location: /sweetheaven/admin/payment_settings.php');
+    exit;
+}
+
+// ── Ensure uploads directory exists ───────────────────────────────────────────
+$uploadDir = __DIR__ . '/../uploads/payments/';
+if (!is_dir($uploadDir)) mkdir($uploadDir, 0775, true);
+
+// ── Auto-add logo_image column if missing ─────────────────────────────────────
+$hasLogoCol = (bool) $db->query("SHOW COLUMNS FROM payment_methods LIKE 'logo_image'")->fetch();
+if (!$hasLogoCol) {
+    try {
+        $db->exec("ALTER TABLE payment_methods ADD COLUMN logo_image VARCHAR(255) DEFAULT NULL AFTER acc_no");
+        $hasLogoCol = true;
+    } catch (Exception $e) {
+        $hasLogoCol = false;
+    }
+}
+
+// ── Helper: upload an image file ──────────────────────────────────────────────
+function uploadImage($fileInput, $recordId, $prefix) {
+    if (empty($fileInput['name'][0])) return null;
+
+    $uploadDir = __DIR__ . '/../uploads/payments/';
+    $tmp  = $fileInput['tmp_name'][0];
+    $name = $fileInput['name'][0];
+    $err  = $fileInput['error'][0];
+    $ext  = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+
+    if ($err !== UPLOAD_ERR_OK) return null;
+    if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) return null;
+
+    $filename = $prefix . '_' . $recordId . '_' . time() . '.' . $ext;
+    if (move_uploaded_file($tmp, $uploadDir . $filename)) {
+        return 'uploads/payments/' . $filename;
+    }
+    return null;
+}
+
+// ── Helper: delete an image file ──────────────────────────────────────────────
+function deleteImageFile($path) {
+    if ($path && file_exists(__DIR__ . '/../' . $path)) {
+        @unlink(__DIR__ . '/../' . $path);
+    }
 }
 
 // ── CREATE ────────────────────────────────────────────────────────────────────
@@ -25,23 +78,27 @@ if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? ''
            ->execute([$name, $accName, $accNo]);
         $newId = $db->lastInsertId();
 
-        if (!empty($_FILES['qr_image']['name'][0])) {
-            $uploadDir = __DIR__ . '/../uploads/payments/';
-            if (!is_dir($uploadDir)) mkdir($uploadDir, 0775, true);
-            $tmp = $_FILES['qr_image']['tmp_name'][0];
-            $ext = strtolower(pathinfo($_FILES['qr_image']['name'][0], PATHINFO_EXTENSION));
-            if (in_array($ext, ['jpg','jpeg','png','webp']) && $_FILES['qr_image']['error'][0] === UPLOAD_ERR_OK) {
-                $filename = 'qr_' . $newId . '_' . time() . '.' . $ext;
-                move_uploaded_file($tmp, $uploadDir . $filename);
-                $db->prepare("UPDATE payment_methods SET qr_image=? WHERE id=?")
-                   ->execute(['uploads/payments/' . $filename, $newId]);
-            }
+        // Upload logo
+        $logoPath = uploadImage($_FILES['logo_image'] ?? [], $newId, 'logo');
+        if ($logoPath) {
+            $db->prepare("UPDATE payment_methods SET logo_image=? WHERE id=?")
+               ->execute([$logoPath, $newId]);
         }
-        $msg = 'Payment method added successfully!';
+
+        // Upload QR code
+        $qrPath = uploadImage($_FILES['qr_image'] ?? [], $newId, 'qr');
+        if ($qrPath) {
+            $db->prepare("UPDATE payment_methods SET qr_image=? WHERE id=?")
+               ->execute([$qrPath, $newId]);
+        }
+
+        setFlash('Payment method added successfully!');
     } else {
-        $msg = 'Please fill in all required fields.';
-        $msgType = 'error';
+        setFlash('Please fill in all required fields.', 'error');
     }
+
+    header('Location: /sweetheaven/admin/payment_settings.php');
+    exit;
 }
 
 // ── UPDATE ────────────────────────────────────────────────────────────────────
@@ -55,46 +112,64 @@ if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? ''
         $db->prepare("UPDATE payment_methods SET payment_name=?, acc_name=?, acc_no=? WHERE id=?")
            ->execute([$name ?: 'Payment', $accName, $accNo, $pmId]);
 
-        if (!empty($_FILES['qr_image']['name'][0])) {
-            $uploadDir = __DIR__ . '/../uploads/payments/';
-            if (!is_dir($uploadDir)) mkdir($uploadDir, 0775, true);
-            $tmp = $_FILES['qr_image']['tmp_name'][0];
-            $ext = strtolower(pathinfo($_FILES['qr_image']['name'][0], PATHINFO_EXTENSION));
-            if (in_array($ext, ['jpg','jpeg','png','webp']) && $_FILES['qr_image']['error'][0] === UPLOAD_ERR_OK) {
-                $filename = 'qr_' . $pmId . '_' . time() . '.' . $ext;
-                move_uploaded_file($tmp, $uploadDir . $filename);
-                $db->prepare("UPDATE payment_methods SET qr_image=? WHERE id=?")
-                   ->execute(['uploads/payments/' . $filename, $pmId]);
-            }
+        // Upload new logo (delete old one first)
+        $logoPath = uploadImage($_FILES['logo_image'] ?? [], $pmId, 'logo');
+        if ($logoPath) {
+            $old = $db->prepare("SELECT logo_image FROM payment_methods WHERE id=?");
+            $old->execute([$pmId]);
+            deleteImageFile($old->fetchColumn());
+            $db->prepare("UPDATE payment_methods SET logo_image=? WHERE id=?")
+               ->execute([$logoPath, $pmId]);
         }
-        $msg = 'Payment method updated successfully!';
+
+        // Upload new QR code (delete old one first)
+        $qrPath = uploadImage($_FILES['qr_image'] ?? [], $pmId, 'qr');
+        if ($qrPath) {
+            $old = $db->prepare("SELECT qr_image FROM payment_methods WHERE id=?");
+            $old->execute([$pmId]);
+            deleteImageFile($old->fetchColumn());
+            $db->prepare("UPDATE payment_methods SET qr_image=? WHERE id=?")
+               ->execute([$qrPath, $pmId]);
+        }
+
+        setFlash('Payment method updated successfully!');
     } else {
-        $msg = 'Please fill in all required fields.';
-        $msgType = 'error';
+        setFlash('Please fill in all required fields.', 'error');
     }
+
+    header('Location: /sweetheaven/admin/payment_settings.php');
+    exit;
 }
 
 // ── DELETE ────────────────────────────────────────────────────────────────────
 if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
     $pmId = (int)($_POST['payment_method_id'] ?? 0);
     if ($pmId) {
-        $row = $db->prepare("SELECT qr_image FROM payment_methods WHERE id=?");
+        $row = $db->prepare("SELECT logo_image, qr_image FROM payment_methods WHERE id=?");
         $row->execute([$pmId]);
-        $qr = $row->fetchColumn();
-        if ($qr && file_exists(__DIR__ . '/../' . $qr)) @unlink(__DIR__ . '/../' . $qr);
+        $files = $row->fetch();
+        if ($files) {
+            if (!empty($files['logo_image'])) deleteImageFile($files['logo_image']);
+            if (!empty($files['qr_image'])) deleteImageFile($files['qr_image']);
+        }
         $db->prepare("DELETE FROM payment_methods WHERE id=?")->execute([$pmId]);
-        $msg = 'Payment method deleted.';
+        setFlash('Payment method deleted.');
     }
+
+    header('Location: /sweetheaven/admin/payment_settings.php');
+    exit;
 }
 
+// ── READ ──────────────────────────────────────────────────────────────────────
 $paymentMethods = $db->query("SELECT * FROM payment_methods ORDER BY id ASC")->fetchAll();
+$flash = getFlash();
 $pageTitle = __('payment_page_title');
 require_once __DIR__ . '/../includes/admin_header.php';
 ?>
 
-<?php if ($msg): ?>
-<div class="mb-6 px-5 py-3 rounded-xl text-sm font-medium <?= ($msgType ?? 'success') === 'error' ? 'bg-amber-50 border border-amber-200 text-amber-700' : 'bg-emerald-50 border border-emerald-200 text-emerald-700' ?>">
-    <?= htmlspecialchars($msg) ?>
+<?php if ($flash): ?>
+<div class="mb-6 px-5 py-3 rounded-xl text-sm font-medium <?= $flash['type'] === 'error' ? 'bg-amber-50 border border-amber-200 text-amber-700' : 'bg-emerald-50 border border-emerald-200 text-emerald-700' ?>">
+    <?= htmlspecialchars($flash['msg']) ?>
 </div>
 <?php endif; ?>
 
@@ -123,12 +198,24 @@ require_once __DIR__ . '/../includes/admin_header.php';
         <!-- Card Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/60">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center text-rose-500">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                    </svg>
-                </div>
+                <?php
+                $methodName = strtolower($pm['payment_name'] ?? '');
+                ?>
+                <?php if (!empty($pm['logo_image'])): ?>
+                    <img src="/sweetheaven/<?= htmlspecialchars($pm['logo_image']) ?>"
+                         class="w-10 h-10 rounded-xl object-contain bg-gray-100" alt="Logo">
+                <?php elseif (strpos($methodName, 'kbz') !== false && file_exists(__DIR__ . '/../images/kbz.png')): ?>
+                    <img src="../images/kbz.png" class="w-10 h-10 rounded-xl object-contain bg-gray-100" alt="KBZ Pay">
+                <?php elseif (strpos($methodName, 'wave') !== false && file_exists(__DIR__ . '/../images/wave.png')): ?>
+                    <img src="../images/wave.png" class="w-10 h-10 rounded-xl object-contain bg-gray-100" alt="Wave Pay">
+                <?php else: ?>
+                    <div class="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center text-rose-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                        </svg>
+                    </div>
+                <?php endif; ?>
                 <h3 class="font-bold text-gray-800"><?= htmlspecialchars($pm['payment_name']) ?></h3>
             </div>
             <?php if ($isAdmin): ?>
@@ -137,10 +224,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 <input type="hidden" name="payment_method_id" value="<?= $pm['id'] ?>">
                 <button type="submit" title="<?= __('admin_delete_tooltip') ?>"
                     class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                    </svg>
+                    <img src="../images/delete1.png" class="w-5 h-5">
                 </button>
             </form>
             <?php endif; ?>
@@ -148,7 +232,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 
         <!-- Payment Details -->
         <?php if ($isAdmin): ?>
-        <form method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
+        <form method="POST" enctype="multipart/form-data" class="p-6 space-y-4" onsubmit="disableSubmit(this)">
             <input type="hidden" name="action" value="update">
             <input type="hidden" name="payment_method_id" value="<?= $pm['id'] ?>">
 
@@ -174,6 +258,25 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 </div>
             </div>
 
+            <!-- Logo Upload -->
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5"><?= __('payment_label_logo') ?></label>
+                <?php if (!empty($pm['logo_image'])): ?>
+                <div class="mb-3 flex items-center gap-4">
+                    <img src="/sweetheaven/<?= htmlspecialchars($pm['logo_image']) ?>"
+                        class="w-16 h-16 object-contain border border-gray-200 rounded-xl bg-gray-50" alt="Logo">
+                    <div>
+                        <p class="text-xs text-gray-500 font-medium"><?= __('payment_logo_current') ?></p>
+                        <p class="text-xs text-gray-400 mt-0.5"><?= __('payment_qr_upload') ?></p>
+                    </div>
+                </div>
+                <?php endif; ?>
+                <input type="file" name="logo_image[]" accept="image/jpeg,image/png,image/webp"
+                    class="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-rose-50 file:text-rose-600 hover:file:bg-rose-100">
+                <p class="text-xs text-gray-400 mt-1"><?= __('payment_logo_optional') ?></p>
+            </div>
+
+            <!-- QR Code Upload -->
             <div>
                 <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5"><?= __('payment_label_qr') ?></label>
                 <?php if (!empty($pm['qr_image'])): ?>
@@ -192,11 +295,12 @@ require_once __DIR__ . '/../includes/admin_header.php';
             </div>
 
             <button type="submit"
-                class="w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors shadow-sm hover:shadow-md active:scale-[0.98]">
+                class="submit-btn w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors shadow-sm hover:shadow-md active:scale-[0.98]">
                 <?= __('payment_save') ?>
             </button>
         </form>
         <?php else: ?>
+        <!-- Cashier / Read-only view -->
         <div class="p-6 space-y-4">
             <div>
                 <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5"><?= __('payment_label_method') ?></label>
@@ -255,7 +359,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
             </button>
         </div>
 
-        <form method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
+        <form method="POST" enctype="multipart/form-data" class="p-6 space-y-4" onsubmit="disableSubmit(this)">
             <input type="hidden" name="action" value="create">
 
             <div>
@@ -276,6 +380,15 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
             </div>
 
+            <!-- Logo Upload -->
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5"><?= __('payment_label_logo') ?></label>
+                <input type="file" name="logo_image[]" accept="image/jpeg,image/png,image/webp"
+                    class="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-rose-50 file:text-rose-600 hover:file:bg-rose-100">
+                <p class="text-xs text-gray-400 mt-1"><?= __('payment_logo_optional') ?></p>
+            </div>
+
+            <!-- QR Code Upload -->
             <div>
                 <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5"><?= __('payment_label_qr') ?></label>
                 <input type="file" name="qr_image[]" accept="image/jpeg,image/png,image/webp"
@@ -289,7 +402,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     <?= __('admin_cancel') ?>
                 </button>
                 <button type="submit"
-                    class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors shadow-sm hover:shadow-md active:scale-[0.98]">
+                    class="submit-btn flex-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors shadow-sm hover:shadow-md active:scale-[0.98]">
                     <?= __('payment_btn_add') ?>
                 </button>
             </div>
@@ -308,6 +421,15 @@ function closeAddModal() {
 }
 document.getElementById('addPaymentModal').addEventListener('click', closeAddModal);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAddModal(); });
+
+// Disable submit button after click to prevent duplicate submissions
+function disableSubmit(form) {
+    const btn = form.querySelector('.submit-btn');
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+    }
+}
 </script>
 
 <?php require_once __DIR__ . '/../includes/admin_footer.php'; ?>

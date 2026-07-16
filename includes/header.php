@@ -69,19 +69,19 @@ $sort       = trim($_GET['sort'] ?? '');
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 34px;
+        gap: 4px;
         height: 34px;
+        padding: 0 8px;
         border-radius: 8px;
-        border: 1px solid rgba(244, 63, 94, .18);
-        background: rgba(255, 255, 255, .7);
+        border: none;
+        background: transparent;
         color: #78716c;
         cursor: pointer;
-        transition: background .2s, border-color .2s, color .2s;
+        white-space: nowrap;
+        transition: color .2s;
     }
 
     .lang-globe-btn:hover {
-        background: rgba(255, 255, 255, .95);
-        border-color: rgba(244, 63, 94, .4);
         color: #e11d48;
     }
 
@@ -90,7 +90,7 @@ $sort       = trim($_GET['sort'] ?? '');
         position: absolute;
         top: calc(100% + 8px);
         right: 0;
-        min-width: 120px;
+        width: 110px;
         background: #fff;
         border: 1px solid #f1e3e6;
         border-radius: 12px;
@@ -106,7 +106,8 @@ $sort       = trim($_GET['sort'] ?? '');
     .lang-menu-item {
         display: flex;
         align-items: center;
-        gap: 8px;
+        justify-content: center;
+        gap: 6px;
         width: 100%;
         padding: 9px 14px;
         font-size: 13px;
@@ -115,7 +116,7 @@ $sort       = trim($_GET['sort'] ?? '');
         background: none;
         border: none;
         cursor: pointer;
-        text-align: left;
+        text-align: center;
         transition: background .15s, color .15s;
         font-family: inherit;
     }
@@ -165,9 +166,14 @@ $sort       = trim($_GET['sort'] ?? '');
                     <input type="hidden" name="category_id" value="<?= $categoryId ?>">
                     <input type="hidden" name="sort" value="<?= $sort ?>">
                     <?php if ($discounted): ?><input type="hidden" name="discounted" value="1"><?php endif; ?>
-                    <input type="search" name="search" placeholder="<?= __('products_search_ph') ?>"
-                        value="<?= htmlspecialchars($search) ?>"
-                        class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 w-48">
+                    <div class="relative">
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                        <input type="search" name="search" placeholder="<?= __('products_search_ph') ?>"
+                            value="<?= htmlspecialchars($search) ?>"
+                            class="border border-gray-200 rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 w-48">
+                    </div>
                 </form>
             </ul>
 
@@ -185,10 +191,11 @@ $sort       = trim($_GET['sort'] ?? '');
                     <button type="button" class="lang-globe-btn" id="langGlobeBtn"
                         onclick="toggleLangMenu()" aria-haspopup="true" aria-expanded="false"
                         title="Select language">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg width="16" height="16" fill="none" stroke="#3b82f6" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
                                 d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                         </svg>
+                        <span id="langLabel"><?= $_currentLang === 'my' ? ' မြန်မာ' : ' ENG' ?></span>
                     </button>
 
                     <!-- Dropdown menu -->
@@ -214,6 +221,7 @@ $sort       = trim($_GET['sort'] ?? '');
 
                     function setLang(code) {
                         document.getElementById('langInput').value = code;
+                        document.getElementById('langLabel').textContent = code === 'my' ? ' မြန်မာ' : ' ENG';
                         document.getElementById('langForm').submit();
                     }
                     // Close when clicking outside
@@ -351,6 +359,7 @@ $sort       = trim($_GET['sort'] ?? '');
                             <?php endif; ?>
                             <div class="border-t border-stone-100">
                                 <a href="/sweetheaven/auth/logout.php"
+                                    onclick="event.preventDefault(); if(confirm('Are you sure you want to log out?')){ window.location.href='/sweetheaven/auth/logout.php'; }"
                                     class="flex items-center gap-2 px-4 py-3 text-sm text-stone-500 hover:bg-rose-50 hover:text-rose-500 transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -405,6 +414,7 @@ $sort       = trim($_GET['sort'] ?? '');
                             class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm"><?= __('nav_profile') ?></a>
                     </li>
                     <li><a href="/sweetheaven/auth/logout.php"
+                            onclick="event.preventDefault(); if(confirm('Are you sure you want to log out?')){ window.location.href='/sweetheaven/auth/logout.php'; }"
                             class="block px-4 py-2.5 text-stone-500 font-medium rounded-lg hover:bg-rose-50 hover:text-rose-500 text-sm"><?= __('nav_logout') ?></a>
                     </li>
                 <?php else: ?>

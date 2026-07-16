@@ -362,6 +362,7 @@ $relatedProducts = $relatedProducts->fetchAll();
     </div>
 
     <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+    <?php require_once __DIR__ . '/../includes/auth_modal.php'; ?>
 
     <script>
         function changeQty(delta) {
@@ -371,38 +372,22 @@ $relatedProducts = $relatedProducts->fetchAll();
             input.value = Math.max(1, Math.min(val, max));
         }
 
-        function addToCart(productId) {
-            const qty = document.getElementById('qty')?.value || 1;
+        /* Override shared addToCart for product detail page (supports quantity) */
+        function addToCart(productId, productName, qty) {
+            qty = qty || document.getElementById('qty')?.value || 1;
             fetch('/sweetheaven/api/cart.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `action=add&product_id=${productId}&qty=${qty}`
             }).then(r => r.json()).then(data => {
                 if (data.success) {
-                    showToast('Added to cart!');
+                    if (typeof showToast === 'function') showToast('Added to cart!');
                     const badge = document.getElementById('cartBadge');
                     if (badge) { badge.textContent = data.cart_count; badge.classList.remove('hidden'); }
-                } else if (data.redirect) window.location.href = '/sweetheaven/user/index.php?show_login=1';
-            });
-        }
-
-        function toggleWishlist(productId, btn) {
-            fetch('/sweetheaven/api/wishlist.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `product_id=${productId}`
-            }).then(r => r.json()).then(data => {
-                if (data.success) {
-                    const svg = btn.querySelector('svg');
-                    svg.setAttribute('fill', data.is_wishlisted ? 'currentColor' : 'none');
-                    btn.classList.toggle('border-rose-400', data.is_wishlisted);
-                    btn.classList.toggle('border-gray-200', !data.is_wishlisted);
-                    btn.classList.toggle('bg-rose-50', data.is_wishlisted);
-                    btn.classList.toggle('text-rose-500', data.is_wishlisted);
-                    btn.classList.toggle('text-gray-400', !data.is_wishlisted);
-                    showToast(data.is_wishlisted ? '❤️ ' + (data.message || 'Added to wishlist') : '💔 Removed from wishlist');
-                    if (typeof updateWishlistBadge === 'function') updateWishlistBadge(data.wishlist_count);
-                } else if (data.redirect) window.location.href = '/sweetheaven/user/index.php?show_login=1';
+                } else if (data.redirect) {
+                    setPendingAction({ type: 'cart', productId, productName: productName || 'Product', qty });
+                    openAuthModal('login');
+                }
             });
         }
 

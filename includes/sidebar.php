@@ -12,13 +12,13 @@ $activeClass = "bg-white/60 text-rose-400 font-semibold sidebar-link-active";
 
 <!-- Sidebar -->
 <aside id="sidebar"
-    class="w-64 min-h-screen bg-pink-300 flex flex-col fixed top-0 left-0 z-40 transition-transform duration-300 -translate-x-full lg:translate-x-0">
+    class="w-64 h-full bg-pink-300 flex flex-col fixed top-0 left-0 z-40 overflow-y-auto transition-transform duration-300 -translate-x-full lg:translate-x-0">
 
     <!-- Brand -->
     <div class="p-5 border-b border-slate-800">
         <a href="/sweetheaven/admin/dashboard.php" class="flex items-center gap-3 flex-nowrap">
-            <div class="w-9 h-9 bg-rose-500/20 rounded-lg flex items-center justify-center shrink-0">
-                <img src="/sweetheaven/images/shoplogo.png" class="h-6 w-auto" alt="Logo">
+            <div class="w-9 h-9 bg-white/30 rounded-lg flex items-center justify-center shrink-0">
+                <img src="/sweetheaven/images/9102671.png" class="h-6 w-auto" alt="Logo">
             </div>
             <div class="min-w-0">
                 <p class="text-pink-700 font-bold text-lg leading-tight whitespace-nowrap">Sweet Heaven</p>
@@ -153,6 +153,18 @@ $activeClass = "bg-white/60 text-rose-400 font-semibold sidebar-link-active";
             </svg>
             <span><?= __('admin_nav_payments') ?></span>
         </a>
+
+        <!-- Settings — both roles -->
+        <a href="/sweetheaven/admin/profile_edit.php"
+            class="<?= $baseClass ?> <?= $currentPage === 'profile_edit' ? $activeClass : '' ?>">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span><?= __('admin_nav_settings') ?></span>
+        </a>
     </nav>
 
     <!-- View Store — both roles -->
@@ -173,8 +185,9 @@ $activeClass = "bg-white/60 text-rose-400 font-semibold sidebar-link-active";
     <div class="p-4 border-t border-slate-800">
         <div class="flex items-center gap-3 bg-rose-400/30 rounded-xl p-3">
 
-            <!-- Avatar + name → links to Edit Profile -->
+            <!-- Avatar + name → Logout with confirmation -->
             <a href="/sweetheaven/auth/logout.php"
+               onclick="event.preventDefault(); if(confirm('Are you sure you want to log out?')){ window.location.href='/sweetheaven/auth/logout.php'; }"
                class="flex items-center gap-3 flex-1 min-w-0 text-slate-500 hover:text-rose-400 transition-colors"
                title="<?= __('admin_edit_profile') ?>">
                 <div class="w-9 h-9 bg-pink-500 rounded-full flex items-center justify-center text-rose-800 font-bold text-sm shrink-0">

@@ -285,13 +285,13 @@ if ($customizeRequest) {
                         </h2>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="col-span-2">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_full_name') ?></label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_full_name') ?> <span class="text-red-500">*</span></label>
                                 <input type="text" name="full_name" required
                                     value="<?= htmlspecialchars($user['name'] ?? '') ?>"
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_phone') ?></label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_phone') ?> <span class="text-red-500">*</span></label>
                                 <input type="number" name="phone" required placeholder="<?= __('checkout_phone_ph') ?>"
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                             </div>
@@ -301,7 +301,7 @@ if ($customizeRequest) {
                                     class="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 text-gray-400 text-sm">
                             </div>
                             <div class="col-span-2">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_address') ?></label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_address') ?> <span class="text-red-500">*</span></label>
                                 <textarea name="shipping_address" required rows="3"
                                     placeholder="<?= __('checkout_address_ph') ?>"
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"></textarea>
@@ -400,8 +400,12 @@ if ($customizeRequest) {
                                 <label class="cursor-pointer payment-method-label" data-method-id="<?= $pm['id'] ?>" data-method-type="<?= $methodKey ?>">
                                     <input type="radio" name="payment_method_id" value="<?= $pm['id'] ?>" <?= $index === 0 ? 'checked' : '' ?> required class="sr-only peer">
                                     <div class="flex gap-3 border-2 border-gray-200 <?= $colorClass ?> rounded-2xl p-5 transition-all">
-                                        <img src="../images/kbz.png" class="w-8 h-8 hidden" data-logo="kbz">
-                                        <img src="../images/wave.png" class="w-8 h-8 hidden" data-logo="wave">
+                                        <?php if (!empty($pm['logo_image'])): ?>
+                                            <img src="/sweetheaven/<?= htmlspecialchars($pm['logo_image']) ?>" class="w-8 h-8 rounded-lg object-contain bg-gray-100" alt="Logo">
+                                        <?php else: ?>
+                                            <img src="../images/kbz.png" class="w-8 h-8 hidden" data-logo="kbz">
+                                            <img src="../images/wave.png" class="w-8 h-8 hidden" data-logo="wave">
+                                        <?php endif; ?>
                                         <p class="font-bold text-slate-800">
                                             <?= htmlspecialchars($pm['payment_name']) ?>
                                         </p>

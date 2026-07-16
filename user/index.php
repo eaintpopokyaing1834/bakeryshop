@@ -117,6 +117,33 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
             from { opacity: 0; transform: translateY(32px) scale(0.96); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
+
+        .btn-slide-hover {
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .btn-slide-hover::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #e8746a;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform .35s ease;
+            z-index: -1;
+            border-radius: inherit;
+        }
+        .btn-slide-hover:hover::before {
+            transform: scaleX(1);
+        }
+        .btn-slide-hover:hover {
+            color: #fff;
+            border-color: #e8746a;
+        }
     </style>
 </head>
 
@@ -143,7 +170,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
 
                     <div class="absolute z-[-1] top-1/2 -left-20 -translate-x-1/2  w-80 h-80 opacity-20 rounded-full bg-[#e8746a]"></div>
 
-                <span class="inline-flex items-center gap-1.5 bg-white border border-[#f5c3be] text-[#c45c55] px-3.5 py-[5px] rounded-full text-[11px] font-semibold tracking-[.06em] uppercase mb-6">
+                <span class="inline-flex items-center gap-1.5 backdrop-blur-md bg-white/30 border border-white/40 text-[#c45c55] px-3.5 py-[5px] rounded-full text-[11px] font-semibold tracking-[.06em] uppercase mb-6 shadow-[0_4px_16px_rgba(232,116,106,.12)]">
                     <span class="w-[7px] h-[7px] rounded-full bg-[#e8746a] animate-[pulse_2s_infinite]"></span>
                     <?= __('hero_pill') ?>
                 </span>
@@ -166,7 +193,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                         </svg>
                     </a>
                     <a href="#categories"
-                        class="inline-flex items-center gap-2 border border-rose-200 text-rose-500 bg-white px-7 py-3.5 rounded-full font-semibold text-sm hover:bg-rose-50 hover:-translate-y-0.5 transition-all duration-200">
+                        class="btn-slide-hover inline-flex items-center gap-2 border border-rose-200 text-rose-500 bg-white px-7 py-3.5 rounded-full font-semibold text-sm hover:-translate-y-0.5 transition-all duration-200">
                         <?= __('hero_browse_cat') ?>
                     </a>
                 </div>
@@ -236,8 +263,14 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
 
             </div>
 
-            <div class="relative">
-                <div class="overflow-hidden rounded-2xl">
+            <div class="flex items-center gap-4">
+                <button id="catPrev"
+                    class="flex-shrink-0 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-stone-600 hover:bg-white hover:text-rose-500 transition-all opacity-0 md:opacity-100 hover:shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <div class="overflow-hidden rounded-2xl flex-1 min-w-0">
                     <div class="flex transition-transform duration-500 ease-in-out [will-change:transform]" id="categoryTrack">
                         <?php foreach ($categories as $cat): ?>
                             <?php
@@ -265,15 +298,8 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                         <?php endforeach; ?>
                     </div>
                 </div>
-
-                <button id="catPrev"
-                    class="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center text-stone-600 hover:bg-white hover:text-rose-500 transition-all z-10 opacity-0 md:opacity-100">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                </button>
                 <button id="catNext"
-                    class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center text-stone-600 hover:bg-white hover:text-rose-500 transition-all z-10 opacity-0 md:opacity-100">
+                    class="flex-shrink-0 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-stone-600 hover:bg-white hover:text-rose-500 transition-all opacity-0 md:opacity-100 hover:shadow-lg">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
@@ -980,7 +1006,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
             </div>
             <!-- Text -->
             <div class="animate-[fadeUp_0.7s_ease_both] [animation-delay:.2s]">
-                <p class="text-xs font-semibold uppercase tracking-widest mb-2" text-[#e8746a]">
+                <p class="text-xs font-semibold uppercase tracking-widest mb-2 text-[#e8746a]">
                     <?= __('story_label') ?>
                 </p>
                 <h2 class="font-display text-3xl text-gray-800 mb-5"><?= __('story_title') ?></h2>
@@ -1011,6 +1037,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                     <p class="text-xs font-semibold uppercase tracking-widest mb-2" text-[#e8746a]>
                         <?= __('review_display_label') ?>
                     </p>
+                    
                     <h2 class="font-display text-3xl text-gray-800"><?= __('review_display_title') ?></h2>
                     <p class="text-gray-400 text-sm mt-2"><?= __('review_display_desc') ?></p>
                 </div>
@@ -1022,8 +1049,14 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                     <p class="text-sm"><?= __('review_no_reviews') ?></p>
                 </div>
             <?php else: ?>
-                <div class="relative">
-                    <div class="overflow-hidden rounded-2xl">
+                <div class="flex items-center gap-4">
+                    <button id="reviewPrev"
+                        class="flex-shrink-0 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-stone-600 hover:bg-white hover:text-rose-500 transition-all opacity-0 md:opacity-100 hover:shadow-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <div class="overflow-hidden rounded-2xl flex-1 min-w-0">
                         <div class="flex transition-transform duration-500 ease-in-out [will-change:transform]" id="reviewTrack">
                             <?php foreach ($customerReviews as $r): ?>
                                 <div class="flex-shrink-0 px-2 [transition:width_0.3s_ease]">
@@ -1048,15 +1081,8 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                             <?php endforeach; ?>
                         </div>
                     </div>
-
-                    <button id="reviewPrev"
-                        class="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center text-stone-600 hover:bg-white hover:text-rose-500 transition-all z-10 opacity-0 md:opacity-100">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
                     <button id="reviewNext"
-                        class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center text-stone-600 hover:bg-white hover:text-rose-500 transition-all z-10 opacity-0 md:opacity-100">
+                        class="flex-shrink-0 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-stone-600 hover:bg-white hover:text-rose-500 transition-all opacity-0 md:opacity-100 hover:shadow-lg">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>

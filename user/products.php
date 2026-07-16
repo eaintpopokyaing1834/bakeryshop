@@ -270,41 +270,9 @@ if ($isLoggedIn && !$isAdmin) {
 </div>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/auth_modal.php'; ?>
 
 <script>
-function addToCart(productId, name) {
-    fetch('/sweetheaven/api/cart.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `action=add&product_id=${productId}&qty=1`
-    }).then(r=>r.json()).then(data=>{
-        if (data.success) {
-            showToast(`${name} added to cart!`);
-            const badge = document.getElementById('cartBadge');
-            if (badge) { badge.textContent = data.cart_count; badge.classList.remove('hidden'); }
-        } else if (data.redirect) window.location.href='/sweetheaven/user/index.php?show_login=1';
-    });
-}
-
-function toggleWishlist(productId, btn) {
-    fetch('/sweetheaven/api/wishlist.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `product_id=${productId}`
-    }).then(r=>r.json()).then(data=>{
-        if (data.success) {
-            const svg = btn.querySelector('svg');
-            btn.classList.toggle('bg-rose-500', data.is_wishlisted);
-            btn.classList.toggle('bg-white/90', !data.is_wishlisted);
-            btn.classList.toggle('text-white', data.is_wishlisted);
-            btn.classList.toggle('text-gray-400', !data.is_wishlisted);
-            svg.setAttribute('fill', data.is_wishlisted ? 'currentColor' : 'none');
-            showToast(data.is_wishlisted ? '❤️ ' + (data.message || 'Added to wishlist') : '💔 Removed from wishlist');
-            if (typeof updateWishlistBadge === 'function') updateWishlistBadge(data.wishlist_count);
-        } else if (data.redirect) window.location.href='/sweetheaven/user/index.php?show_login=1';
-    });
-}
-
 function showToast(msg) {
     const t = document.getElementById('toast');
     document.getElementById('toastMsg').textContent = msg;

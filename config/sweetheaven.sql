@@ -145,8 +145,12 @@ CREATE TABLE IF NOT EXISTS payment_methods (
     payment_name VARCHAR(100) NOT NULL,
     acc_name VARCHAR(100),
     acc_no VARCHAR(50),
+    logo_image VARCHAR(255) DEFAULT NULL,
     qr_image VARCHAR(255)
 );
+
+-- Run this if table already exists without logo_image column:
+-- ALTER TABLE payment_methods ADD COLUMN logo_image VARCHAR(255) DEFAULT NULL AFTER acc_no;
 
 -- -----------------------------------------------
 -- Table: payment
