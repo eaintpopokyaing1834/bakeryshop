@@ -68,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             } else {
                 $subtotal = 0;
+                $originalSubtotalCalc = 0;
                 foreach ($cart as $cid => $citem) {
                     $pStmt = $db->prepare("SELECT p.price, d.type AS discount_type, d.value AS discount_value FROM products p LEFT JOIN discounts d ON p.discount_id = d.id WHERE p.id=?");
                     $pStmt->execute([$cid]);
@@ -80,13 +81,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $unitPrice = max(0, $unitPrice - $pData['discount_value']);
                         }
                     }
+                    $originalSubtotalCalc += (float)$pData['price'] * $citem['qty'];
                     $subtotal += $unitPrice * $citem['qty'];
                 }
                 $orderCount = $db->prepare("SELECT COUNT(*) FROM orders WHERE user_id=?");
                 $orderCount->execute([$_SESSION['user_id']]);
                 $isFirstOrder = $orderCount->fetchColumn() == 0;
-                $firstOrderDiscount = $isFirstOrder ? $subtotal * 0.05 : 0;
-                $totalAmount = $subtotal - $firstOrderDiscount + $shippingFee;
+                $firstOrderDiscount = $isFirstOrder ? $originalSubtotalCalc * 0.05 : 0;
+                $totalAmount = $originalSubtotalCalc - ($originalSubtotalCalc - $subtotal) - $firstOrderDiscount + $shippingFee;
             }
 
             if (!$error) {
@@ -177,6 +179,7 @@ $user = $user->fetch();
 
 $cartDetails = [];
 $subtotal = 0;
+$originalSubtotal = 0;
 $firstOrderDiscount = 0;
 $totalSavings = 0;
 
@@ -190,6 +193,7 @@ if ($customizeRequest) {
         'primary_image' => $customizeRequest['reference_image'],
     ];
     $subtotal = (float)$customizeRequest['admin_price'];
+    $originalSubtotal = $subtotal;
 } else {
     // Build cart items from DB
     $ids = implode(',', array_map('intval', array_keys($cart)));
@@ -205,26 +209,33 @@ if ($customizeRequest) {
         $qty = $cart[$item['id']]['qty'];
         $item['qty'] = $qty;
         $unitPrice = (float)$item['price'];
+        $savingsPerUnit = 0;
         if ($item['discount_value']) {
             $item['discount_name_display'] = $item['discount_name'];
+            $savingsPerUnit = $unitPrice;
             if ($item['discount_type'] === 'percentage') {
                 $unitPrice = $unitPrice * (1 - $item['discount_value'] / 100);
             } else {
                 $unitPrice = max(0, $unitPrice - $item['discount_value']);
             }
+            $savingsPerUnit -= $unitPrice;
         }
         $item['unit_price'] = $unitPrice;
-        $item['item_total'] = $unitPrice * $qty;
-        $subtotal += $item['item_total'];
+        $item['savings_per_unit'] = $savingsPerUnit;
+        $item['item_total'] = (float)$item['price'] * $qty;  // original price × qty
+        $originalSubtotal += $item['item_total'];
+        $subtotal += $unitPrice * $qty;  // discounted subtotal
         $cartDetails[] = $item;
     }
 
-    // First-order discount
+    // Product-level savings
+    $totalSavings = array_sum(array_map(fn($i) => $i['savings_per_unit'] * $i['qty'], $cartDetails));
+
+    // First-order discount: 5% of original subtotal
     $orderCount = $db->prepare("SELECT COUNT(*) FROM orders WHERE user_id=?");
     $orderCount->execute([$_SESSION['user_id']]);
     $isFirstOrder = $orderCount->fetchColumn() == 0;
-    $firstOrderDiscount = $isFirstOrder ? $subtotal * 0.05 : 0;
-    $totalSavings = $subtotal ? array_sum(array_map(fn($i) => ($i['price'] * $i['qty']) - $i['item_total'], $cartDetails)) : 0;
+    $firstOrderDiscount = $isFirstOrder ? $originalSubtotal * 0.05 : 0;
 }
 ?>
 <!DOCTYPE html>
@@ -439,8 +450,13 @@ if ($customizeRequest) {
                         <h3 class="font-bold text-gray-800 text-lg mb-5"><?= __('checkout_order_summary') ?></h3>
 
                         <div class="space-y-4 mb-5 max-h-72 overflow-y-auto pr-1">
-                            <?php foreach ($cartDetails as $item): ?>
-                                <?php $imgSrc = $item['primary_image'] ? '/sweetheaven/' . $item['primary_image'] : '/sweetheaven/images/maincake.jpg'; ?>
+                            <?php foreach ($cartDetails as $item):
+                                $imgSrc = $item['primary_image'] ? '/sweetheaven/' . $item['primary_image'] : '/sweetheaven/images/maincake.jpg';
+                                $discountLabel = '';
+                                if (!empty($item['discount_name_display'])) {
+                                    $discountLabel = ' (' . htmlspecialchars($item['discount_name_display']) . ')';
+                                }
+                            ?>
                                 <div class="flex items-center gap-3">
                                     <div class="w-12 h-12 rounded-xl overflow-hidden bg-rose-50 shrink-0">
                                         <img src="<?= htmlspecialchars($imgSrc) ?>" class="w-full h-full object-cover">
@@ -449,17 +465,12 @@ if ($customizeRequest) {
                                         <p class="text-sm font-medium text-gray-700 line-clamp-1">
                                             <?= htmlspecialchars($item['name']) ?>
                                         </p>
-                                        <p class="text-xs text-gray-400">x<?= $item['qty'] ?>
-                                            <?php if (!empty($item['discount_name_display'])): ?>
-                                                <span class="text-green-600 font-semibold"> • <?= htmlspecialchars($item['discount_name_display']) ?></span>
-                                            <?php endif; ?>
+                                        <p class="text-xs text-gray-400">
+                                            <?= number_format($item['price']) ?> × <?= $item['qty'] ?><?= $discountLabel ?>
                                         </p>
                                     </div>
-                                    <div class="text-right">
+                                    <div class="text-right shrink-0">
                                         <p class="text-sm font-bold text-gray-700"><?= number_format($item['item_total']) ?></p>
-                                        <?php if (!empty($item['discount_name_display'])): ?>
-                                            <p class="text-[10px] line-through text-gray-400"><?= number_format($item['price'] * $item['qty']) ?></p>
-                                        <?php endif; ?>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -468,12 +479,17 @@ if ($customizeRequest) {
                         <div class="border-t border-gray-100 pt-4 space-y-2 text-sm">
                             <div class="flex justify-between text-gray-500">
                                 <span><?= __('checkout_subtotal') ?></span>
-                                <span><?= number_format($subtotal) ?> <?= __('common_mmk') ?></span>
+                                <span id="subtotalDisplay"><?= number_format($originalSubtotal) ?> <?= __('common_mmk') ?></span>
                             </div>
                             <?php if ($totalSavings > 0): ?>
-                            <div class="flex justify-between text-green-600 font-medium">
+                            <div class="flex justify-between text-green-600 font-medium" id="discountSavingsRow">
                                 <span><?= __('checkout_product_discounts') ?></span>
-                                <span>-<?= number_format($totalSavings) ?> <?= __('common_mmk') ?></span>
+                                <span id="discountDisplay">-<?= number_format($totalSavings) ?> <?= __('common_mmk') ?></span>
+                            </div>
+                            <?php else: ?>
+                            <div class="flex justify-between text-green-600 font-medium hidden" id="discountSavingsRow">
+                                <span><?= __('checkout_product_discounts') ?></span>
+                                <span id="discountDisplay"></span>
                             </div>
                             <?php endif; ?>
                             <?php if ($firstOrderDiscount > 0): ?>
@@ -489,7 +505,7 @@ if ($customizeRequest) {
                             <div
                                 class="flex justify-between font-bold text-gray-800 text-base border-t border-gray-100 pt-2">
                                 <span><?= __('checkout_total') ?></span>
-                                <span id="totalDisplay"><?= number_format($subtotal - $firstOrderDiscount) ?> <?= __('common_mmk') ?></span>
+                                <span id="totalDisplay"><?= number_format($originalSubtotal - $totalSavings - $firstOrderDiscount) ?> <?= __('common_mmk') ?></span>
                             </div>
                         </div>
 
@@ -506,7 +522,8 @@ if ($customizeRequest) {
     <?php require_once __DIR__ . '/../includes/footer.php'; ?>
 
     <script>
-        const subtotal = <?= $subtotal ?>;
+        const originalSubtotal = <?= $originalSubtotal ?>;
+        const totalSavings = <?= $totalSavings ?>;
         const firstOrderDiscount = <?= $firstOrderDiscount ?>;
         const paymentMethods = <?= json_encode($paymentMethods) ?>;
 
@@ -514,7 +531,7 @@ if ($customizeRequest) {
         function updateShipping(radio) {
             const cost = parseInt(radio.dataset.cost, 10) || 0;
             const label = radio.dataset.label || '';
-            const total = subtotal - firstOrderDiscount + cost;
+            const total = originalSubtotal - totalSavings - firstOrderDiscount + cost;
             const shippingEl = document.getElementById('shippingDisplay');
             const totalEl    = document.getElementById('totalDisplay');
             shippingEl.textContent = cost === 0 ? label : cost.toLocaleString('en') + ' <?= __('common_mmk') ?>';

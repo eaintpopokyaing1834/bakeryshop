@@ -48,7 +48,8 @@ switch ($action) {
     case 'remove':
         $productId = (int)($_POST['product_id'] ?? 0);
         unset($_SESSION['cart'][$productId]);
-        echo json_encode(['success' => true, 'cart_count' => cartCount()]);
+        $total = array_sum(array_map(fn($i) => $i['price'] * $i['qty'], $_SESSION['cart'] ?? []));
+        echo json_encode(['success' => true, 'cart_count' => cartCount(), 'total' => $total]);
         break;
 
     case 'update':

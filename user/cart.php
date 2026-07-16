@@ -35,7 +35,7 @@ if (!empty($cart)) {
         }
         $row['savings_per_unit'] = (float)$row['price'] - $unitPrice; // savings per single unit
         $row['unit_price']        = $unitPrice;
-        $row['item_total']        = $unitPrice * $qty;  // discounted line total
+        $row['item_total']        = (float)$row['price'] * $qty;  // always original price × qty
         $subtotal                += $row['item_total'];  // $subtotal = discounted grand total
         $cartProducts[]           = $row;
     }
@@ -54,16 +54,16 @@ $totalSavings = array_sum(array_map(
 ));
 // $subtotal already equals $originalSubtotal - $totalSavings
 
-// First-order 5 % discount applies on the discounted subtotal (mirrors checkout.php)
+// First-order 5 % discount applies on the original subtotal
 $firstOrderDiscount = 0;
 if (!empty($cartProducts) && isset($_SESSION['user_id'])) {
     $ocStmt = $db->prepare("SELECT COUNT(*) FROM orders WHERE user_id=?");
     $ocStmt->execute([$_SESSION['user_id']]);
     if ($ocStmt->fetchColumn() == 0) {
-        $firstOrderDiscount = $subtotal * 0.05;
+        $firstOrderDiscount = $originalSubtotal * 0.05;
     }
 }
-$grandTotal = $subtotal - $firstOrderDiscount;
+$grandTotal = $originalSubtotal - $totalSavings - $firstOrderDiscount;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -140,27 +140,28 @@ $grandTotal = $subtotal - $firstOrderDiscount;
                 <h3 class="font-bold text-gray-800 text-lg mb-5"><?= __('cart_order_summary') ?></h3>
 
                 <!-- Product list -->
-                <div class="space-y-4 mb-5 max-h-72 overflow-y-auto pr-1">
+                <div class="space-y-4 mb-5 max-h-72 overflow-y-auto pr-1" id="summaryProductList">
                     <?php foreach ($cartProducts as $item):
                         $imgSrc = $item['primary_image'] ? '/sweetheaven/'.$item['primary_image'] : '/sweetheaven/images/maincake.jpg';
+                        $discountLabel = '';
+                        if (!empty($item['discount_name'])) {
+                            $discountLabel = ' (' . htmlspecialchars($item['discount_name']) . ')';
+                        }
                     ?>
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-3" id="summary-item-<?= $item['id'] ?>"
+                         data-unit-price="<?= $item['price'] ?>"
+                         data-discount-label="<?= $discountLabel ?>">
                         <div class="w-12 h-12 rounded-xl overflow-hidden bg-rose-50 shrink-0">
                             <img src="<?= htmlspecialchars($imgSrc) ?>" class="w-full h-full object-cover" alt="<?= htmlspecialchars($item['name']) ?>">
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-medium text-gray-700 line-clamp-1"><?= htmlspecialchars($item['name']) ?></p>
-                            <p class="text-xs text-gray-400">x<?= $item['qty'] ?>
-                                <?php if (!empty($item['discount_name'])): ?>
-                                    <span class="text-green-600 font-semibold"> • <?= htmlspecialchars($item['discount_name']) ?></span>
-                                <?php endif; ?>
+                            <p class="text-xs text-gray-400">
+                                <span id="summary-price-<?= $item['id'] ?>"><?= number_format($item['price']) ?> × <?= $item['qty'] ?></span><?= $discountLabel ?>
                             </p>
                         </div>
                         <div class="text-right shrink-0">
-                            <p class="text-sm font-bold text-gray-700"><?= number_format($item['item_total']) ?></p>
-                            <?php if (!empty($item['discount_name'])): ?>
-                                <p class="text-[10px] line-through text-gray-400"><?= number_format($item['price'] * $item['qty']) ?></p>
-                            <?php endif; ?>
+                            <p class="text-sm font-bold text-gray-700" id="summary-total-<?= $item['id'] ?>"><?= number_format($item['item_total']) ?></p>
                         </div>
                     </div>
                     <?php endforeach; ?>
@@ -186,9 +187,14 @@ $grandTotal = $subtotal - $firstOrderDiscount;
                     <?php endif; ?>
 
                     <?php if ($firstOrderDiscount > 0): ?>
-                    <div class="flex justify-between text-blue-600 font-medium">
+                    <div class="flex justify-between text-blue-600 font-medium" id="firstOrderDiscountRow">
                         <span><?= __('checkout_first_order_discount') ?></span>
-                        <span>-<?= number_format($firstOrderDiscount) ?> <?= __('common_mmk') ?></span>
+                        <span id="firstOrderDiscountDisplay">-<?= number_format($firstOrderDiscount) ?> <?= __('common_mmk') ?></span>
+                    </div>
+                    <?php else: ?>
+                    <div class="flex justify-between text-blue-600 font-medium hidden" id="firstOrderDiscountRow">
+                        <span><?= __('checkout_first_order_discount') ?></span>
+                        <span id="firstOrderDiscountDisplay"></span>
                     </div>
                     <?php endif; ?>
 
@@ -231,7 +237,7 @@ $grandTotal = $subtotal - $firstOrderDiscount;
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
 
 <script>
-const _firstOrderDiscount = <?= $firstOrderDiscount ?>;
+const _isFirstOrder = <?= $firstOrderDiscount > 0 ? 'true' : 'false' ?>;
 const _mmk = ' <?= __('common_mmk') ?>';
 
 // Recalculate total product-level savings from DOM data attributes
@@ -246,19 +252,24 @@ function recalcSavings() {
 }
 
 function updateSummary(originalTotal) {
-    const savings    = recalcSavings();
-    const discounted = originalTotal - savings;
-    const grand      = discounted - _firstOrderDiscount;
+    const savings           = recalcSavings();
+    const discounted        = originalTotal - savings;
+    const firstOrderDiscount = _isFirstOrder ? originalTotal * 0.05 : 0;
+    const grand             = discounted - firstOrderDiscount;
 
     const subtotalEl  = document.getElementById('subtotalDisplay');
     const discountRow = document.getElementById('discountSavingsRow');
     const discountEl  = document.getElementById('discountDisplay');
+    const firstOrderRow = document.getElementById('firstOrderDiscountRow');
+    const firstOrderEl  = document.getElementById('firstOrderDiscountDisplay');
     const grandEl     = document.getElementById('grandTotal');
 
-    if (subtotalEl)  subtotalEl.textContent  = originalTotal.toLocaleString('en') + _mmk;
-    if (discountEl)  discountEl.textContent  = '-' + Math.round(savings).toLocaleString('en') + _mmk;
-    if (discountRow) discountRow.classList.toggle('hidden', savings <= 0);
-    if (grandEl)     grandEl.textContent     = Math.round(grand).toLocaleString('en') + _mmk;
+    if (subtotalEl)     subtotalEl.textContent     = originalTotal.toLocaleString('en') + _mmk;
+    if (discountEl)     discountEl.textContent     = '-' + Math.round(savings).toLocaleString('en') + _mmk;
+    if (discountRow)    discountRow.classList.toggle('hidden', savings <= 0);
+    if (firstOrderEl)   firstOrderEl.textContent   = '-' + Math.round(firstOrderDiscount).toLocaleString('en') + _mmk;
+    if (firstOrderRow)  firstOrderRow.classList.toggle('hidden', firstOrderDiscount <= 0);
+    if (grandEl)        grandEl.textContent        = Math.round(grand).toLocaleString('en') + _mmk;
 }
 
 function updateQty(productId, newQty) {
@@ -270,22 +281,36 @@ function updateQty(productId, newQty) {
         if (!data.success) return;
         if (newQty <= 0) {
             document.getElementById(`cart-item-${productId}`)?.remove();
+            document.getElementById(`summary-item-${productId}`)?.remove();
             updateCartCountText();
         } else {
+            // Update left-side cart item
             const qtyEl = document.getElementById(`qty-${productId}`);
-            // Recompute per-item line total from savings data + new qty
-            const row   = document.getElementById(`cart-item-${productId}`);
-            const savingsPerUnit = parseFloat(row?.dataset?.savingsPerUnit) || 0;
             const subEl = document.getElementById(`subtotal-${productId}`);
             if (qtyEl) qtyEl.textContent = newQty;
-            // data.subtotal is original price × qty (from session), subtract savings to get discounted
-            if (subEl) subEl.textContent = Math.round(data.subtotal - savingsPerUnit * newQty).toLocaleString('en');
+            if (subEl) subEl.textContent = Math.round(data.subtotal).toLocaleString('en');
+
+            // Update right-side order summary item
+            const summaryItem = document.getElementById(`summary-item-${productId}`);
+            if (summaryItem) {
+                const unitPrice = parseFloat(summaryItem.dataset.unitPrice) || 0;
+                const discountLabel = summaryItem.dataset.discountLabel || '';
+                const priceText = numberFormat(unitPrice) + ' × ' + newQty;
+                const summaryPriceEl = document.getElementById(`summary-price-${productId}`);
+                const summaryTotalEl = document.getElementById(`summary-total-${productId}`);
+                if (summaryPriceEl) summaryPriceEl.textContent = priceText;
+                if (summaryTotalEl) summaryTotalEl.textContent = numberFormat(unitPrice * newQty);
+            }
         }
         // data.total = sum of (original session price × qty) across all items
         updateSummary(data.total);
         const badge = document.getElementById('cartBadge');
         if (badge) { badge.textContent = data.cart_count; if(data.cart_count===0)badge.classList.add('hidden'); }
     });
+}
+
+function numberFormat(n) {
+    return Math.round(n).toLocaleString('en');
 }
 
 function removeItem(productId) {
@@ -296,7 +321,9 @@ function removeItem(productId) {
     }).then(r=>r.json()).then(data=>{
         if (data.success) {
             document.getElementById(`cart-item-${productId}`)?.remove();
+            document.getElementById(`summary-item-${productId}`)?.remove();
             updateCartCountText();
+            updateSummary(data.total);
             const badge = document.getElementById('cartBadge');
             if (badge) { badge.textContent = data.cart_count; if(data.cart_count===0)badge.classList.add('hidden'); }
             if (data.cart_count === 0) location.reload();
