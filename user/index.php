@@ -147,7 +147,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
     </style>
 </head>
 
-<body class="overflow-x-hidden text-gray-700">
+<body class="overflow-x-hidden text-gray-700 bg-[#fdf8f3]">
 
     <?php require_once __DIR__ . '/../includes/header.php'; ?>
 
@@ -475,7 +475,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
     </script>
 
     <!-- ═════════════════════════ BEST SELLERS ═════════════════════════ -->
-    <section class="py-20 bg-white">
+    <section class="py-20 bg-[#fdf8f3]">
         <div class="max-w-7xl mx-auto px-6">
             <div class="flex flex-col items-center justify-center mb-10 animate-[fadeUp_0.7s_ease_both] space-y-4">
                 <div>
@@ -589,7 +589,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
     </section>
 
     <!-- ═════════════════════════ CUSTOMIZE CAKE ═════════════════════════ -->
-    <section class="py-20 bg-gradient-to-br from-pink-50 via-white to-rose-50">
+    <section class="py-20 bg-[#fdf8f3]">
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid md:grid-cols-2 gap-12 items-center">
                 <div class="relative">
@@ -653,7 +653,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
     </section>
 
     <!-- ═════════════════════════ PROMOTIONS ═════════════════════════ -->
-    <section class="py-16 bg-white">
+    <section class="py-16 bg-[#fdf8f3]">
         <div class="max-w-7xl mx-auto px-6">
 
             <div class="grid lg:grid-cols-2  gap-6">
@@ -679,14 +679,14 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                     </div>
 
                     <!-- Promo 2 -->
-                    <div class="rounded-2xl transition-all duration-200 ease-in-out hover:-translate-y-[3px] hover:shadow-[0_12px_36px_rgba(0,0,0,.07)] overflow-hidden flex flex-col md:flex-row border border-amber-100"
+                    <div class="rounded-2xl transition-all duration-200 ease-in-out hover:-translate-y-[3px] hover:shadow-[0_12px_36px_rgba(0,0,0,.07)] overflow-hidden flex flex-col md:flex-row border border-amber-100
                         bg-[#fffbf0]">
                         <div class="p-12 flex-1">
                             <span class="text-3xl mb-3 block">🎁</span>
                             <h3 class="font-bold text-gray-800 text-xl mb-2"><?= __('promo_free_gift_title') ?></h3>
                             <p class="text-gray-500 text-sm leading-relaxed mb-5"><?= __('promo_free_gift_desc') ?></p>
                             <a href="/sweetheaven/user/products.php"
-                                class="inline-block text-white font-semibold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity"
+                                class="inline-block text-white font-semibold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity
                                 bg-amber-500">
                                 <?= __('promo_shop_now') ?>
                             </a>
@@ -729,7 +729,7 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
 
 
     <!-- ═════════════════════════ SPECIAL DISCOUNTS ═════════════════════════ -->
-    <section id="special-discounts" class="py-16 bg-white">
+    <section id="special-discounts" class="py-16 bg-[#fdf8f3]">
         <div class="max-w-7xl mx-auto px-6">
 
             <!-- ── Section Header ── -->
@@ -1094,89 +1094,78 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
         </div>
     </section>
 
-    <!-- ═════════════════════════ REVIEW FORM ═════════════════════════ -->
-    <?php if (isset($_SESSION['user_id']) && !in_array($_SESSION['role'] ?? '', ['admin', 'cashier'])): ?>
-        <section id="review-form" class="py-10 lg:py-14 bg-[#fdf8f3]">
+    <!-- ═════════════════════════ CONTACT US ═════════════════════════ -->
+        <section id="contact-us" class="py-10 lg:py-14 bg-[#fdf8f3]">
             <div class="max-w-7xl mx-auto px-6">
-            <div class="relative overflow-hidden rounded-3xl px-6 py-4 lg:py-24 bg-gradient-to-br from-pink-400 to-pink-200">
-            <!-- Decorative blobs -->
-            <div class="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
-            <div class="absolute bottom-0 right-0 w-96 h-96 bg-rose-300/20 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl"></div>
 
-            <div class="relative z-10">
-                <div class="grid lg:grid-cols-2 gap-6 items-center">
+                <!-- Section Title -->
+                <div class="text-center mb-10">
+                    <p class="text-xs font-semibold uppercase tracking-widest text-[#e8746a] mb-2">Get In Touch</p>
+                    <h2 class="font-display text-4xl text-gray-800">Contact Us</h2>
+                    <p class="text-gray-400 text-sm mt-2">We'd love to hear from you. Send us a message and we'll get back to you soon.</p>
+                </div>
 
-                    <!-- Left: Glassmorphism form -->
-                    <div>
-                        <div class="backdrop-blur-xl bg-white/25 border border-white/40 rounded-3xl p-8 sm:p-10 shadow-[0_8px_32px_0_rgba(0,0,0,0.12)]">
-                            <!-- Header -->
-                            <div class="mb-8">
-                                <p class="text-xs font-semibold uppercase tracking-widest text-white/70 mb-2">
-                                    <?= __('review_display_label') ?>
-                                </p>
-                                <h2 class="font-display text-3xl sm:text-4xl text-white mb-3"><?= __('review_form_title') ?></h2>
-                                <p class="text-white/70 text-sm"><?= __('review_form_desc') ?></p>
-                            </div>
+                <div class="grid lg:grid-cols-2 gap-8 items-center">
 
-                            <!-- Form -->
-                            <form id="reviewForm" class="space-y-5">
-                                <div class="grid sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-xs font-semibold text-white/80 uppercase tracking-wider mb-2">
-                                            <?= __('review_form_name_label') ?>
-                                        </label>
-                                        <input type="text" id="reviewName" required
-                                            class="w-full px-4 py-3.5 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white/30 text-sm transition-all"
-                                            placeholder="<?= __('review_form_name_ph') ?>">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-white/80 uppercase tracking-wider mb-2">
-                                            <?= __('review_form_email_label') ?>
-                                        </label>
-                                        <input type="email" id="reviewEmail" required
-                                            class="w-full px-4 py-3.5 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white/30 text-sm transition-all"
-                                            placeholder="<?= __('review_form_email_ph') ?>">
-                                    </div>
+                    <!-- Left: Form with light pink background -->
+                    <div class="bg-pink-100 rounded-3xl p-8 sm:p-10 shadow-sm">
+                        <!-- Header -->
+                        <div class="mb-8">
+                            <p class="text-xs font-semibold uppercase tracking-widest text-[#e8746a] mb-2">Drop Us a Line</p>
+                            <h3 class="font-display text-3xl sm:text-4xl text-gray-800 mb-3">Send a Message</h3>
+                            <p class="text-gray-500 text-sm">Fill in the form below and we'll respond as soon as possible.</p>
+                        </div>
+
+                        <!-- Form -->
+                        <form id="contactForm" class="space-y-5">
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Your Name <span class="text-rose-400">*</span></label>
+                                    <input type="text" id="contactName" required
+                                        class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all"
+                                        placeholder="e.g. Aye Aye">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold text-white/80 uppercase tracking-wider mb-2">
-                                        <?= __('review_form_message_label') ?>
-                                    </label>
-                                    <textarea id="reviewMessage" rows="4" required
-                                        class="w-full px-4 py-3.5 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white/30 text-sm resize-none transition-all"
-                                        placeholder="<?= __('review_form_message_ph') ?>"></textarea>
+                                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Email Address <span class="text-rose-400">*</span></label>
+                                    <input type="email" id="contactEmail" required
+                                        class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all"
+                                        placeholder="you@example.com">
                                 </div>
-                                <button type="submit"
-                                    class="w-full sm:w-auto bg-white text-rose-500 font-bold px-10 py-3.5 rounded-xl transition-all text-sm shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0">
-                                    <?= __('review_form_submit') ?>
-                                </button>
-                            </form>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Phone Number <span class="text-gray-400 font-normal normal-case tracking-normal">(optional)</span></label>
+                                <input type="tel" id="contactPhone"
+                                    class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all"
+                                    placeholder="09 xxxxxxx">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Your Message <span class="text-rose-400">*</span></label>
+                                <textarea id="contactMessage" rows="4" required
+                                    class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none transition-all"
+                                    placeholder="Tell us how we can help you..."></textarea>
+                            </div>
+                            <button type="submit" id="contactSubmitBtn"
+                                class="w-full sm:w-auto bg-[#e8746a] hover:bg-[#d4635a] text-white font-bold px-10 py-3.5 rounded-xl transition-all text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0">
+                                Send Message
+                            </button>
+                        </form>
 
-                            <!-- Message -->
-                            <div id="reviewFormMsg" class="mt-5 hidden"></div>
-                        </div>
+                        <!-- Message -->
+                        <div id="contactFormMsg" class="mt-5 hidden"></div>
                     </div>
 
-                    <!-- Right: Image -->
+                    <!-- Right: Image only, no background -->
                     <div class="hidden lg:flex justify-center items-center">
-                        <div class="relative">
-                            <img src="/sweetheaven/images/review.jpg" alt="Sweet Heaven Bakery"
-                                 class="w-80 h-80 lg:w-[420px] lg:h-[420px] object-cover rounded-[2rem] shadow-2xl border-4 border-white/30">
-                            <div class="absolute -bottom-4 -right-4 bg-white/30 backdrop-blur-md rounded-2xl px-5 py-3 border border-white/40 shadow-lg">
-                                <p class="text-white font-bold text-sm">🎂 <?= __('review_form_title') ?></p>
-                            </div>
-                        </div>
+                        <img src="/sweetheaven/images/review.jpg" alt="Sweet Heaven Bakery"
+                             class="w-80 h-80 lg:w-[420px] lg:h-[420px] object-cover rounded-[2rem] shadow-xl">
                     </div>
 
                 </div>
             </div>
-            </div>
-            </div>
         </section>
-    <?php endif; ?>
 
     <!-- ═════════════════════════ ABOUT US ═════════════════════════ -->
-    <section class="py-20 bg-white">
+    <section class="py-20 bg-[#fdf8f3]">
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid md:grid-cols-2 gap-12 items-center">
                 <div class="rounded-3xl overflow-hidden shadow-lg animate-[fadeUp_0.7s_ease_both]">
@@ -1208,43 +1197,58 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
     </section>
 
     <script>
-        document.getElementById('reviewForm')?.addEventListener('submit', function (e) {
+        document.getElementById('contactForm')?.addEventListener('submit', function (e) {
             e.preventDefault();
-            const btn = this.querySelector('button[type="submit"]');
-            const msgBox = document.getElementById('reviewFormMsg');
+            const btn = document.getElementById('contactSubmitBtn');
+            const msgBox = document.getElementById('contactFormMsg');
             btn.disabled = true;
-            btn.textContent = '<?= __('review_form_submitting') ?>';
+            btn.textContent = 'Sending...';
+            msgBox.classList.add('hidden');
 
-            fetch('/sweetheaven/api/customer_review.php', {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+            fetch('/sweetheaven/api/contact_us.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
-                    name: document.getElementById('reviewName').value,
-                    email: document.getElementById('reviewEmail').value,
-                    message: document.getElementById('reviewMessage').value
-                })
+                    name:    document.getElementById('contactName').value,
+                    email:   document.getElementById('contactEmail').value,
+                    phone:   document.getElementById('contactPhone').value,
+                    message: document.getElementById('contactMessage').value
+                }),
+                signal: controller.signal
             })
-                .then(r => r.json())
-                .then(data => {
-                    msgBox.classList.remove('hidden');
-                    if (data.success) {
-                        msgBox.className = 'mt-5 backdrop-blur-md bg-emerald-400/30 border border-emerald-300/40 text-white px-4 py-3 rounded-xl text-sm font-medium';
-                        msgBox.textContent = data.message;
-                        document.getElementById('reviewForm').reset();
-                    } else {
-                        msgBox.className = 'mt-5 backdrop-blur-md bg-red-400/30 border border-red-300/40 text-white px-4 py-3 rounded-xl text-sm font-medium';
-                        msgBox.textContent = data.message;
-                    }
-                    btn.disabled = false;
-                    btn.textContent = '<?= __('review_form_submit') ?>';
-                })
-                .catch(() => {
-                    msgBox.classList.remove('hidden');
-                    msgBox.className = 'mt-5 backdrop-blur-md bg-red-400/30 border border-red-300/40 text-white px-4 py-3 rounded-xl text-sm font-medium';
-                    msgBox.textContent = '<?= __('review_form_error') ?>';
-                    btn.disabled = false;
-                    btn.textContent = '<?= __('review_form_submit') ?>';
-                });
+            .then(r => {
+                clearTimeout(timeoutId);
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(data => {
+                msgBox.classList.remove('hidden');
+                if (data.success) {
+                    msgBox.className = 'mt-5 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm font-medium';
+                    msgBox.textContent = data.message;
+                    document.getElementById('contactForm').reset();
+                } else {
+                    msgBox.className = 'mt-5 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium';
+                    msgBox.textContent = data.message || 'Something went wrong.';
+                }
+                btn.disabled = false;
+                btn.textContent = 'Send Message';
+            })
+            .catch(err => {
+                clearTimeout(timeoutId);
+                msgBox.classList.remove('hidden');
+                msgBox.className = 'mt-5 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium';
+                if (err.name === 'AbortError') {
+                    msgBox.textContent = 'Request timed out. Please try again.';
+                } else {
+                    msgBox.textContent = 'Something went wrong. Please try again. (' + err.message + ')';
+                }
+                btn.disabled = false;
+                btn.textContent = 'Send Message';
+            });
         });
     </script>
 

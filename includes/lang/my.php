@@ -385,16 +385,21 @@ return [
     'review_display_desc'       => 'ကျွန်ုပ်တို့၏ ချိုမြိန်သော အသိုက်အဝန်းက ပြောကြသည်',
     'review_no_reviews'         => 'သုံးသပ်ချက် မရှိသေးပါ။ ပထမဆုံး သုံးသပ်ချက်ရေးပါ!',
 
-    // ── Review Form (Index) ──────────────────────────────
-    'review_form_name_label'    => 'အမည်အပြည့်အစုံ *',
-    'review_form_name_ph'       => 'သင်၏ အမည်',
-    'review_form_email_label'   => 'အီးမေးလ်လိပ်စာ *',
-    'review_form_email_ph'      => 'you@example.com',
-    'review_form_message_label' => 'သင်၏ သုံးသပ်ချက် *',
-    'review_form_message_ph'    => 'သင်၏ အတွေ့အကြုံကို ပြောပြပါ...',
-    'review_form_submit'        => 'သုံးသပ်ချက် တင်မည်',
-    'review_form_submitting'    => 'တင်နေသည်...',
-    'review_form_error'         => 'တစ်ခုခု မှားယွင်းသွားသည်။ ပြန်ကြိုးစားပါ။',
+    // ── Contact Us (Index) ──────────────────────────────
+    'contact_us_title'         => 'ဆက်သွယ်ရန်',
+    'contact_us_label'         => 'ဆက်သွယ်ပါ',
+    'contact_us_desc'          => 'မေးခွန်း သို့မဟုတ် အကြံပြုချက် ရှိပါသလား? ကျွန်ုပ်တို့ ကြားချင်ပါသည်!',
+    'contact_us_name_label'    => 'အမည်အပြည့်အစုံ *',
+    'contact_us_name_ph'       => 'သင်၏ အမည်',
+    'contact_us_email_label'   => 'အီးမေးလ်လိပ်စာ *',
+    'contact_us_email_ph'      => 'you@example.com',
+    'contact_us_phone_label'   => 'ဖုန်းနံပါတ်',
+    'contact_us_phone_ph'      => 'သင်၏ ဖုန်းနံပါတ်',
+    'contact_us_message_label' => 'မက်ဆေ့ချ် *',
+    'contact_us_message_ph'    => 'သင်၏ မက်ဆေ့ချ်ကို ရေးပါ...',
+    'contact_us_submit'        => 'မက်ဆေ့ချ် ပို့မည်',
+    'contact_us_submitting'    => 'ပို့နေသည်...',
+    'contact_us_error'         => 'လိုအပ်သော အချက်အလက်များ ဖြည့်ပါ။',
 
     // ── Toast / JS Messages ──────────────────────────────
     'toast_added_to_cart'       => '%s တောင်းထဲ ထည့်ပြီးပါပြီ!',

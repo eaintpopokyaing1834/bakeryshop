@@ -385,18 +385,21 @@ return [
     'review_display_desc' => 'Here\'s what our sweet community has to say',
     'review_no_reviews' => 'No reviews yet. Be the first to share your experience!',
 
-    // ── Review Form (Index) ──────────────────────────────
-    'review_form_title' => 'Share Your Experience',
-    'review_form_desc' => 'We\'d love to hear your thoughts about our products and service.',
-    'review_form_name_label' => 'Full Name *',
-    'review_form_name_ph' => 'Your name',
-    'review_form_email_label' => 'Email Address *',
-    'review_form_email_ph' => 'you@example.com',
-    'review_form_message_label' => 'Your Review *',
-    'review_form_message_ph' => 'Tell us about your experience...',
-    'review_form_submit' => 'Submit Review',
-    'review_form_submitting' => 'Submitting...',
-    'review_form_error' => 'Something went wrong. Please try again.',
+    // ── Contact Us (Index) ──────────────────────────────
+    'contact_us_title' => 'Contact Us',
+    'contact_us_label' => 'Get in Touch',
+    'contact_us_desc' => 'Have a question or feedback? We\'d love to hear from you!',
+    'contact_us_name_label' => 'Full Name *',
+    'contact_us_name_ph' => 'Your name',
+    'contact_us_email_label' => 'Email Address *',
+    'contact_us_email_ph' => 'you@example.com',
+    'contact_us_phone_label' => 'Phone Number',
+    'contact_us_phone_ph' => 'Your phone number',
+    'contact_us_message_label' => 'Message *',
+    'contact_us_message_ph' => 'Write your message here...',
+    'contact_us_submit' => 'Send Message',
+    'contact_us_submitting' => 'Sending...',
+    'contact_us_error' => 'Please fill in all required fields.',
 
     // ── Toast / JS Messages ──────────────────────────────
     'toast_added_to_cart' => '%s added to cart!',

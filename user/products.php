@@ -159,9 +159,14 @@ if ($isLoggedIn && !$isAdmin) {
                         <input type="hidden" name="category_id" value="<?= $categoryId ?>">
                         <input type="hidden" name="sort" value="<?= $sort ?>">
                         <?php if ($discounted): ?><input type="hidden" name="discounted" value="1"><?php endif; ?>
-                        <input type="search" name="search" placeholder="<?= __('products_search_ph') ?>"
-                            value="<?= htmlspecialchars($search) ?>"
-                            class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 w-48">
+                        <div class="relative">
+                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                            </svg>
+                            <input type="search" name="search" placeholder="<?= __('products_search_ph') ?>"
+                                value="<?= htmlspecialchars($search) ?>"
+                                class="border border-gray-200 rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 w-48">
+                        </div>
                     </form>
                     <!-- Sort -->
                     <form method="GET" id="sortForm">
