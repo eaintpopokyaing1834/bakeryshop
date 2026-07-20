@@ -30,16 +30,6 @@ $bestSellers = $db->query("
     LIMIT 4
 ")->fetchAll();
 
-// Ensure customer_reviews table exists
-$db->exec("CREATE TABLE IF NOT EXISTS customer_reviews (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL,
-    message TEXT NOT NULL,
-    status ENUM('pending','approved','rejected') DEFAULT 'pending',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
 $latestProducts = $db->query("
     SELECT p.*,
            pi.image_url AS primary_image
@@ -50,7 +40,13 @@ $latestProducts = $db->query("
     LIMIT 9
 ")->fetchAll();
 
-$customerReviews = $db->query("SELECT name, message, created_at FROM customer_reviews WHERE status='approved' ORDER BY created_at DESC")->fetchAll();
+$customerReviews = $db->query("
+    SELECT u.name, r.comment AS message, r.rating, r.created_at
+    FROM reviews r
+    JOIN users u ON r.user_id = u.id
+    WHERE r.status='approved'
+    ORDER BY r.created_at DESC
+")->fetchAll();
 
 // Fetch all discounted products
 $discountedProducts = $db->query("
@@ -67,6 +63,13 @@ $discountedProducts = $db->query("
 ")->fetchAll();
 
 $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['admin', 'cashier']);
+$isLoggedIn = isset($_SESSION['user_id']);
+$currentUser = null;
+if ($isLoggedIn) {
+    $stmtUser = $db->prepare("SELECT name, email FROM users WHERE id = ?");
+    $stmtUser->execute([$_SESSION['user_id']]);
+    $currentUser = $stmtUser->fetch();
+}
 
 ?>
 <!DOCTYPE html>
@@ -1048,6 +1051,31 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                     <p class="text-4xl mb-3">💬</p>
                     <p class="text-sm"><?= __('review_no_reviews') ?></p>
                 </div>
+            <?php elseif (count($customerReviews) === 1): ?>
+                <?php $r = $customerReviews[0]; ?>
+                <div class="max-w-md mx-auto">
+                    <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm text-left">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-500 font-bold text-sm flex-shrink-0">
+                                <?= strtoupper(substr($r['name'], 0, 1)) ?>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="font-semibold text-gray-700 text-sm truncate"><?= htmlspecialchars($r['name']) ?></p>
+                                <p class="text-xs text-gray-400"><?= date('M j, Y', strtotime($r['created_at'])) ?></p>
+                            </div>
+                        </div>
+                        <?php if ($r['rating']): ?>
+                            <div class="flex items-center gap-1 mb-3">
+                                <?php for ($i = 1; $i <= 5; $i++): ?>
+                                    <svg class="w-4 h-4 <?= $i <= $r['rating'] ? 'text-amber-400' : 'text-gray-200' ?>" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                    </svg>
+                                <?php endfor; ?>
+                            </div>
+                        <?php endif; ?>
+                        <p class="text-gray-500 text-sm leading-7">"<?= htmlspecialchars($r['message']) ?>"</p>
+                    </div>
+                </div>
             <?php else: ?>
                 <div class="flex items-center gap-4">
                     <button id="reviewPrev"
@@ -1075,6 +1103,15 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                                                 </p>
                                             </div>
                                         </div>
+                                        <?php if ($r['rating']): ?>
+                                            <div class="flex items-center gap-1 mb-3">
+                                                <?php for ($i = 1; $i <= 5; $i++): ?>
+                                                    <svg class="w-4 h-4 <?= $i <= $r['rating'] ? 'text-amber-400' : 'text-gray-200' ?>" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                    </svg>
+                                                <?php endfor; ?>
+                                            </div>
+                                        <?php endif; ?>
                                         <p class="text-gray-500 text-sm leading-7">"<?= htmlspecialchars($r['message']) ?>"</p>
                                     </div>
                                 </div>
@@ -1122,19 +1159,23 @@ $isAdmin = isset($_SESSION['user_id']) && in_array($_SESSION['role'] ?? '', ['ad
                                 <div>
                                     <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Your Name <span class="text-rose-400">*</span></label>
                                     <input type="text" id="contactName" required
-                                        class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all"
-                                        placeholder="e.g. Aye Aye">
+                                        class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all <?= $isLoggedIn ? 'bg-gray-50 cursor-not-allowed' : '' ?>"
+                                        placeholder="e.g. Aye Aye"
+                                        value="<?= $isLoggedIn ? htmlspecialchars($currentUser['name'] ?? '') : '' ?>"
+                                        <?= $isLoggedIn ? 'readonly' : '' ?>>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Email Address <span class="text-rose-400">*</span></label>
                                     <input type="email" id="contactEmail" required
-                                        class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all"
-                                        placeholder="you@example.com">
+                                        class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all <?= $isLoggedIn ? 'bg-gray-50 cursor-not-allowed' : '' ?>"
+                                        placeholder="you@example.com"
+                                        value="<?= $isLoggedIn ? htmlspecialchars($currentUser['email'] ?? '') : '' ?>"
+                                        <?= $isLoggedIn ? 'readonly' : '' ?>>
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Phone Number <span class="text-gray-400 font-normal normal-case tracking-normal">(optional)</span></label>
-                                <input type="tel" id="contactPhone"
+                                <input type="number" id="contactPhone"
                                     class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all"
                                     placeholder="09 xxxxxxx">
                             </div>

@@ -9,7 +9,6 @@ require_once __DIR__ . '/../config/db.php';
 $db = getDB();
 $newOrdersCount = (int) $db->query("SELECT COUNT(*) FROM notifications WHERE (type='new_order' OR type='customize_request') AND is_seen=0")->fetchColumn();
 $totalNotifications = (int) $db->query("SELECT COUNT(*) FROM notifications WHERE (type='new_order' OR type='customize_request') AND is_seen=0")->fetchColumn();
-$pendingReviewsCount = (int) $db->query("SELECT COUNT(*) FROM customer_reviews WHERE status='pending'")->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="en">

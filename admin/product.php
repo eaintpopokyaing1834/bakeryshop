@@ -280,7 +280,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         </div>
         <?php if ($totalPages > 1): ?>
         <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-            <p class="text-sm text-gray-400"><?= __('admin_page_of') ?> <?= $page ?> / <?= $totalPages ?></p>
+            <p class="text-sm text-gray-400"><?= sprintf(__('admin_page_of'), $page, $totalPages) ?></p>
             <div class="flex items-center gap-1">
                 <?php if ($page > 1): ?>
                 <a href="?tab=products&page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← <?= __('admin_prev') ?></a>

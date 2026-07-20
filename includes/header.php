@@ -28,10 +28,10 @@ if ($isLoggedIn && !$isAdmin) {
     $wishlistCount = (int) $wstmt->fetchColumn();
 }
 $_currentLang = currentLang();
-$categoryId = (int)($_GET['category_id'] ?? 0);
-$search     = trim($_GET['search'] ?? '');
-$discounted = (int)($_GET['discounted'] ?? 0);
-$sort       = trim($_GET['sort'] ?? '');
+$categoryId = (int) ($_GET['category_id'] ?? 0);
+$search = trim($_GET['search'] ?? '');
+$discounted = (int) ($_GET['discounted'] ?? 0);
+$sort = trim($_GET['sort'] ?? '');
 
 ?>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
@@ -152,6 +152,8 @@ $sort       = trim($_GET['sort'] ?? '');
                         class="nav-link hover:text-rose-500 transition-colors"><?= __('nav_home') ?></a></li>
                 <li><a href="/sweetheaven/user/products.php"
                         class="nav-link hover:text-rose-500 transition-colors"><?= __('nav_products') ?></a></li>
+                <li><a href="/sweetheaven/user/index.php#contact-us"
+                        class="nav-link hover:text-rose-500 transition-colors"><?= __('nav_contact') ?></a></li>
                 <?php if (!$isAdmin): ?>
                     <li><a href="/sweetheaven/user/customize.php"
                             class="nav-link hover:text-rose-500 transition-colors"><?= __('nav_customize') ?></a></li>
@@ -167,8 +169,10 @@ $sort       = trim($_GET['sort'] ?? '');
                     <input type="hidden" name="sort" value="<?= $sort ?>">
                     <?php if ($discounted): ?><input type="hidden" name="discounted" value="1"><?php endif; ?>
                     <div class="relative">
-                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                         </svg>
                         <input type="search" name="search" placeholder="<?= __('products_search_ph') ?>"
                             value="<?= htmlspecialchars($search) ?>"
@@ -178,7 +182,7 @@ $sort       = trim($_GET['sort'] ?? '');
             </ul>
 
             <!-- Right Actions -->
-            <div class="flex flex-row items-center gap-6">
+            <div class="flex flex-row items-center gap-2">
 
                 <!-- Language Selector (icon-only, dropdown on click) -->
                 <form method="POST" action="" id="langForm" style="display:none">
@@ -188,9 +192,8 @@ $sort       = trim($_GET['sort'] ?? '');
 
                 <div class="lang-dropdown-wrap" id="langDropdownWrap">
                     <!-- Globe icon button -->
-                    <button type="button" class="lang-globe-btn" id="langGlobeBtn"
-                        onclick="toggleLangMenu()" aria-haspopup="true" aria-expanded="false"
-                        title="Select language">
+                    <button type="button" class="lang-globe-btn" id="langGlobeBtn" onclick="toggleLangMenu()"
+                        aria-haspopup="true" aria-expanded="false" title="Select language">
                         <svg width="16" height="16" fill="none" stroke="#3b82f6" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
                                 d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
@@ -225,7 +228,7 @@ $sort       = trim($_GET['sort'] ?? '');
                         document.getElementById('langForm').submit();
                     }
                     // Close when clicking outside
-                    document.addEventListener('click', function(e) {
+                    document.addEventListener('click', function (e) {
                         const wrap = document.getElementById('langDropdownWrap');
                         if (wrap && !wrap.contains(e.target)) {
                             document.getElementById('langMenu').classList.remove('open');
@@ -399,6 +402,9 @@ $sort       = trim($_GET['sort'] ?? '');
                 <li><a href="/sweetheaven/user/products.php"
                         class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm"><?= __('nav_products') ?></a>
                 </li>
+                <li><a href="/sweetheaven/user/index.php#contact-us"
+                        class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm"><?= __('nav_contact') ?></a>
+                </li>
                 <?php if (!$isAdmin): ?>
                     <li><a href="/sweetheaven/user/customize.php"
                             class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm"><?= __('nav_customize') ?></a>
@@ -501,8 +507,8 @@ $sort       = trim($_GET['sort'] ?? '');
 
     function markAllSeen() {
         fetch('/sweetheaven/api/user_notifications.php?action=mark_seen', {
-                method: 'POST'
-            })
+            method: 'POST'
+        })
             .then(r => r.json())
             .then(() => {
                 // hide badge
@@ -557,7 +563,7 @@ $sort       = trim($_GET['sort'] ?? '');
                     }
                     _lastNotifCount = count;
                 })
-                .catch(() => {}); // silently ignore network errors
+                .catch(() => { }); // silently ignore network errors
         }
 
         // Poll every 30 seconds
@@ -586,7 +592,7 @@ $sort       = trim($_GET['sort'] ?? '');
     }
 
     /* ── Close dropdowns on outside click ── */
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         // Profile
         const profileDd = document.getElementById('profileDropdown');
         if (profileDd && !profileDd.contains(e.target)) {

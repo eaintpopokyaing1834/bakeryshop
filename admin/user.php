@@ -303,7 +303,8 @@ require_once __DIR__ . '/../includes/admin_header.php';
         <table class="w-full">
             <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
                 <tr>
-                    <th class="px-6 py-4 text-left">User</th>
+                    <th class="px-6 py-4 text-left">ID</th>
+                    <th class="px-6 py-4 text-left">Name</th>
                     <th class="px-6 py-4 text-left"><?= __('admin_email') ?></th>
                     <th class="px-6 py-4 text-left"><?= __('admin_role') ?></th>
                     <th class="px-6 py-4 text-left"><?= __('admin_joined') ?></th>
@@ -313,19 +314,17 @@ require_once __DIR__ . '/../includes/admin_header.php';
             </thead>
             <tbody class="divide-y divide-gray-50">
             <?php if (empty($users)): ?>
-                <tr><td colspan="6" class="px-6 py-16 text-center text-gray-400"><?= __('user_no_users') ?></td></tr>
+                <tr><td colspan="7" class="px-6 py-16 text-center text-gray-400"><?= __('user_no_users') ?></td></tr>
             <?php else: ?>
             <?php foreach ($users as $u): ?>
             <tr class="hover:bg-gray-50/50 transition-colors" id="user-row-<?= $u['id'] ?>">
+                <td class="px-6 py-4 text-sm text-gray-400">#<?= $u['id'] ?></td>
                 <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold">
                             <?= strtoupper(substr($u['name'],0,1)) ?>
                         </div>
-                        <div>
-                            <p class="font-semibold text-gray-700 text-sm"><?= htmlspecialchars($u['name']) ?></p>
-                            <p class="text-xs text-gray-400"><?= __('user_id_prefix') ?> #<?= $u['id'] ?></p>
-                        </div>
+                        <p class="font-semibold text-gray-700 text-sm"><?= htmlspecialchars($u['name']) ?></p>
                     </div>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-600"><?= htmlspecialchars($u['email']) ?></td>

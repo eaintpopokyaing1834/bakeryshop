@@ -154,11 +154,10 @@ if ($isLoggedIn && !$isAdmin) {
                     <p class="text-sm text-gray-400"><?= count($products) ?> <?= currentLang() === 'my' ? 'ထုတ်ကုန် ' . count($products) . ' ခု တွေ့ရှိသည်' :  ' product' . (count($products) !== 1 ? 's' : '') . ' found' ?></p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <!-- Search -->
-                    <form method="GET" class="flex gap-2">
+                    <form method="GET" class="flex items-center gap-3">
                         <input type="hidden" name="category_id" value="<?= $categoryId ?>">
-                        <input type="hidden" name="sort" value="<?= $sort ?>">
                         <?php if ($discounted): ?><input type="hidden" name="discounted" value="1"><?php endif; ?>
+                        <!-- Search Input -->
                         <div class="relative">
                             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -167,12 +166,12 @@ if ($isLoggedIn && !$isAdmin) {
                                 value="<?= htmlspecialchars($search) ?>"
                                 class="border border-gray-200 rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 w-48">
                         </div>
-                    </form>
-                    <!-- Sort -->
-                    <form method="GET" id="sortForm">
-                        <input type="hidden" name="category_id" value="<?= $categoryId ?>">
-                        <input type="hidden" name="search" value="<?= htmlspecialchars($search) ?>">
-                        <?php if ($discounted): ?><input type="hidden" name="discounted" value="1"><?php endif; ?>
+                        <!-- Search Button -->
+                        <button type="submit"
+                            class="bg-rose-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-rose-600 transition-colors shadow-sm shadow-rose-200">
+                            <?= __('products_search_btn') ?>
+                        </button>
+                        <!-- Sort Dropdown -->
                         <select name="sort" onchange="this.form.submit()"
                             class="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
                             <option value="newest" <?= $sort==='newest'?'selected':'' ?>><?= __('products_sort_newest') ?></option>

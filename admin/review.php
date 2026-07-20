@@ -5,16 +5,6 @@ require_once __DIR__ . '/../includes/lang.php';
 $db = getDB();
 $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
 
-// Create table if not exists
-$db->exec("CREATE TABLE IF NOT EXISTS customer_reviews (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL,
-    message TEXT NOT NULL,
-    status ENUM('pending','approved','rejected') DEFAULT 'pending',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
 // Handle actions (cashier only)
 $action = $_GET['action'] ?? '';
 $reviewId = (int) ($_GET['id'] ?? 0);
@@ -24,7 +14,7 @@ if ($action === 'approve' && $reviewId) {
         header('Location: /sweetheaven/admin/review.php?msg=View-only+access');
         exit;
     }
-    $db->prepare("UPDATE customer_reviews SET status='approved' WHERE id=?")->execute([$reviewId]);
+    $db->prepare("UPDATE reviews SET status='approved' WHERE id=?")->execute([$reviewId]);
     header('Location: /sweetheaven/admin/review.php?msg=Approved');
     exit;
 }
@@ -33,7 +23,7 @@ if ($action === 'reject' && $reviewId) {
         header('Location: /sweetheaven/admin/review.php?msg=View-only+access');
         exit;
     }
-    $db->prepare("UPDATE customer_reviews SET status='rejected' WHERE id=?")->execute([$reviewId]);
+    $db->prepare("UPDATE reviews SET status='rejected' WHERE id=?")->execute([$reviewId]);
     header('Location: /sweetheaven/admin/review.php?msg=Rejected');
     exit;
 }
@@ -42,7 +32,7 @@ if ($action === 'delete' && $reviewId) {
         header('Location: /sweetheaven/admin/review.php?msg=View-only+access');
         exit;
     }
-    $db->prepare("DELETE FROM customer_reviews WHERE id=?")->execute([$reviewId]);
+    $db->prepare("DELETE FROM reviews WHERE id=?")->execute([$reviewId]);
     header('Location: /sweetheaven/admin/review.php?msg=Deleted');
     exit;
 }
@@ -51,12 +41,14 @@ $statusFilter = $_GET['status'] ?? 'all';
 $where = '';
 $params = [];
 if ($statusFilter !== 'all') {
-    $where = 'WHERE status = ?';
+    $where = 'WHERE r.status = ?';
     $params[] = $statusFilter;
+} else {
+    $where = 'WHERE 1=1';
 }
 
 // Count for pagination
-$countStmt = $db->prepare("SELECT COUNT(*) FROM customer_reviews $where");
+$countStmt = $db->prepare("SELECT COUNT(*) FROM reviews r $where");
 $countStmt->execute($params);
 $totalReviews = (int)$countStmt->fetchColumn();
 
@@ -66,7 +58,14 @@ $totalPages  = max(1, (int)ceil($totalReviews / $perPage));
 $page = min($page, $totalPages);
 $offset      = ($page - 1) * $perPage;
 
-$stmt = $db->prepare("SELECT * FROM customer_reviews $where ORDER BY created_at DESC LIMIT $perPage OFFSET $offset");
+$stmt = $db->prepare("
+    SELECT r.*, u.name AS customer_name, u.email AS customer_email, r.comment AS review_text
+    FROM reviews r
+    JOIN users u ON r.user_id = u.id
+    $where
+    ORDER BY r.created_at DESC
+    LIMIT $perPage OFFSET $offset
+");
 foreach ($params as $i => $val) {
     $stmt->bindValue($i + 1, $val);
 }
@@ -127,14 +126,24 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                 <div class="flex items-center gap-3">
                                     <div
                                         class="w-8 h-8 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 font-bold text-sm">
-                                        <?= strtoupper(substr($r['name'], 0, 1)) ?>
+                                        <?= strtoupper(substr($r['customer_name'], 0, 1)) ?>
                                     </div>
-                                    <span class="text-sm font-medium text-gray-700"><?= htmlspecialchars($r['name']) ?></span>
+                                    <span class="text-sm font-medium text-gray-700"><?= htmlspecialchars($r['customer_name']) ?></span>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-500"><?= htmlspecialchars($r['email']) ?></td>
+                            <td class="px-6 py-4 text-sm text-gray-500"><?= htmlspecialchars($r['customer_email']) ?></td>
                             <td class="px-6 py-4 text-sm text-gray-600 max-w-xs">
-                                <p class="line-clamp-2"><?= htmlspecialchars($r['message']) ?></p>
+                                <?php if ($r['rating']): ?>
+                                    <div class="flex items-center gap-1 mb-1">
+                                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                                            <svg class="w-3 h-3 <?= $i <= $r['rating'] ? 'text-amber-400' : 'text-gray-200' ?>" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                        <?php endfor; ?>
+                                        <span class="text-xs text-gray-400 ml-1"><?= $r['rating'] ?>/5</span>
+                                    </div>
+                                <?php endif; ?>
+                                <p class="line-clamp-2"><?= htmlspecialchars($r['review_text']) ?></p>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-400 whitespace-nowrap">
                                 <?= date('M j, Y', strtotime($r['created_at'])) ?></td>
@@ -172,7 +181,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
     </div>
     <?php if ($totalPages > 1): ?>
     <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-        <p class="text-sm text-gray-400"><?= __('admin_page_of', [$page, $totalPages]) ?></p>
+        <p class="text-sm text-gray-400"><?= sprintf(__('admin_page_of'), $page, $totalPages) ?></p>
         <div class="flex items-center gap-1">
             <?php if ($page > 1): ?>
             <a href="?status=<?= urlencode($statusFilter) ?>&page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← <?= __('admin_prev') ?></a>

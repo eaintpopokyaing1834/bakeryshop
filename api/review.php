@@ -42,7 +42,7 @@ if ($existing->fetch()) {
        ->execute([$rating, $comment, $userId, $productId]);
     $msg = 'Review updated!';
 } else {
-    $db->prepare("INSERT INTO reviews (user_id,product_id,rating,comment) VALUES (?,?,?,?)")
+    $db->prepare("INSERT INTO reviews (user_id,product_id,rating,comment,status) VALUES (?,?,?,?,'approved')")
        ->execute([$userId, $productId, $rating, $comment]);
     $msg = 'Review submitted!';
 }
