@@ -127,97 +127,101 @@ $statusColors = [
     'cancelled'  => 'bg-red-100 text-red-700 border-red-200',
 ];
 ?>
-<div class="px-4">
-<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+<div class="px-4 mb-5">
+<div class="admin-card-static p-5">
     <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div class="flex flex-wrap gap-2">
             <?php foreach (['all','pending','processing','shipped','delivered','cancelled'] as $s): ?>
             <a href="?status=<?= $s ?>&search=<?= urlencode($search) ?>"
-               class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors
-               <?= $statusFilter === $s ? 'bg-rose-500 text-white shadow-md shadow-rose-100' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>">
+               class="filter-pill <?= $statusFilter === $s ? 'filter-pill-active' : 'filter-pill-default' ?>">
                <?= $s === 'all' ? __('admin_all') : ucfirst(__("status_$s")) ?>
             </a>
             <?php endforeach; ?>
         </div>
-        <form method="GET" class="flex gap-2">
+        <form method="GET" class="flex items-center gap-2">
             <input type="hidden" name="status" value="<?= htmlspecialchars($statusFilter) ?>">
-            <input type="search" name="search" placeholder="<?= __('order_search_ph') ?>"
-                value="<?= htmlspecialchars($search) ?>"
-                class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 w-60">
-            <button class="bg-rose-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-rose-600"><?= __('admin_search') ?></button>
+            <div class="relative">
+                <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="search" name="search" placeholder="<?= __('order_search_ph') ?>"
+                    value="<?= htmlspecialchars($search) ?>"
+                    class="search-input">
+            </div>
+            <button type="submit" class="btn-primary" style="padding:9px 18px"><?= __('admin_search') ?></button>
         </form>
     </div>
 </div>
 </div>
 
-<section class="px-4">
-<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-        <h3 class="font-bold text-gray-800"><?= __('admin_nav_orders') ?> <span class="text-gray-400 font-normal text-sm ml-2">(<?= $totalOrders ?> <?= __('admin_total') ?>)</span></h3>
+<section class="px-4 pb-6">
+<div class="section-card">
+    <div class="section-card-header">
+        <div>
+            <h3><?= __('admin_nav_orders') ?></h3>
+            <p class="sub"><?= $totalOrders ?> <?= __('admin_total') ?></p>
+        </div>
     </div>
 
     <div class="overflow-x-auto">
-        <table class="w-full">
-            <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
+        <table class="admin-table">
+            <thead>
                 <tr>
-                    <th class="px-6 py-4 text-left"><?= __('admin_order_id') ?></th>
-                    <th class="px-6 py-4 text-left"><?= __('admin_customer') ?></th>
-                    <th class="px-6 py-4 text-left"><?= __('admin_amount') ?></th>
-                    <th class="px-6 py-4 text-left"><?= __('order_shipping') ?></th>
-                    <th class="px-6 py-4 text-left"><?= __('order_payment') ?></th>
-                    <th class="px-6 py-4 text-left"><?= __('admin_status') ?></th>
-                    <th class="px-6 py-4 text-left"><?= __('admin_date') ?></th>
-                    <th class="px-6 py-4 text-left"><?= __('admin_actions') ?></th>
+                    <th><?= __('admin_order_id') ?></th>
+                    <th><?= __('admin_customer') ?></th>
+                    <th><?= __('admin_amount') ?></th>
+                    <th><?= __('order_shipping') ?></th>
+                    <th><?= __('order_payment') ?></th>
+                    <th><?= __('admin_status') ?></th>
+                    <th><?= __('admin_date') ?></th>
+                    <th><?= __('admin_actions') ?></th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-50" id="ordersTableBody">
+            <tbody id="ordersTableBody">
             <?php if (empty($orders)): ?>
-                <tr><td colspan="8" class="px-6 py-16 text-center text-gray-400">
-                    <p class="text-4xl mb-3">📋</p>
-                    <?= __('order_no_orders') ?>
+                <tr><td colspan="8">
+                    <div class="empty-state"><span class="empty-state-icon">📋</span><p class="empty-state-text"><?= __('order_no_orders') ?></p></div>
                 </td></tr>
             <?php else: ?>
             <?php foreach ($orders as $order): ?>
-            <tr class="hover:bg-gray-50/50 transition-colors" id="order-row-<?= $order['id'] ?>">
-                <td class="px-6 py-4">
+            <tr id="order-row-<?= $order['id'] ?>">
+                <td>
                     <button onclick="toggleItems(<?= $order['id'] ?>)"
-                        class="font-mono text-rose-500 font-bold hover:underline text-sm">
+                        class="font-mono text-sm font-bold text-rose-500 hover:underline">
                         #<?= str_pad($order['id'], 4, '0', STR_PAD_LEFT) ?>
                     </button>
                 </td>
-                <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 font-bold text-sm">
-                            <?= strtoupper(substr($order['customer_name'],0,1)) ?>
-                        </div>
+                <td>
+                    <div class="flex items-center gap-2.5">
+                        <div class="user-avatar"><?= strtoupper(substr($order['customer_name'],0,1)) ?></div>
                         <div>
-                            <p class="text-sm font-medium text-gray-700"><?= htmlspecialchars($order['customer_name']) ?></p>
+                            <p class="text-sm font-semibold text-gray-700"><?= htmlspecialchars($order['customer_name']) ?></p>
                             <p class="text-xs text-gray-400"><?= htmlspecialchars($order['customer_email']) ?></p>
                         </div>
                     </div>
                 </td>
-                <td class="px-6 py-4 font-semibold text-gray-700 text-sm"><?= number_format($order['total_amount']) ?> <?= __('admin_mmk') ?></td>
-                <td class="px-6 py-4 text-sm text-gray-600 capitalize"><?= match($order['shipping_method']) {
-                    'standard' => __('order_ship_standard'),
-                    'express'  => __('order_ship_express'),
-                    'pickup'   => __('order_ship_pickup'),
-                    'free'     => __('order_ship_free'),
-                    default    => ucfirst($order['shipping_method']),
-                } ?></td>
-                <td class="px-6 py-4 text-sm">
-                    <p class="text-gray-600"><?= htmlspecialchars($order['payment_name'] ?? __('admin_n_a')) ?></p>
+                <td>
+                    <span class="text-sm font-bold text-gray-800"><?= number_format($order['total_amount']) ?></span>
+                    <span class="text-xs text-gray-400 ml-0.5"><?= __('admin_mmk') ?></span>
+                </td>
+                <td>
+                    <span class="text-sm text-gray-600"><?= match($order['shipping_method']) {
+                        'standard' => __('order_ship_standard'),
+                        'express'  => __('order_ship_express'),
+                        'pickup'   => __('order_ship_pickup'),
+                        'free'     => __('order_ship_free'),
+                        default    => ucfirst($order['shipping_method']),
+                    } ?></span>
+                </td>
+                <td>
+                    <p class="text-sm text-gray-600"><?= htmlspecialchars($order['payment_name'] ?? __('admin_n_a')) ?></p>
                     <?php if ($order['pay_status']): ?>
-                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full inline-block mt-1
-                        <?= $order['pay_status'] === 'approved' ? 'bg-green-100 text-green-700' : '' ?>
-                        <?= $order['pay_status'] === 'pending' ? 'bg-amber-100 text-amber-700' : '' ?>
-                        <?= $order['pay_status'] === 'rejected' ? 'bg-red-100 text-red-700' : '' ?>">
+                    <span class="status-badge badge-<?= $order['pay_status'] ?> mt-1">
                         <?= ucfirst(__("status_{$order['pay_status']}")) ?>
                     </span>
                     <?php endif; ?>
                 </td>
-                <td class="px-6 py-4">
+                <td>
                     <?php if ($isAdmin): ?>
-                        <span class="text-xs font-semibold px-3 py-1.5 rounded-full <?= $statusColors[$order['status']] ?? 'bg-gray-100 text-gray-600' ?>">
+                        <span class="status-badge badge-<?= $order['status'] ?>">
                             <?= ucfirst(__("status_{$order['status']}")) ?>
                         </span>
                     <?php else: ?>
@@ -230,16 +234,18 @@ $statusColors = [
                         </select>
                     <?php endif; ?>
                 </td>
-                <td class="px-6 py-4 text-sm text-gray-400"><?= date('M j, Y', strtotime($order['order_date'])) ?></td>
-                <td class="px-6 py-4">
+                <td>
+                    <span class="text-sm text-gray-400 whitespace-nowrap"><?= date('M j, Y', strtotime($order['order_date'])) ?></span>
+                </td>
+                <td>
                     <button onclick="toggleItems(<?= $order['id'] ?>)"
-                        class="text-sm text-rose-500 hover:text-rose-600 font-medium flex items-center gap-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        class="flex items-center gap-1.5 text-xs font-semibold text-rose-500 hover:text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         <?= __('order_items') ?>
                     </button>
                 </td>
             </tr>
-            <tr id="items-<?= $order['id'] ?>" class="hidden bg-rose-50/30">
+            <tr id="items-<?= $order['id'] ?>" class="hidden" style="background: linear-gradient(135deg,#fff8f8,#fef2f2)">
                 <td colspan="8" class="px-8 py-4">
                     <div class="order-items-content" data-order-id="<?= $order['id'] ?>">
                         <p class="text-gray-400 text-sm italic"><?= __('order_loading_items') ?></p>
@@ -307,17 +313,23 @@ $statusColors = [
         </table>
     </div>
     <?php if ($totalPages > 1): ?>
-    <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-        <p class="text-sm text-gray-400"><?= sprintf(__('admin_page_of'), $page, $totalPages) ?></p>
-        <div class="flex items-center gap-1">
+    <div class="pagination-wrap">
+        <p class="pagination-info"><?= sprintf(__('admin_page_of'), $page, $totalPages) ?></p>
+        <div class="pagination-pills">
             <?php if ($page > 1): ?>
-            <a href="?status=<?= urlencode($statusFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← <?= __('admin_prev') ?></a>
+            <a href="?status=<?= urlencode($statusFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $page - 1 ?>" class="pg-btn pg-btn-nav">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                <?= __('admin_prev') ?>
+            </a>
             <?php endif; ?>
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-            <a href="?status=<?= urlencode($statusFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors <?= $i === $page ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>"><?= $i ?></a>
+            <a href="?status=<?= urlencode($statusFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" class="pg-btn <?= $i === $page ? 'pg-btn-active' : 'pg-btn-default' ?>"><?= $i ?></a>
             <?php endfor; ?>
             <?php if ($page < $totalPages): ?>
-            <a href="?status=<?= urlencode($statusFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"><?= __('admin_next') ?> →</a>
+            <a href="?status=<?= urlencode($statusFilter) ?>&search=<?= urlencode($search) ?>&page=<?= $page + 1 ?>" class="pg-btn pg-btn-nav">
+                <?= __('admin_next') ?>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
             <?php endif; ?>
         </div>
     </div>
@@ -401,6 +413,28 @@ function showToast(msg) {
     document.body.appendChild(t);
     setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
 }
+
+// ── Highlight order from reports.php ?highlight=X ────
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    const highlightId = params.get('highlight');
+    if (!highlightId) return;
+    const row = document.getElementById('order-row-' + highlightId);
+    if (!row) return;
+    // Scroll into view
+    setTimeout(() => {
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Flash highlight ring
+        row.style.transition = 'box-shadow 0.3s ease, background 0.3s ease';
+        row.style.background = '#fefce8';
+        row.style.boxShadow = 'inset 0 0 0 2px #f59e0b';
+        setTimeout(() => {
+            row.style.background = '';
+            row.style.boxShadow = '';
+        }, 2500);
+    }, 200);
+})();
+
 </script>
 
 <?php require_once __DIR__ . '/../includes/admin_footer.php'; ?>

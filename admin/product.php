@@ -211,6 +211,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <table class="w-full">
                 <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
                     <tr>
+                        <th class="px-6 py-4 text-left"><?= __('product_col_id') ?></th>
                         <th class="px-6 py-4 text-left"><?= __('product_col_product') ?></th>
                         <th class="px-6 py-4 text-left"><?= __('product_col_category') ?></th>
                         <th class="px-6 py-4 text-left"><?= __('product_col_price') ?></th>
@@ -222,6 +223,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 <tbody class="divide-y divide-gray-50">
                     <?php foreach ($products as $p): ?>
                         <tr class="hover:bg-gray-50/50 transition-colors">
+                            <td class="px-6 py-4 font-mono text-gray-500 text-sm"><?= $p['id'] ?></td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-12 h-12 rounded-xl overflow-hidden bg-rose-50 shrink-0">

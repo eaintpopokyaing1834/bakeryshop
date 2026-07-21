@@ -252,6 +252,7 @@ $statusColors = [
                     <th class="px-6 py-3 text-left"><?= __('admin_amount') ?></th>
                     <th class="px-6 py-3 text-left"><?= __('admin_status') ?></th>
                     <th class="px-6 py-3 text-left"><?= __('admin_date') ?></th>
+                    <th class="px-6 py-3 text-left"><?= __('admin_actions') ?></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50" id="ordersTable">
@@ -260,11 +261,6 @@ $statusColors = [
             <!-- Print-only: all orders -->
             <tbody id="ordersTableAll" style="display:none;"></tbody>
         </table>
-    </div>
-    <!-- Pagination -->
-    <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between" id="pagination">
-        <p class="text-sm text-gray-500" id="pageInfo"></p>
-        <div class="flex gap-2" id="pageButtons"></div>
     </div>
 </div>
 
@@ -314,7 +310,6 @@ function fetchReport() {
             updateBestSellingTable(data.best_selling_all_time);
             updateStatusTable(data.status_summary);
             updateOrdersTable(data.orders);
-            updatePagination(data.total_pages, data.current_page, data.total_orders);
         })
         .catch(err => {
             console.error('Report fetch error:', err);
@@ -479,42 +474,17 @@ function updateOrdersTable(orders) {
                 </span>
             </td>
             <td class="px-6 py-4 text-sm text-gray-400">${new Date(o.order_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+            <td class="px-6 py-4">
+                <a href="/sweetheaven/admin/order.php?highlight=${o.id}"
+                   class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Manage
+                </a>
+            </td>
         </tr>
     `).join('');
 }
 
-// ── Pagination ───────────────────────────────────────
-function updatePagination(totalPages, current, totalOrders) {
-    document.getElementById('pageInfo').textContent = '<?= __('reports_page_info') ?>'.replace('{current}', current).replace('{total}', totalPages).replace('{orders}', totalOrders);
-
-    const btns = document.getElementById('pageButtons');
-    if (totalPages <= 1) { btns.innerHTML = ''; return; }
-
-    let html = '';
-    if (current > 1) {
-        html += `<button onclick="goToPage(${current - 1})" class="px-3 py-1 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"><?= __('reports_prev') ?></button>`;
-    }
-
-    for (let i = 1; i <= totalPages; i++) {
-        if (i === 1 || i === totalPages || (i >= current - 2 && i <= current + 2)) {
-            html += `<button onclick="goToPage(${i})" class="px-3 py-1 text-sm rounded-lg transition-colors ${i === current ? 'bg-rose-500 text-white' : 'border border-gray-200 hover:bg-gray-50'}">${i}</button>`;
-        } else if (i === current - 3 || i === current + 3) {
-            html += `<span class="px-2 py-1 text-sm text-gray-400">...</span>`;
-        }
-    }
-
-    if (current < totalPages) {
-        html += `<button onclick="goToPage(${current + 1})" class="px-3 py-1 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"><?= __('reports_next') ?></button>`;
-    }
-
-    btns.innerHTML = html;
-}
-
-function goToPage(page) {
-    currentPage = page;
-    fetchReport();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
 
 // ── Export to Excel ──────────────────────────────────
 function exportToExcel() {

@@ -34,64 +34,84 @@ require_once __DIR__ . '/../includes/admin_header.php';
 ?>
 
 <?php if ($msg): ?>
-    <div class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-700 px-5 py-3 rounded-xl text-sm font-medium">
+    <div class="flash-success mb-5 mx-4">
+        <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
         <?= $msg ?>
     </div>
 <?php endif; ?>
 
-<section class="px-4">
-<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-100">
-        <h3 class="font-bold text-gray-800"><?= __('admin_nav_contact_messages') ?> (<?= $totalRows ?>)</h3>
+<section class="px-4 pb-6">
+<div class="section-card">
+    <!-- Card Header -->
+    <div class="section-card-header">
+        <div>
+            <h3><?= __('admin_nav_contact_messages') ?></h3>
+            <p class="sub"><?= $totalRows ?> <?= __('admin_total') ?? 'total messages' ?></p>
+        </div>
+        <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            <?= $totalRows ?> messages
+        </span>
     </div>
 
+    <!-- Table -->
     <div class="overflow-x-auto">
-        <table class="w-full">
-            <thead class="bg-yellow-100 text-xs text-gray-500 uppercase tracking-wider">
+        <table class="admin-table">
+            <thead>
                 <tr>
-                    <th class="px-6 py-4 text-left">ID</th>
-                    <th class="px-6 py-4 text-left"><?= __('admin_customer') ?></th>
-                    <th class="px-6 py-4 text-left"><?= __('review_col_email') ?></th>
-                    <th class="px-6 py-4 text-left">Phone</th>
-                    <th class="px-6 py-4 text-left">Message</th>
-                    <th class="px-6 py-4 text-left"><?= __('admin_date') ?></th>
+                    <th>ID</th>
+                    <th><?= __('admin_customer') ?></th>
+                    <th><?= __('review_col_email') ?></th>
+                    <th>Phone</th>
+                    <th>Message</th>
+                    <th><?= __('admin_date') ?></th>
                     <?php if ($role === 'admin'): ?>
-                        <th class="px-6 py-4 text-left"><?= __('admin_actions') ?></th>
+                        <th><?= __('admin_actions') ?></th>
                     <?php endif; ?>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-50">
+            <tbody>
                 <?php if (empty($messages)): ?>
                     <tr>
-                        <td colspan="<?= $role === 'admin' ? 7 : 6 ?>" class="px-6 py-16 text-center text-gray-400">
-                            <p class="text-4xl mb-3">📭</p>
-                            <p>No contact messages yet.</p>
+                        <td colspan="<?= $role === 'admin' ? 7 : 6 ?>">
+                            <div class="empty-state">
+                                <span class="empty-state-icon">📭</span>
+                                <p class="empty-state-text">No contact messages yet.</p>
+                            </div>
                         </td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($messages as $m): ?>
-                        <tr class="hover:bg-gray-50/50 transition-colors">
-                            <td class="px-6 py-4 text-sm text-gray-400">#<?= $m['id'] ?></td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 font-bold text-sm">
-                                        <?= strtoupper(substr($m['name'], 0, 1)) ?>
-                                    </div>
-                                    <span class="text-sm font-medium text-gray-700"><?= htmlspecialchars($m['name']) ?></span>
+                        <tr>
+                            <td>
+                                <span class="text-xs font-mono text-gray-400">#<?= $m['id'] ?></span>
+                            </td>
+                            <td>
+                                <div class="flex items-center gap-2.5">
+                                    <div class="user-avatar"><?= strtoupper(substr($m['name'], 0, 1)) ?></div>
+                                    <span class="text-sm font-semibold text-gray-700"><?= htmlspecialchars($m['name']) ?></span>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-500"><?= htmlspecialchars($m['email']) ?></td>
-                            <td class="px-6 py-4 text-sm text-gray-500"><?= htmlspecialchars($m['phone'] ?: '—') ?></td>
-                            <td class="px-6 py-4 text-sm text-gray-600 max-w-xs">
-                                <p class="line-clamp-2"><?= htmlspecialchars($m['message']) ?></p>
+                            <td>
+                                <a href="mailto:<?= htmlspecialchars($m['email']) ?>" class="text-sm text-blue-500 hover:text-blue-600 hover:underline"><?= htmlspecialchars($m['email']) ?></a>
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-400 whitespace-nowrap">
-                                <?= date('M j, Y', strtotime($m['created_at'])) ?>
+                            <td>
+                                <span class="text-sm text-gray-500"><?= htmlspecialchars($m['phone'] ?: '—') ?></span>
+                            </td>
+                            <td class="max-w-xs">
+                                <p class="text-sm text-gray-600 line-clamp-2 leading-relaxed"><?= htmlspecialchars($m['message']) ?></p>
+                            </td>
+                            <td>
+                                <span class="text-sm text-gray-400 whitespace-nowrap"><?= date('M j, Y', strtotime($m['created_at'])) ?></span>
                             </td>
                             <?php if ($role === 'admin'): ?>
-                                <td class="px-6 py-4">
-                                    <a href="?action=delete&id=<?= $m['id'] ?>" onclick="return confirm('Delete this message?')"
-                                        class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors"><?= __('review_action_delete') ?></a>
+                                <td>
+                                    <a href="?action=delete&id=<?= $m['id'] ?>"
+                                       onclick="return confirm('Delete this message?')"
+                                       class="btn-delete">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        <?= __('review_action_delete') ?>
+                                    </a>
                                 </td>
                             <?php endif; ?>
                         </tr>
@@ -101,18 +121,25 @@ require_once __DIR__ . '/../includes/admin_header.php';
         </table>
     </div>
 
+    <!-- Pagination -->
     <?php if ($totalPages > 1): ?>
-    <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-        <p class="text-sm text-gray-400"><?= sprintf(__('admin_page_of'), $page, $totalPages) ?></p>
-        <div class="flex items-center gap-1">
+    <div class="pagination-wrap">
+        <p class="pagination-info"><?= sprintf(__('admin_page_of'), $page, $totalPages) ?></p>
+        <div class="pagination-pills">
             <?php if ($page > 1): ?>
-                <a href="?page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← <?= __('admin_prev') ?></a>
+                <a href="?page=<?= $page - 1 ?>" class="pg-btn pg-btn-nav">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    <?= __('admin_prev') ?>
+                </a>
             <?php endif; ?>
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <a href="?page=<?= $i ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors <?= $i === $page ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>"><?= $i ?></a>
+                <a href="?page=<?= $i ?>" class="pg-btn <?= $i === $page ? 'pg-btn-active' : 'pg-btn-default' ?>"><?= $i ?></a>
             <?php endfor; ?>
             <?php if ($page < $totalPages): ?>
-                <a href="?page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"><?= __('admin_next') ?> →</a>
+                <a href="?page=<?= $page + 1 ?>" class="pg-btn pg-btn-nav">
+                    <?= __('admin_next') ?>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
             <?php endif; ?>
         </div>
     </div>
