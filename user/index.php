@@ -1137,9 +1137,9 @@ if ($isLoggedIn) {
 
                 <!-- Section Title -->
                 <div class="text-center mb-10">
-                    <p class="text-xs font-semibold uppercase tracking-widest text-[#e8746a] mb-2">Get In Touch</p>
-                    <h2 class="font-display text-4xl text-gray-800">Contact Us</h2>
-                    <p class="text-gray-400 text-sm mt-2">We'd love to hear from you. Send us a message and we'll get back to you soon.</p>
+                    <p class="text-xs font-semibold uppercase tracking-widest text-[#e8746a] mb-2"><?= __('contact_us_label') ?></p>
+                    <h2 class="font-display text-4xl text-gray-800"><?= __('contact_us_title') ?></h2>
+                    <p class="text-gray-400 text-sm mt-2"><?= __('contact_us_desc') ?></p>
                 </div>
 
                 <div class="grid lg:grid-cols-2 gap-8 items-center">
@@ -1148,46 +1148,48 @@ if ($isLoggedIn) {
                     <div class="bg-pink-100 rounded-3xl p-8 sm:p-10 shadow-sm">
                         <!-- Header -->
                         <div class="mb-8">
-                            <p class="text-xs font-semibold uppercase tracking-widest text-[#e8746a] mb-2">Drop Us a Line</p>
-                            <h3 class="font-display text-3xl sm:text-4xl text-gray-800 mb-3">Send a Message</h3>
-                            <p class="text-gray-500 text-sm">Fill in the form below and we'll respond as soon as possible.</p>
+                            <p class="text-xs font-semibold uppercase tracking-widest text-[#e8746a] mb-2"><?= __('contact_us_form_label') ?></p>
+                            <h3 class="font-display text-3xl sm:text-4xl text-gray-800 mb-3"><?= __('contact_us_form_title') ?></h3>
+                            <p class="text-gray-500 text-sm"><?= __('contact_us_form_desc') ?></p>
                         </div>
 
                         <!-- Form -->
                         <form id="contactForm" class="space-y-5">
                             <div class="grid sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Your Name <span class="text-rose-400">*</span></label>
+                                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2"><?= __('contact_us_name_label') ?> <span class="text-rose-400">*</span></label>
                                     <input type="text" id="contactName" required
                                         class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all <?= $isLoggedIn ? 'bg-gray-50 cursor-not-allowed' : '' ?>"
-                                        placeholder="e.g. Aye Aye"
+                                        placeholder="<?= htmlspecialchars(__('contact_us_name_ph')) ?>"
                                         value="<?= $isLoggedIn ? htmlspecialchars($currentUser['name'] ?? '') : '' ?>"
                                         <?= $isLoggedIn ? 'readonly' : '' ?>>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Email Address <span class="text-rose-400">*</span></label>
+                                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2"><?= __('contact_us_email_label') ?> <span class="text-rose-400">*</span></label>
                                     <input type="email" id="contactEmail" required
                                         class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all <?= $isLoggedIn ? 'bg-gray-50 cursor-not-allowed' : '' ?>"
-                                        placeholder="you@example.com"
+                                        placeholder="<?= htmlspecialchars(__('contact_us_email_ph')) ?>"
                                         value="<?= $isLoggedIn ? htmlspecialchars($currentUser['email'] ?? '') : '' ?>"
                                         <?= $isLoggedIn ? 'readonly' : '' ?>>
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Phone Number <span class="text-gray-400 font-normal normal-case tracking-normal">(optional)</span></label>
+                                <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2"><?= __('contact_us_phone_label') ?> <span class="text-gray-400 font-normal normal-case tracking-normal"><?= __('contact_us_phone_optional') ?></span></label>
                                 <input type="number" id="contactPhone"
                                     class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all"
-                                    placeholder="09 xxxxxxx">
+                                    placeholder="<?= htmlspecialchars(__('contact_us_phone_ph')) ?>">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Your Message <span class="text-rose-400">*</span></label>
+                                <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2"><?= __('contact_us_message_label') ?> <span class="text-rose-400">*</span></label>
                                 <textarea id="contactMessage" rows="4" required
                                     class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none transition-all"
-                                    placeholder="Tell us how we can help you..."></textarea>
+                                    placeholder="<?= htmlspecialchars(__('contact_us_message_ph')) ?>"></textarea>
                             </div>
                             <button type="submit" id="contactSubmitBtn"
-                                class="w-full sm:w-auto bg-[#e8746a] hover:bg-[#d4635a] text-white font-bold px-10 py-3.5 rounded-xl transition-all text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0">
-                                Send Message
+                                class="w-full sm:w-auto bg-[#e8746a] hover:bg-[#d4635a] text-white font-bold px-10 py-3.5 rounded-xl transition-all text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+                                data-submit-text="<?= htmlspecialchars(__('contact_us_submit')) ?>"
+                                data-submitting-text="<?= htmlspecialchars(__('contact_us_submitting')) ?>">
+                                <?= __('contact_us_submit') ?>
                             </button>
                         </form>
 
@@ -1242,8 +1244,12 @@ if ($isLoggedIn) {
             e.preventDefault();
             const btn = document.getElementById('contactSubmitBtn');
             const msgBox = document.getElementById('contactFormMsg');
+            const submitText    = btn.dataset.submitText    || 'Send Message';
+            const submittingText = btn.dataset.submittingText || 'Sending...';
+            const errTimeout    = <?= json_encode(__('contact_us_err_timeout')) ?>;
+            const errGeneral    = <?= json_encode(__('contact_us_err_general')) ?>;
             btn.disabled = true;
-            btn.textContent = 'Sending...';
+            btn.textContent = submittingText;
             msgBox.classList.add('hidden');
 
             const controller = new AbortController();
@@ -1273,22 +1279,22 @@ if ($isLoggedIn) {
                     document.getElementById('contactForm').reset();
                 } else {
                     msgBox.className = 'mt-5 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium';
-                    msgBox.textContent = data.message || 'Something went wrong.';
+                    msgBox.textContent = data.message || errGeneral;
                 }
                 btn.disabled = false;
-                btn.textContent = 'Send Message';
+                btn.textContent = submitText;
             })
             .catch(err => {
                 clearTimeout(timeoutId);
                 msgBox.classList.remove('hidden');
                 msgBox.className = 'mt-5 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium';
                 if (err.name === 'AbortError') {
-                    msgBox.textContent = 'Request timed out. Please try again.';
+                    msgBox.textContent = errTimeout;
                 } else {
-                    msgBox.textContent = 'Something went wrong. Please try again. (' + err.message + ')';
+                    msgBox.textContent = errGeneral + ' (' + err.message + ')';
                 }
                 btn.disabled = false;
-                btn.textContent = 'Send Message';
+                btn.textContent = submitText;
             });
         });
     </script>
@@ -1732,8 +1738,7 @@ if ($isLoggedIn) {
                             </span>
                             <input type="password" id="regPassword" name="password" required autocomplete="new-password"
                                 placeholder="Password (min 6 chars)" class="w-full py-3 pl-10 pr-[42px] rounded-[14px] border-[1.5px] border-[#f0d8d8] bg-white text-[.855rem] text-[#3d2020] outline-none font-inherit transition-all duration-200 placeholder:text-[#d4adad] focus:border-[#e8a0a0] focus:shadow-[0_0_0_3.5px_rgba(220,130,130,.14)] focus:bg-[#fffbfb] peer">
-                            <button type="button" onclick="toggleModalPassword('regPassword',this)" class="absolute right-[13px] bg-transparent border-none cursor-pointer text-[#d4a0a0] p-0.5 flex transition-colors duration-200 hover:text-[#c97878]">
-                                tabindex="-1">
+                            <button type="button" onclick="toggleModalPassword('regPassword',this)" class="absolute right-[13px] bg-transparent border-none cursor-pointer text-[#d4a0a0] p-0.5 flex transition-colors duration-200 hover:text-[#c97878]" tabindex="-1">
                                 <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
                                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
