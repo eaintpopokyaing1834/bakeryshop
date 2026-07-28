@@ -98,7 +98,16 @@ $statusColors = [
     <title>My Profile — Sweet Heaven Bakery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>* { font-family: 'Poppins', sans-serif; }</style>
+    <style>
+        @media print {
+            body * { visibility: hidden; }
+            #voucherPrintArea, #voucherPrintArea * { visibility: visible; }
+            #voucherPrintArea { position: fixed; inset: 0; background: #fff; padding: 40px; z-index: 9999; }
+            #voucherPrintArea .no-print { display: none !important; }
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
 <?php require_once __DIR__ . '/../includes/header.php'; ?>
@@ -245,8 +254,8 @@ $statusColors = [
                         <?= ucfirst($order['pay_status']) ?>
                     </span>
                     <?php endif; ?>
-                    <?php if (!empty($order['screenshot'])): ?>
-                    &middot; <a href="/sweetheaven/<?= htmlspecialchars($order['screenshot']) ?>" target="_blank" class="text-rose-500 hover:underline">View Receipt</a>
+                    <?php if ($order['status'] === 'delivered'): ?>
+                    &middot; <button onclick="openVoucher(<?= $order['id'] ?>)" class="text-rose-500 hover:underline font-semibold"><?= __('profile_view_voucher') ?></button>
                     <?php endif; ?>
                 </p>
                 <?php endif; ?>
@@ -358,6 +367,76 @@ $statusColors = [
     <?php endif; ?>
 </div>
 
+<!-- Voucher Modal -->
+<div id="voucherModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 overflow-y-auto">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full mx-auto overflow-hidden relative" onclick="event.stopPropagation()">
+        <button onclick="closeVoucher()" class="absolute top-4 right-4 w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors z-10">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <div id="voucherContent" class="p-6">
+            <div id="voucherPrintArea">
+                <div class="text-center mb-6">
+                    <div class="flex items-center justify-center gap-3 mb-1">
+                        <img src="/sweetheaven/images/9102671.png" class="h-10 w-auto" alt="Sweet Heaven">
+                        <span class="text-2xl font-bold text-stone-800"><?= __('voucher_brand') ?></span>
+                    </div>
+                    <p class="text-xs text-gray-400"><?= __('voucher_title') ?></p>
+                </div>
+                <div class="text-center mb-4" id="voucherLoading">
+                    <svg class="animate-spin h-8 w-8 text-rose-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
+                </div>
+                <div id="voucherBody" class="hidden space-y-5">
+                    <div class="border-b border-gray-100 pb-4">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2"><?= __('voucher_customer_info') ?></p>
+                        <p class="text-sm font-semibold text-gray-800" id="vCustName"></p>
+                        <p class="text-xs text-gray-500" id="vCustEmail"></p>
+                        <p class="text-xs text-gray-500" id="vCustPhone"></p>
+                    </div>
+                    <div class="border-b border-gray-100 pb-4">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2"><?= __('voucher_order_details') ?></p>
+                        <div class="space-y-2" id="vItems"></div>
+                        <div class="mt-3 pt-3 border-t border-gray-100 space-y-1 text-sm" id="vSummary">
+                            <div class="flex justify-between text-gray-500">
+                                <span><?= __('voucher_subtotal') ?></span>
+                                <span id="vOriginalSubtotal"></span>
+                            </div>
+                            <div id="vProductDiscountRow" class="flex justify-between text-green-600 hidden">
+                                <span><?= __('voucher_product_discounts') ?></span>
+                                <span id="vProductDiscount"></span>
+                            </div>
+                            <div id="vFirstOrderRow" class="flex justify-between text-blue-600 hidden">
+                                <span><?= __('voucher_first_order_discount') ?></span>
+                                <span id="vFirstOrderDiscount"></span>
+                            </div>
+                            <div class="flex justify-between text-gray-500">
+                                <span><?= __('voucher_shipping_method') ?></span>
+                                <span id="vShipping"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center pb-4">
+                        <span class="text-sm font-semibold text-gray-600"><?= __('voucher_total_amount') ?></span>
+                        <span class="text-xl font-bold text-rose-500" id="vTotal"></span>
+                    </div>
+                    <div class="text-center pt-3 border-t border-gray-100">
+                        <p class="text-xs text-gray-400"><?= __('voucher_thank_you') ?></p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-4 no-print">
+                <button onclick="printVoucher()" class="flex-1 bg-stone-800 hover:bg-stone-900 text-white font-semibold py-3 px-4 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    <?= __('voucher_print') ?>
+                </button>
+                <button onclick="downloadPDF(this)" class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <?= __('voucher_download_pdf') ?>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="toast" class="hidden fixed bottom-6 right-6 bg-stone-800 text-white px-5 py-3 rounded-xl shadow-md text-sm font-medium z-50 items-center gap-2">
     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
     <span id="toastMsg"></span>
@@ -418,6 +497,104 @@ function showToast(msg) {
     document.getElementById('toastMsg').textContent = msg;
     t.classList.remove('hidden'); t.classList.add('flex');
     setTimeout(()=>{ t.classList.add('hidden'); t.classList.remove('flex'); }, 3000);
+}
+
+const shippingLabels = {
+    'free_delivery': '<?= __('order_ship_free') ?>',
+    'pickup': '<?= __('order_ship_pickup') ?>',
+    'express': '<?= __('order_ship_express') ?>',
+    'standard': '<?= __('order_ship_standard') ?>',
+};
+
+function openVoucher(orderId) {
+    const modal = document.getElementById('voucherModal');
+    const loading = document.getElementById('voucherLoading');
+    const body = document.getElementById('voucherBody');
+    modal.classList.remove('hidden');
+    loading.classList.remove('hidden');
+    body.classList.add('hidden');
+
+    fetch('/sweetheaven/api/voucher.php?order_id=' + orderId)
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) { showToast(data.error); closeVoucher(); return; }
+            loading.classList.add('hidden');
+            body.classList.remove('hidden');
+            populateVoucher(data);
+        })
+        .catch(() => { showToast('Failed to load voucher'); closeVoucher(); });
+}
+
+function closeVoucher() {
+    document.getElementById('voucherModal').classList.add('hidden');
+}
+
+function populateVoucher(data) {
+    document.getElementById('vCustName').textContent = data.customer_name;
+    document.getElementById('vCustEmail').textContent = '📧 ' + data.email;
+    document.getElementById('vCustPhone').textContent = '📞 ' + (data.phone || 'N/A');
+
+    const itemsHtml = data.items.map(item => {
+        const total = Number(item.discounted_price) * Number(item.quantity);
+        return `<div class="flex justify-between items-center py-1.5 text-sm">
+            <div><span class="text-gray-700 font-medium">${escHtml(item.product_name)}</span>
+            <span class="text-gray-400 ml-1">×${item.quantity}</span></div>
+            <span class="font-semibold text-gray-700">${Number(item.discounted_price).toLocaleString()} MMK</span>
+        </div>`;
+    }).join('');
+    document.getElementById('vItems').innerHTML = itemsHtml;
+
+    document.getElementById('vOriginalSubtotal').textContent = Number(data.original_subtotal).toLocaleString() + ' MMK';
+    document.getElementById('vTotal').textContent = Number(data.total_amount).toLocaleString() + ' MMK';
+
+    const shipLabel = shippingLabels[data.shipping_method] || data.shipping_method;
+    document.getElementById('vShipping').textContent = data.shipping_fee > 0 ? Number(data.shipping_fee).toLocaleString() + ' MMK' : shipLabel + ' (' + '<?= __('voucher_free') ?>' + ')';
+
+    const prodDiscRow = document.getElementById('vProductDiscountRow');
+    if (data.product_discount > 0) {
+        prodDiscRow.classList.remove('hidden');
+        document.getElementById('vProductDiscount').textContent = '-' + Number(data.product_discount).toLocaleString() + ' MMK';
+    } else {
+        prodDiscRow.classList.add('hidden');
+    }
+
+    const firstOrderRow = document.getElementById('vFirstOrderRow');
+    if (data.first_order_discount > 0) {
+        firstOrderRow.classList.remove('hidden');
+        document.getElementById('vFirstOrderDiscount').textContent = '-' + Number(data.first_order_discount).toLocaleString() + ' MMK';
+    } else {
+        firstOrderRow.classList.add('hidden');
+    }
+}
+
+document.getElementById('voucherModal').addEventListener('click', closeVoucher);
+
+function printVoucher() {
+    window.print();
+}
+
+function downloadPDF(btn) {
+    const element = document.getElementById('voucherPrintArea');
+    const origText = btn.innerHTML;
+    btn.innerHTML = '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>';
+    btn.disabled = true;
+
+    const opt = {
+        margin:        [10, 10],
+        filename:     'SweetHeaven_Voucher.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save().then(() => {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+    }).catch(() => {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+        showToast('PDF generation failed');
+    });
 }
 </script>
 </body>
