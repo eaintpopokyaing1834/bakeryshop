@@ -18,16 +18,16 @@ if (!function_exists('__')) {
                     <?= __('footer_tagline') ?>
                 </p>
                 <div class="flex gap-3">
-                    <a href="#"
+                    <a href="https://www.facebook.com/share/14nuHubYZhY/"
                         class="w-10 h-10 bg-stone-100 hover:bg-rose-100 text-stone-400 hover:text-rose-500 rounded-full flex items-center justify-center transition-colors">
                         
                         <img src="../images/facebook.png" class="w-6 h-6">
                     </a>
-                    <a href="#"
+                    <a href="https://www.tiktok.com/@eaint_luv_eaint"
                         class="w-10 h-10 bg-stone-100 hover:bg-rose-100 text-stone-400 hover:text-rose-500 rounded-full flex items-center justify-center transition-colors">
                         <img src="../images/tiktok.png" class="w-6 h-6">
                     </a>
-                    <a href="#"
+                    <a href="https://t.me/p2_iiv"
                         class="w-10 h-10 bg-stone-100 hover:bg-rose-100 text-stone-400 hover:text-rose-500 rounded-full flex items-center justify-center transition-colors">
                         <img src="../images/telegram.png" class="w-8 h-8">
                     </a>
