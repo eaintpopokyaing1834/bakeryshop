@@ -22,9 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     $user = $user->fetch();
 
     if (!$name || !$email) {
-        $profileError = 'Name and email are required.';
+        $profileError = __('profile_err_required');
     } elseif ($passNew && !password_verify($passCur, $user['password'])) {
-        $profileError = 'Current password is incorrect.';
+        $profileError = __('profile_err_password');
     } else {
         $profileImage = $user['profile_image'];
         if (!empty($_FILES['profile_image']['tmp_name'])) {
@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                 ->execute([$name, $email, $profileImage, $userId]);
         }
         $_SESSION['name'] = $name;
-        $profileMsg = 'Profile updated successfully!';
+        $profileMsg = __('profile_success');
     }
 }
 
@@ -264,7 +264,7 @@ $statusColors = [
                 <div class="flex items-center gap-3 mt-3">
                     <span
                         class="bg-white/20 text-xs px-3 py-1 rounded-full font-semibold"><?= ucfirst($user['role']) ?></span>
-                    <span class="text-slate-600 text-xs">Member since
+                    <span class="text-slate-600 text-xs"><?= __('profile_member_since') ?>
                         <?= date('M Y', strtotime($user['created_at'])) ?></span>
                 </div>
             </div>
@@ -272,7 +272,7 @@ $statusColors = [
 
         <!-- Tabs -->
         <div class="flex gap-2 mb-6 bg-white rounded-2xl p-2 shadow-sm border border-gray-100">
-            <?php $tabs = $isAdmin ? ['account' => '👤 Account'] : ['account' => '👤 Account', 'orders' => '📋 My Orders', 'customize' => '🎨 Customize', 'wishlist' => '❤️ Wishlist']; ?>
+            <?php $tabs = $isAdmin ? ['account' => __('profile_tab_account')] : ['account' => __('profile_tab_account'), 'orders' => __('profile_tab_orders'), 'customize' => __('profile_tab_customize'), 'wishlist' => __('profile_tab_wishlist')]; ?>
             <?php foreach ($tabs as $t => $label): ?>
                 <a href="?tab=<?= $t ?>"
                     class="flex-1 text-center py-3 px-4 rounded-xl text-sm font-semibold transition-colors
@@ -285,7 +285,7 @@ $statusColors = [
         <!-- Account Tab -->
         <?php if ($activeTab === 'account'): ?>
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-                <h2 class="text-xl font-bold text-gray-800 mb-6">Account Settings</h2>
+                <h2 class="text-xl font-bold text-gray-800 mb-6"><?= __('profile_account_settings') ?></h2>
 
                 <?php if ($profileMsg): ?>
                     <div class="mb-5 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">✅
@@ -313,7 +313,7 @@ $statusColors = [
                         <div>
                             <label
                                 class="cursor-pointer bg-rose-50 hover:bg-rose-50 text-rose-600 px-4 py-2 rounded-xl text-sm font-semibold transition-colors">
-                                Change Photo
+                                <?= __('profile_change_photo') ?>
                                 <input type="file" name="profile_image" accept="image/*" class="hidden"
                                     onchange="previewImage(this)">
                             </label>
@@ -322,30 +322,30 @@ $statusColors = [
 
                     <div class="grid sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('profile_full_name') ?></label>
                             <input type="text" name="name" required value="<?= htmlspecialchars($user['name']) ?>"
                                 class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Email Address *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('profile_email') ?></label>
                             <input type="email" name="email" required value="<?= htmlspecialchars($user['email']) ?>"
                                 class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Current Password</label>
-                            <input type="password" name="current_password" placeholder="Required to change password"
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('profile_cur_pass') ?></label>
+                            <input type="password" name="current_password" placeholder="<?= __('profile_cur_pass_ph') ?>"
                                 class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">New Password</label>
-                            <input type="password" name="new_password" placeholder="Leave blank to keep current"
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('profile_new_pass') ?></label>
+                            <input type="password" name="new_password" placeholder="<?= __('profile_new_pass_ph') ?>"
                                 class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                         </div>
                     </div>
 
                     <button type="submit"
                         class="bg-pink-500 hover:bg-pink-600 text-white font-semibold px-8 py-3 rounded-xl transition-colors">
-                        Save Changes
+                        <?= __('profile_save') ?>
                     </button>
                 </form>
             </div>
@@ -356,10 +356,9 @@ $statusColors = [
                 <?php if (empty($orders)): ?>
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-16 text-center">
                         <p class="text-5xl mb-4">📋</p>
-                        <h3 class="text-xl font-bold text-gray-700 mb-2">No orders yet</h3>
+                        <h3 class="text-xl font-bold text-gray-700 mb-2"><?= __('profile_no_orders') ?></h3>
                         <a href="/sweetheaven/user/products.php"
-                            class="bg-rose-500 text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-rose-600 transition-colors mt-4 inline-block">Shop
-                            Now</a>
+                            class="bg-rose-500 text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-rose-600 transition-colors mt-4 inline-block"><?= __('profile_shop_now') ?></a>
                     </div>
                 <?php else: ?>
                     <?php foreach ($orders as $order): ?>
@@ -396,7 +395,7 @@ $statusColors = [
                                     <?php endforeach; ?>
                                 </div>
                                 <?php if ($order['payment_name']): ?>
-                                    <p class="text-xs text-gray-400 mt-3">Payment: <?= htmlspecialchars($order['payment_name']) ?>
+                                    <p class="text-xs text-gray-400 mt-3"><?= __('profile_payment') ?> <?= htmlspecialchars($order['payment_name']) ?>
                                         <?php if ($order['pay_status']): ?>
                                             <span class="inline-block text-xs font-semibold px-2 py-0.5 rounded-full ml-1
                         <?= $order['pay_status'] === 'approved' ? 'bg-green-100 text-green-700' : '' ?>
@@ -411,7 +410,7 @@ $statusColors = [
                                         <?php endif; ?>
                                     </p>
                                 <?php endif; ?>
-                                <p class="text-xs text-gray-400">Shipping to: <?= htmlspecialchars($order['shipping_address']) ?>
+                                <p class="text-xs text-gray-400"><?= __('profile_shipping_to') ?> <?= htmlspecialchars($order['shipping_address']) ?>
                                 </p>
                             </div>
                         </div>
@@ -425,10 +424,9 @@ $statusColors = [
                 <?php if (empty($customizeRequests)): ?>
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-16 text-center">
                         <p class="text-5xl mb-4">🎂</p>
-                        <h3 class="text-xl font-bold text-gray-700 mb-2">No customize requests yet</h3>
+                        <h3 class="text-xl font-bold text-gray-700 mb-2"><?= __('profile_no_customize') ?></h3>
                         <a href="/sweetheaven/user/customize.php"
-                            class="bg-rose-500 text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-rose-600 transition-colors mt-4 inline-block">Customize
-                            a Cake</a>
+                            class="bg-rose-500 text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-rose-600 transition-colors mt-4 inline-block"><?= __('profile_customize_now') ?></a>
                     </div>
                 <?php else: ?>
                     <?php foreach ($customizeRequests as $cr): ?>
@@ -454,23 +452,23 @@ $statusColors = [
                             <div class="px-6 py-4">
                                 <div class="grid sm:grid-cols-2 gap-4 text-sm">
                                     <div class="space-y-1">
-                                        <p><span class="font-semibold text-gray-600">Size:</span>
+                                        <p><span class="font-semibold text-gray-600"><?= __('profile_size') ?></span>
                                             <?= htmlspecialchars($cr['size']) ?></p>
-                                        <p><span class="font-semibold text-gray-600">Flavor:</span>
+                                        <p><span class="font-semibold text-gray-600"><?= __('profile_flavor') ?></span>
                                             <?= htmlspecialchars($cr['flavor']) ?></p>
                                         <?php if ($cr['color']): ?>
-                                            <p><span class="font-semibold text-gray-600">Color:</span>
+                                            <p><span class="font-semibold text-gray-600"><?= __('profile_color') ?></span>
                                                 <?= htmlspecialchars($cr['color']) ?></p><?php endif; ?>
                                         <?php if ($cr['cake_message']): ?>
-                                            <p><span class="font-semibold text-gray-600">Message:</span>
+                                            <p><span class="font-semibold text-gray-600"><?= __('profile_message') ?></span>
                                                 <?= htmlspecialchars($cr['cake_message']) ?></p><?php endif; ?>
-                                        <p><span class="font-semibold text-gray-600">Delivery:</span>
+                                        <p><span class="font-semibold text-gray-600"><?= __('profile_delivery') ?></span>
                                             <?= date('M j, Y', strtotime($cr['delivery_date'])) ?></p>
                                     </div>
                                     <div class="space-y-1">
                                         <?php if ($cr['reference_image']): ?>
                                             <div>
-                                                <span class="font-semibold text-gray-600">Reference:</span>
+                                                <span class="font-semibold text-gray-600"><?= __('profile_reference') ?></span>
                                                 <a href="/sweetheaven/<?= htmlspecialchars($cr['reference_image']) ?>" target="_blank"
                                                     class="text-rose-500 hover:underline block mt-1">
                                                     <img src="/sweetheaven/<?= htmlspecialchars($cr['reference_image']) ?>"
@@ -479,12 +477,12 @@ $statusColors = [
                                             </div>
                                         <?php endif; ?>
                                         <?php if ($cr['admin_price']): ?>
-                                            <p><span class="font-semibold text-gray-600">Price:</span> <span
+                                            <p><span class="font-semibold text-gray-600"><?= __('profile_price') ?></span> <span
                                                     class="text-rose-500 font-bold"><?= number_format($cr['admin_price']) ?>
                                                     <?= __('common_mmk') ?></span></p>
                                         <?php endif; ?>
                                         <?php if ($cr['admin_note']): ?>
-                                            <p><span class="font-semibold text-gray-600">Note:</span>
+                                            <p><span class="font-semibold text-gray-600"><?= __('profile_note') ?></span>
                                                 <?= htmlspecialchars($cr['admin_note']) ?></p>
                                         <?php endif; ?>
                                     </div>
@@ -495,7 +493,7 @@ $statusColors = [
                                 <?php if ($cr['status'] === 'approved'): ?>
                                     <a href="/sweetheaven/user/checkout.php?customize_id=<?= $cr['id'] ?>"
                                         class="mt-4 inline-block bg-rose-500 hover:bg-rose-600 text-white font-semibold px-6 py-3 rounded-xl transition-colors text-sm">
-                                        Proceed to Order
+                                        <?= __('profile_proceed_order') ?>
                                     </a>
                                 <?php endif; ?>
                             </div>
@@ -509,10 +507,9 @@ $statusColors = [
             <?php if (empty($wishlist)): ?>
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-16 text-center">
                     <p class="text-5xl mb-4">❤️</p>
-                    <h3 class="text-xl font-bold text-gray-700 mb-2">Your wishlist is empty</h3>
+                    <h3 class="text-xl font-bold text-gray-700 mb-2"><?= __('profile_no_wishlist') ?></h3>
                     <a href="/sweetheaven/user/products.php"
-                        class="bg-rose-500 text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-rose-600 transition-colors mt-4 inline-block">Explore
-                        Products</a>
+                        class="bg-rose-500 text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-rose-600 transition-colors mt-4 inline-block"><?= __('profile_explore') ?></a>
                 </div>
             <?php else: ?>
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -528,8 +525,7 @@ $statusColors = [
                                     <?= __('common_mmk') ?></p>
                                 <div class="flex gap-2">
                                     <button onclick="addToCart(<?= $item['id'] ?>)"
-                                        class="flex-1 bg-pink-500 text-white text-xs font-semibold py-2 rounded-xl hover:bg-rose-600 transition-colors">Add
-                                        to Cart</button>
+                                        class="flex-1 bg-pink-500 text-white text-xs font-semibold py-2 rounded-xl hover:bg-rose-600 transition-colors"><?= __('profile_add_cart') ?></button>
                                     <button onclick="removeFromWishlist(<?= $item['id'] ?>, this)"
                                         class="p-2 text-gray-300 hover:text-red-500 transition-colors">
                                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -549,8 +545,8 @@ $statusColors = [
 
     <!-- Voucher Modal -->
     <div id="voucherModal"
-        class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 overflow-y-auto">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full mx-auto overflow-hidden relative"
+        class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/50 p-2 sm:p-4 flex items-start justify-center">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-3xl w-full relative mt-4 mb-4 shrink-0"
             onclick="event.stopPropagation()" style="box-sizing:border-box;">
             <button onclick="closeVoucher()"
                 class="absolute top-4 right-4 w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors z-10 no-print">
@@ -558,119 +554,110 @@ $statusColors = [
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
-            <div id="voucherContent" class="p-6" style="box-sizing:border-box;width:100%;">
-                <div id="voucherPrintArea" style="box-sizing:border-box;width:100%;">
-                    <div class="text-center mb-6">
-                        <div class="flex items-center justify-center gap-3 mb-1">
-                            <img src="/sweetheaven/images/9102671.png" class="h-10 w-auto" alt="Sweet Heaven">
-                            <span class="text-2xl font-bold text-stone-800"><?= __('voucher_brand') ?></span>
-                        </div>
-                        <p class="text-xs text-gray-400"><?= __('voucher_title') ?></p>
-                    </div>
+            <div id="voucherContent" class="p-4 sm:p-6" style="box-sizing:border-box;width:100%;">
+                <div id="voucherPrintArea" style="box-sizing:border-box;width:100%;max-width:800px;margin:0 auto;">
                     <div class="text-center mb-4" id="voucherLoading">
-                        <svg class="animate-spin h-8 w-8 text-rose-500 mx-auto" xmlns="http://www.w3.org/2000/svg"
-                            fill="none" viewBox="0 0 24 24">
+                        <svg class="animate-spin h-8 w-8 text-rose-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                            <path class="opacity-75" fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                         </svg>
                     </div>
-                    <div id="voucherBody" class="hidden space-y-5">
-                        <div class="border-b border-gray-100 pb-4">
-                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
-                                <?= __('voucher_customer_info') ?></p>
-                            <div class="space-y-1.5 text-sm">
-                                <div
-                                    style="display:flex;justify-content:space-between;align-items:baseline;width:100%;box-sizing:border-box;gap:12px;">
-                                    <span class="text-gray-500"
-                                        style="flex:1 1 auto;min-width:0;"><?= __('voucher_customer_name') ?></span>
-                                    <span class="font-semibold text-gray-800" id="vCustName"
-                                        style="flex:0 0 auto;white-space:nowrap;text-align:right;"></span>
+                    <div id="voucherBody" class="hidden">
+                        <!-- Compact Header -->
+                        <div class="flex flex-col sm:flex-row justify-between items-center sm:items-end border-b border-gray-200 pb-3 mb-4">
+                            <div class="flex items-center gap-3 text-center sm:text-left mb-3 sm:mb-0">
+                                <img src="/sweetheaven/images/9102671.png" class="h-10 w-auto" alt="Sweet Heaven">
+                                <div>
+                                    <h1 class="text-xl font-bold text-stone-800 uppercase tracking-wider mb-0.5">Sweet Heaven</h1>
+                                    <p class="text-xs text-gray-500"><?= __('voucher_shop_address') ?></p>
+                                    <p class="text-xs text-gray-500 mt-0.5"><?= __('voucher_shop_phone') ?></p>
                                 </div>
-                                <div
-                                    style="display:flex;justify-content:space-between;align-items:baseline;width:100%;box-sizing:border-box;gap:12px;">
-                                    <span class="text-gray-500"
-                                        style="flex:1 1 auto;min-width:0;"><?= __('voucher_purchase_date') ?></span>
-                                    <span class="text-gray-800" id="vCustDate"
-                                        style="flex:0 0 auto;white-space:nowrap;text-align:right;"></span>
+                            </div>
+                            <div class="text-xs text-gray-600 text-center sm:text-right">
+                                <p><span class="font-semibold text-gray-800"><?= __('voucher_order_id') ?>:</span> <span id="vCustOrderId"></span></p>
+                                <p class="mt-0.5"><span class="font-semibold text-gray-800"><?= __('voucher_purchase_date') ?>:</span> <span id="vCustDate"></span></p>
+                            </div>
+                        </div>
+
+                        <!-- Two Equal Columns -->
+                        <div class="flex gap-4 mb-4 text-xs" style="display:flex;width:100%;">
+                            <!-- Left Column: Customer Information -->
+                            <div style="flex: 1 1 50%; min-width: 0;">
+                                <h2 class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide border-b border-gray-100 pb-1 mb-2"><?= __('voucher_customer_info') ?></h2>
+                                <div class="space-y-1">
+                                    <p><span class="text-gray-500 inline-block w-20"><?= __('voucher_customer_name') ?>:</span> <span class="font-semibold text-gray-800" id="vCustName"></span></p>
+                                    <p><span class="text-gray-500 inline-block w-20"><?= __('voucher_email') ?>:</span> <span class="text-gray-800 overflow-hidden text-ellipsis whitespace-nowrap align-bottom" id="vCustEmail"></span></p>
+                                    <p><span class="text-gray-500 inline-block w-20"><?= __('voucher_phone') ?>:</span> <span class="text-gray-800" id="vCustPhone"></span></p>
+                                    <p><span class="text-gray-500 inline-block w-20"><?= __('voucher_shipping_method') ?>:</span> <span class="text-gray-800" id="vShipping"></span></p>
                                 </div>
-                                <div
-                                    style="display:flex;justify-content:space-between;align-items:baseline;width:100%;box-sizing:border-box;gap:12px;">
-                                    <span class="text-gray-500"
-                                        style="flex:1 1 auto;min-width:0;"><?= __('voucher_order_id') ?></span>
-                                    <span class="text-gray-800" id="vCustOrderId"
-                                        style="flex:0 0 auto;white-space:nowrap;text-align:right;"></span>
-                                </div>
-                                <div
-                                    style="display:flex;justify-content:space-between;align-items:baseline;width:100%;box-sizing:border-box;gap:12px;">
-                                    <span class="text-gray-500"
-                                        style="flex:1 1 auto;min-width:0;overflow-wrap:break-word;word-break:break-all;"><?= __('voucher_email') ?></span>
-                                    <span class="text-gray-800" id="vCustEmail"
-                                        style="flex:0 0 auto;white-space:nowrap;text-align:right;max-width:60%;overflow:hidden;text-overflow:ellipsis;"></span>
-                                </div>
-                                <div
-                                    style="display:flex;justify-content:space-between;align-items:baseline;width:100%;box-sizing:border-box;gap:12px;">
-                                    <span class="text-gray-500"
-                                        style="flex:1 1 auto;min-width:0;"><?= __('voucher_phone') ?></span>
-                                    <span class="text-gray-800" id="vCustPhone"
-                                        style="flex:0 0 auto;white-space:nowrap;text-align:right;"></span>
+                            </div>
+
+                            <!-- Right Column: Payment Information -->
+                            <div style="flex: 1 1 50%; min-width: 0;">
+                                <h2 class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide border-b border-gray-100 pb-1 mb-2">Payment Information</h2>
+                                <div class="space-y-1">
+                                    <p><span class="text-gray-500 inline-block w-24">Method:</span> <span class="font-semibold text-gray-800" id="vPaymentMethod"></span></p>
+                                    <div class="mt-1 flex items-start gap-2" id="vPaymentScreenshotContainer" style="display:none;">
+                                        <span class="text-gray-500 inline-block w-24 shrink-0">Screenshot:</span>
+                                        <img id="vPaymentScreenshot" src="" alt="Payment Screenshot" class="w-full max-w-[60px] max-h-[70px] rounded border border-gray-200 object-contain aspect-auto shadow-sm">
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="border-b border-gray-100 pb-4">
-                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
-                                <?= __('voucher_order_details') ?></p>
-                            <div class="space-y-2" id="vItems" style="width:100%;box-sizing:border-box;"></div>
-                            <div class="mt-3 pt-3 border-t border-gray-100 space-y-1 text-sm" id="vSummary"
-                                style="width:100%;box-sizing:border-box;">
-                                <div style="display:flex;justify-content:space-between;align-items:baseline;width:100%;box-sizing:border-box;gap:12px;"
-                                    class="text-gray-500">
-                                    <span style="flex:1 1 auto;min-width:0;"><?= __('voucher_subtotal') ?></span>
-                                    <span id="vOriginalSubtotal"
-                                        style="flex:0 0 auto;white-space:nowrap;text-align:right;"></span>
+
+                        <!-- Order Details -->
+                        <div class="mb-4">
+                            <h2 class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide border-b border-gray-100 pb-1 mb-2"><?= __('voucher_order_details') ?></h2>
+                            <table class="w-full text-xs text-left border-collapse" style="width:100%;">
+                                <thead>
+                                    <tr class="border-b border-gray-100 text-gray-500 text-[11px] uppercase tracking-wider">
+                                        <th class="py-1.5 font-semibold" colspan="2"><?= __('voucher_product') ?></th>
+                                        <th class="py-1.5 font-semibold text-center"><?= __('voucher_qty') ?></th>
+                                        <th class="py-1.5 font-semibold text-right"><?= __('voucher_unit_price') ?></th>
+                                        <th class="py-1.5 font-semibold text-right"><?= __('voucher_subtotal') ?></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="vItems" class="divide-y divide-gray-50">
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Order Summary -->
+                        <div class="flex justify-end">
+                            <div class="w-full max-w-xs space-y-1 text-xs mb-4" id="vSummary">
+                                <div class="flex justify-between text-gray-500">
+                                    <span><?= __('voucher_subtotal') ?></span>
+                                    <span id="vOriginalSubtotal"></span>
                                 </div>
-                                <div id="vProductDiscountRow"
-                                    style="display:none;justify-content:space-between;align-items:baseline;width:100%;box-sizing:border-box;gap:12px;"
-                                    class="text-green-600">
-                                    <span
-                                        style="flex:1 1 auto;min-width:0;"><?= __('voucher_product_discounts') ?></span>
-                                    <span id="vProductDiscount"
-                                        style="flex:0 0 auto;white-space:nowrap;text-align:right;"></span>
+                                <div class="flex justify-between text-gray-500" id="vShippingFeeRow">
+                                    <span><?= __('checkout_shipping_fee') ?></span>
+                                    <span id="vShippingFee"></span>
                                 </div>
-                                <div id="vFirstOrderRow"
-                                    style="display:none;justify-content:space-between;align-items:baseline;width:100%;box-sizing:border-box;gap:12px;"
-                                    class="text-blue-600">
-                                    <span
-                                        style="flex:1 1 auto;min-width:0;"><?= __('voucher_first_order_discount') ?></span>
-                                    <span id="vFirstOrderDiscount"
-                                        style="flex:0 0 auto;white-space:nowrap;text-align:right;"></span>
+                                <div id="vProductDiscountRow" style="display:none;" class="flex justify-between text-green-600">
+                                    <span><?= __('voucher_discount_applied') ?></span>
+                                    <span id="vProductDiscount"></span>
                                 </div>
-                                <div style="display:flex;justify-content:space-between;align-items:baseline;width:100%;box-sizing:border-box;gap:12px;"
-                                    class="text-gray-500">
-                                    <span style="flex:1 1 auto;min-width:0;"><?= __('voucher_shipping_method') ?></span>
-                                    <span id="vShipping"
-                                        style="flex:0 0 auto;white-space:nowrap;text-align:right;"></span>
+                                <div id="vFirstOrderRow" style="display:none;" class="flex justify-between text-blue-600">
+                                    <span><?= __('voucher_first_order_discount') ?></span>
+                                    <span id="vFirstOrderDiscount"></span>
+                                </div>
+                                <div class="flex justify-between font-bold text-base text-rose-500 border-t border-gray-100 pt-1.5 mt-1.5">
+                                    <span><?= __('voucher_total_amount') ?></span>
+                                    <span id="vTotal"></span>
                                 </div>
                             </div>
                         </div>
-                        <div
-                            style="display:flex;justify-content:space-between;align-items:center;width:100%;box-sizing:border-box;gap:12px;padding-bottom:1rem;">
-                            <span class="text-sm font-semibold text-gray-600"
-                                style="flex:1 1 auto;min-width:0;"><?= __('voucher_total_amount') ?></span>
-                            <span class="text-xl font-bold text-rose-500" id="vTotal"
-                                style="flex:0 0 auto;white-space:nowrap;text-align:right;"></span>
-                        </div>
-                        <div class="text-center pt-3 border-t border-gray-100">
-                            <p class="text-xs text-gray-400"><?= __('voucher_thank_you') ?></p>
+
+                        <!-- Thank you message -->
+                        <div class="text-center pt-3 border-t border-gray-100 text-xs text-gray-500">
+                            <p><?= __('voucher_thank_you') ?></p>
                         </div>
                     </div>
                 </div>
                 <div class="flex gap-3 mt-4 no-print">
-                    <button onclick="printVoucher()"
-                        class="flex-1 bg-stone-800 hover:bg-stone-900 text-white font-semibold py-3 px-4 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
+                    <button onclick="printVoucher()" class="flex-1 bg-stone-800 hover:bg-stone-900 text-white font-semibold py-2.5 px-4 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                         </svg>
                         <?= __('voucher_print') ?>
                     </button>
@@ -708,7 +695,7 @@ $statusColors = [
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `action=add&product_id=${productId}&qty=1`
             }).then(r => r.json()).then(data => {
-                if (data.success) { showToast('Added to cart!'); const b = document.getElementById('cartBadge'); if (b) { b.textContent = data.cart_count; b.classList.remove('hidden'); } }
+                if (data.success) { showToast('<?= addslashes(__('toast_added_cart')) ?>'); const b = document.getElementById('cartBadge'); if (b) { b.textContent = data.cart_count; b.classList.remove('hidden'); } }
             });
         }
 
@@ -721,15 +708,15 @@ $statusColors = [
             }).then(r => r.json()).then(data => {
                 if (data.success) {
                     btn.closest('.bg-white').remove();
-                    showToast('Removed from wishlist');
+                    showToast('<?= addslashes(__('toast_removed_wishlist')) ?>');
                     if (typeof updateWishlistBadge === 'function') updateWishlistBadge(data.wishlist_count);
                     if (data.wishlist_count === 0 && grid) {
                         const parent = grid.parentNode;
                         grid.remove();
                         const emptyHtml = '<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-16 text-center">' +
                             '<p class="text-5xl mb-4">❤️</p>' +
-                            '<h3 class="text-xl font-bold text-gray-700 mb-2">Your wishlist is empty</h3>' +
-                            '<a href="/sweetheaven/user/products.php" class="bg-rose-500 text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-rose-600 transition-colors mt-4 inline-block">Explore Products</a>' +
+                            '<h3 class="text-xl font-bold text-gray-700 mb-2"><?= addslashes(__('profile_no_wishlist')) ?></h3>' +
+                            '<a href="/sweetheaven/user/products.php" class="bg-rose-500 text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-rose-600 transition-colors mt-4 inline-block"><?= addslashes(__('profile_explore')) ?></a>' +
                             '</div>';
                         parent.insertAdjacentHTML('beforeend', emptyHtml);
                     }
@@ -789,15 +776,27 @@ $statusColors = [
             document.getElementById('vCustEmail').textContent = data.email;
             document.getElementById('vCustPhone').textContent = data.phone || 'N/A';
 
+            document.getElementById('vPaymentMethod').textContent = data.payment_name;
+            const screenshotContainer = document.getElementById('vPaymentScreenshotContainer');
+            if (data.screenshot) {
+                screenshotContainer.style.display = 'block';
+                document.getElementById('vPaymentScreenshot').src = '/sweetheaven/' + data.screenshot;
+            } else {
+                screenshotContainer.style.display = 'none';
+            }
+
             const itemsHtml = data.items.map(item => {
                 const total = Number(item.discounted_price) * Number(item.quantity);
-                return `<div style="display:flex;justify-content:space-between;align-items:baseline;width:100%;box-sizing:border-box;gap:12px;padding:6px 0;">
-            <div style="flex:1 1 auto;min-width:0;overflow-wrap:break-word;">
-                <span class="text-gray-700 font-medium" style="font-size:0.875rem;">${escHtml(item.product_name)}</span>
-                <span class="text-gray-400" style="margin-left:4px;font-size:0.875rem;">\u00d7${item.quantity}</span>
-            </div>
-            <span class="font-semibold text-gray-700" style="flex:0 0 auto;white-space:nowrap;text-align:right;font-size:0.875rem;">${Number(total).toLocaleString()} MMK</span>
-        </div>`;
+                const imgSrc = item.product_image ? ('/sweetheaven/' + item.product_image) : '/sweetheaven/images/default_cake.png';
+                return `<tr class="border-b border-gray-50">
+                    <td class="py-1.5 align-middle w-10">
+                        <img src="${imgSrc}" class="w-7 h-7 object-cover rounded border border-gray-100" alt="Product" onerror="this.src='/sweetheaven/images/default_cake.png'">
+                    </td>
+                    <td class="py-1.5 align-middle font-medium text-gray-800">${escHtml(item.product_name)}</td>
+                    <td class="py-1.5 align-middle text-center text-gray-600">${item.quantity}</td>
+                    <td class="py-1.5 align-middle text-right text-gray-600">${Number(item.discounted_price).toLocaleString()}</td>
+                    <td class="py-1.5 align-middle text-right font-semibold text-gray-800">${Number(total).toLocaleString()}</td>
+                </tr>`;
             }).join('');
             document.getElementById('vItems').innerHTML = itemsHtml;
 
@@ -805,7 +804,9 @@ $statusColors = [
             document.getElementById('vTotal').textContent = Number(data.total_amount).toLocaleString() + ' MMK';
 
             const shipLabel = shippingLabels[data.shipping_method] || data.shipping_method;
-            document.getElementById('vShipping').textContent = data.shipping_fee > 0 ? Number(data.shipping_fee).toLocaleString() + ' MMK' : shipLabel + ' (' + '<?= __('voucher_free') ?>' + ')';
+            document.getElementById('vShipping').textContent = shipLabel;
+            
+            document.getElementById('vShippingFee').textContent = data.shipping_fee > 0 ? Number(data.shipping_fee).toLocaleString() + ' MMK' : 'Free';
 
             const prodDiscRow = document.getElementById('vProductDiscountRow');
             if (data.product_discount > 0) {

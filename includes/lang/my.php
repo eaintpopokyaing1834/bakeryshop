@@ -264,6 +264,8 @@ return [
     'profile_view_voucher' => 'ဘောက်ချာ ကြည့်မည်',
     'voucher_title' => 'ဝယ်ယူမှု ဘောက်ချာ',
     'voucher_brand' => 'Sweet Heaven',
+    'voucher_shop_address' => 'ပါဆယ်လမ်း၊ ဟင်္သာတမြို့နယ်၊ ဧရာဝတီတိုင်းဒေသကြီး',
+    'voucher_shop_phone' => 'ဖုန်း - ၀၉၆၇၇၉၉၆၉၄၅',
     'voucher_customer_info' => 'ဖောက်သည် အချက်အလက်',
     'voucher_order_details' => 'အော်ဒါ အချက်အလက်များ',
     'voucher_product' => 'ပစ္စည်း',

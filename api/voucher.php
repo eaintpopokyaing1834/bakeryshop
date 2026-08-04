@@ -13,9 +13,12 @@ if (!$orderId || !$userId) {
 }
 
 $order = $db->prepare("
-    SELECT o.*, u.name, u.email
+    SELECT o.*, u.name, u.email,
+           pm.payment_name, pay.screenshot
     FROM orders o
     JOIN users u ON o.user_id = u.id
+    LEFT JOIN payment pay ON pay.order_id = o.id
+    LEFT JOIN payment_methods pm ON pay.payment_method_id = pm.id
     WHERE o.id = ? AND o.user_id = ?
 ");
 $order->execute([$orderId, $userId]);
@@ -31,7 +34,8 @@ $items = $db->prepare("
     SELECT oi.quantity, oi.price AS discounted_price,
            COALESCE(p.name, 'Custom Cake') AS product_name,
            p.price AS original_price,
-           oi.product_id
+           oi.product_id,
+           (SELECT image_url FROM product_images pi WHERE pi.product_id = p.id AND pi.is_primary = 1 LIMIT 1) as product_image
     FROM order_items oi
     LEFT JOIN products p ON oi.product_id = p.id
     WHERE oi.order_id = ?
@@ -83,6 +87,8 @@ $voucher = [
     'shipping_fee' => $shippingFee,
     'total_amount' => (float)$order['total_amount'],
     'order_date' => $order['order_date'],
+    'payment_name' => $order['payment_name'] ?? 'N/A',
+    'screenshot' => $order['screenshot'] ?? null,
 ];
 
 echo json_encode($voucher);

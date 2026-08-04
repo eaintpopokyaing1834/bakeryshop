@@ -264,6 +264,8 @@ return [
     'profile_view_voucher' => 'View Voucher',
     'voucher_title' => 'Purchase Voucher',
     'voucher_brand' => 'Sweet Heaven',
+    'voucher_shop_address' => 'Parcel Road, Hinthada Township, Ayeyarwady Region',
+    'voucher_shop_phone' => 'Phone: 09677996945',
     'voucher_customer_info' => 'Customer Information',
     'voucher_order_details' => 'Order Details',
     'voucher_product' => 'Product',
