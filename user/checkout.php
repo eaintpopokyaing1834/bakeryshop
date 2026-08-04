@@ -40,6 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$name || !$phone || !$address || !$paymentMethodId) {
         $error = __('checkout_err_fields_fill');
+    } elseif (!preg_match('/^09\d{9}$/', $phone)) {
+        $error = __('checkout_err_phone');
     } elseif (empty($_FILES['payment_screenshot']) || $_FILES['payment_screenshot']['error'] !== UPLOAD_ERR_OK) {
         $error = __('checkout_err_upload');
     } else {
@@ -292,7 +294,10 @@ if ($customizeRequest) {
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_phone') ?> <span class="text-red-500">*</span></label>
-                                <input type="number" name="phone" required placeholder="<?= __('checkout_phone_ph') ?>"
+                                <input type="number" name="phone" required inputmode="numeric"
+                                    pattern="09[0-9]{9}" maxlength="11"
+                                    placeholder="<?= __('checkout_phone_ph') ?>"
+                                    oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,11)"
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                             </div>
                             <div>
@@ -425,10 +430,10 @@ if ($customizeRequest) {
                         <div id="screenshotUploadSection" class="hidden">
                             <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_payment_ss') ?></label>
                             <p class="text-xs text-gray-400 mb-3"><?= __('checkout_payment_ss_desc') ?></p>
-                            <div class="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center hover:border-rose-300 transition-colors cursor-pointer"
+                            <div class="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center hover:border-rose-300 transition-colors cursor-pointer relative"
                                 id="uploadDropzone">
                                 <input type="file" name="payment_screenshot" id="paymentScreenshot"
-                                    accept="image/jpeg,image/png,image/webp" required class="hidden">
+                                    accept="image/jpeg,image/png,image/webp" required class="sr-only">
                                 <div id="uploadPlaceholder">
                                     <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">

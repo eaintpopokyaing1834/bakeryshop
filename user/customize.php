@@ -10,6 +10,9 @@ $db = getDB();
 $success = '';
 $error = '';
 
+// Earliest allowed delivery date (today + lead time)
+$minDate = date('Y-m-d', strtotime('+' . CUSTOMIZE_LEAD_DAYS . ' days'));
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $size = trim($_POST['size'] ?? '');
     $flavor = trim($_POST['flavor'] ?? '');
@@ -20,6 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$size || !$flavor || !$deliveryDate) {
         $error = __('customize_err_fields');
+    } elseif ($deliveryDate < $minDate) {
+        $error = sprintf(__('customize_err_date'), CUSTOMIZE_LEAD_DAYS);
     } else {
         // ── Server-side guard: block duplicate submissions ──────────────
         $activeCheck = $db->prepare("SELECT id FROM customize_requests WHERE user_id=? AND status IN ('pending','approved') LIMIT 1");
@@ -226,8 +231,9 @@ $reqStatusColors = [
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_date_label') ?></label>
-                            <input type="date" name="delivery_date" required
+                            <input type="date" name="delivery_date" required min="<?= $minDate ?>"
                                 class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
+                            <p class="text-xs text-gray-400 mt-1"><?= sprintf(__('customize_date_hint'), date('M j, Y', strtotime($minDate))) ?></p>
                         </div>
 
                         <div>

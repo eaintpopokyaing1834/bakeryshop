@@ -7,6 +7,9 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_CHARSET', 'utf8mb4');
 
+// Minimum lead time (in days) required for custom cake orders
+define('CUSTOMIZE_LEAD_DAYS', 2);
+
 function getDB(): PDO {
     static $pdo = null;
     if ($pdo === null) {

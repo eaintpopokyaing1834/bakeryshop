@@ -674,14 +674,6 @@ $statusColors = [
                         </svg>
                         <?= __('voucher_print') ?>
                     </button>
-                    <button onclick="downloadPDF(this)"
-                        class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <?= __('voucher_download_pdf') ?>
-                    </button>
                 </div>
             </div>
         </div>
@@ -836,71 +828,6 @@ $statusColors = [
 
         function printVoucher() {
             window.print();
-        }
-
-        function downloadPDF(btn) {
-            const area = document.getElementById('voucherPrintArea');
-            const origText = btn.innerHTML;
-            btn.innerHTML = '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>';
-            btn.disabled = true;
-
-            // html2canvas internally clones the element into an off-screen document.
-            // We use the onclone callback — the CORRECT way — to adjust styles inside
-            // that internal clone without any manual off-screen positioning tricks.
-            // This guarantees the full element (left + right) is always captured.
-            html2pdf().set({
-                margin: [10, 10, 10, 10],
-                filename: 'SweetHeaven_Voucher.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: {
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: true,
-                    logging: false,
-                    onclone: function (clonedDoc) {
-                        const el = clonedDoc.getElementById('voucherPrintArea');
-                        if (!el) return;
-                        // Force full-width, readable layout inside the internal clone
-                        el.style.cssText = [
-                            'display:block',
-                            'width:500px',
-                            'max-width:500px',
-                            'padding:16px 20px',
-                            'margin:0',
-                            'background:#fff',
-                            'box-sizing:border-box',
-                            'overflow:visible',
-                            "font-family:'Poppins',sans-serif"
-                        ].join(';');
-
-                        // Make sure the voucher body is visible (it may have hidden class)
-                        const body = clonedDoc.getElementById('voucherBody');
-                        if (body) {
-                            body.classList.remove('hidden');
-                            body.style.display = 'block';
-                        }
-                        // Hide the loading spinner
-                        const loading = clonedDoc.getElementById('voucherLoading');
-                        if (loading) loading.style.display = 'none';
-
-                        // Ensure all flex rows inside use the correct layout
-                        el.querySelectorAll('[style*="display:flex"]').forEach(row => {
-                            row.style.width = '100%';
-                            row.style.boxSizing = 'border-box';
-                            row.style.overflow = 'visible';
-                        });
-                    }
-                },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-            }).from(area).save().then(() => {
-                btn.innerHTML = origText;
-                btn.disabled = false;
-            }).catch(() => {
-                btn.innerHTML = origText;
-                btn.disabled = false;
-                showToast('PDF generation failed');
-            });
         }
     </script>
 </body>
