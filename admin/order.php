@@ -227,9 +227,18 @@ $statusColors = [
                     <?php else: ?>
                         <select onchange="updateStatus(<?= $order['id'] ?>, this.value, this)"
                             class="text-xs font-semibold px-3 py-1.5 rounded-full border cursor-pointer focus:outline-none focus:ring-2 focus:ring-rose-300 transition-colors
-                            <?= $statusColors[$order['status']] ?? 'bg-gray-100 text-gray-600' ?>">
+                            <?= $statusColors[$order['status']] ?? 'bg-gray-100 text-gray-600' ?>"
+                            <?= (!empty($order['pay_status']) && $order['pay_status'] === 'pending') ? 'disabled' : '' ?>>
                             <?php foreach (['pending','processing','shipped','delivered','cancelled'] as $s): ?>
-                            <option value="<?= $s ?>" <?= $order['status'] === $s ? 'selected' : '' ?>><?= ucfirst(__("status_$s")) ?></option>
+                                <?php 
+                                    $disabled = false;
+                                    if (!empty($order['pay_status'])) {
+                                        if ($order['pay_status'] === 'pending' && $s !== 'pending') $disabled = true;
+                                        if ($order['pay_status'] === 'approved' && in_array($s, ['pending', 'cancelled'])) $disabled = true;
+                                        if ($order['pay_status'] === 'rejected' && $s !== 'cancelled') $disabled = true;
+                                    }
+                                ?>
+                                <option value="<?= $s ?>" <?= $order['status'] === $s ? 'selected' : '' ?> <?= $disabled ? 'disabled' : '' ?>><?= ucfirst(__("status_$s")) ?></option>
                             <?php endforeach; ?>
                         </select>
                     <?php endif; ?>
@@ -355,6 +364,28 @@ function updatePayment(orderId, action) {
             if (row) {
                 row.textContent = action === 'approve' ? '<?= __("status_approved") ?>' : '<?= __("status_rejected") ?>';
                 row.className = `text-xs font-semibold px-2 py-0.5 rounded-full inline-block mt-1 ${action === 'approve' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+            }
+
+            // Update the status dropdown dynamically
+            const selectEl = document.querySelector(`select[onchange*="updateStatus(${orderId}"]`);
+            if (selectEl) {
+                selectEl.disabled = false;
+                Array.from(selectEl.options).forEach(opt => {
+                    if (action === 'approve') {
+                        opt.disabled = (opt.value === 'cancelled' || opt.value === 'pending');
+                    } else if (action === 'reject') {
+                        opt.disabled = (opt.value !== 'cancelled');
+                    }
+                });
+                
+                // Auto-update to valid status if current is disabled
+                if (action === 'approve' && selectEl.value === 'pending') {
+                    selectEl.value = 'processing';
+                    updateStatus(orderId, 'processing', selectEl);
+                } else if (action === 'reject' && selectEl.value !== 'cancelled') {
+                    selectEl.value = 'cancelled';
+                    updateStatus(orderId, 'cancelled', selectEl);
+                }
             }
         }
     });
