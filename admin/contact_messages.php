@@ -76,7 +76,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                         <td colspan="<?= $role === 'admin' ? 7 : 6 ?>">
                             <div class="empty-state">
                                 <span class="empty-state-icon">📭</span>
-                                <p class="empty-state-text">No contact messages yet.</p>
+                                <p class="empty-state-text">No messages yet.</p>
                             </div>
                         </td>
                     </tr>

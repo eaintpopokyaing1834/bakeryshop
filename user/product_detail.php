@@ -225,16 +225,43 @@ $relatedProducts = $relatedProducts->fetchAll();
                                         Add to Cart
                                     </button>
                                 </div>
-                            </div>
+                            <?php elseif (!isset($_SESSION['user_id'])): ?>
+                                <div class="bg-amber-50 border border-amber-200 p-5 rounded-2xl text-center">
+                                    <svg class="w-8 h-8 text-amber-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    <p class="text-gray-700 font-semibold text-sm mb-1">Members Only Purchase</p>
+                                    <p class="text-gray-500 text-xs mb-4">Only registered customers can purchase products.</p>
+                                    <div class="flex gap-3 justify-center flex-wrap">
+                                        <a href="/sweetheaven/auth/login.php"
+                                           onclick="if(typeof openAuthModal==='function'){event.preventDefault();openAuthModal('login');}"
+                                           class="inline-flex items-center gap-1.5 bg-rose-500 hover:bg-rose-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                                            </svg>
+                                            Log In
+                                        </a>
+                                        <a href="/sweetheaven/auth/register.php"
+                                           onclick="if(typeof openAuthModal==='function'){event.preventDefault();openAuthModal('register');}"
+                                           class="inline-flex items-center gap-1.5 bg-white hover:bg-gray-50 text-gray-700 text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors border border-gray-200 shadow-sm">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                            </svg>
+                                            Create Account
+                                        </a>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <div class="bg-blue-50 border border-blue-100 text-blue-700 p-4 rounded-2xl text-center font-semibold text-sm">
+                                    Admin accounts cannot purchase products.
+                                </div>
+                            <?php endif; ?>
                         <?php else: ?>
-                            <div class="bg-blue-50 text-blue-700 p-4 rounded-2xl text-center font-semibold text-sm">
-                                Admin accounts cannot purchase products.
-                            </div>
+                            <div class="bg-red-50 text-red-600 p-4 rounded-2xl text-center font-semibold">This product is currently out of stock</div>
                         <?php endif; ?>
-                    <?php else: ?>
-                        <div class="bg-red-50 text-red-600 p-4 rounded-2xl text-center font-semibold">This product is
-                            currently out of stock</div>
-                    <?php endif; ?>
                 </div>
             </div>
         </div>

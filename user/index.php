@@ -1153,45 +1153,61 @@ if ($isLoggedIn) {
                             <p class="text-gray-500 text-sm"><?= __('contact_us_form_desc') ?></p>
                         </div>
 
-                        <!-- Form -->
-                        <form id="contactForm" class="space-y-5">
-                            <div class="grid sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2"><?= __('contact_us_name_label') ?> <span class="text-rose-400">*</span></label>
-                                    <input type="text" id="contactName" required
-                                        class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all <?= $isLoggedIn ? 'bg-gray-50 cursor-not-allowed' : '' ?>"
-                                        placeholder="<?= htmlspecialchars(__('contact_us_name_ph')) ?>"
-                                        value="<?= $isLoggedIn ? htmlspecialchars($currentUser['name'] ?? '') : '' ?>"
-                                        <?= $isLoggedIn ? 'readonly' : '' ?>>
+                        <?php if ($isAdmin): ?>
+                            <!-- Admin/Cashier: not allowed notice -->
+                            <div class="flex flex-col items-center justify-center text-center py-10 px-4">
+                                <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-4">
+                                    <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                    </svg>
+                                </div>
+                                <p class="text-gray-700 font-bold text-base mb-1">Access Restricted</p>
+                                <p class="text-gray-500 text-sm leading-relaxed">
+                                    Admin and Cashier accounts are not allowed to send messages from this form.
+                                </p>
+                            </div>
+                        <?php else: ?>
+                            <!-- Form — visible to guests & customers -->
+                            <form id="contactForm" class="space-y-5">
+                                <div class="grid sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2"><?= __('contact_us_name_label') ?> <span class="text-rose-400">*</span></label>
+                                        <input type="text" id="contactName" required
+                                            class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all <?= $isLoggedIn ? 'bg-gray-50 cursor-not-allowed' : '' ?>"
+                                            placeholder="<?= htmlspecialchars(__('contact_us_name_ph')) ?>"
+                                            value="<?= $isLoggedIn ? htmlspecialchars($currentUser['name'] ?? '') : '' ?>"
+                                            <?= $isLoggedIn ? 'readonly' : '' ?>>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2"><?= __('contact_us_email_label') ?> <span class="text-rose-400">*</span></label>
+                                        <input type="email" id="contactEmail" required
+                                            class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all <?= $isLoggedIn ? 'bg-gray-50 cursor-not-allowed' : '' ?>"
+                                            placeholder="<?= htmlspecialchars(__('contact_us_email_ph')) ?>"
+                                            value="<?= $isLoggedIn ? htmlspecialchars($currentUser['email'] ?? '') : '' ?>"
+                                            <?= $isLoggedIn ? 'readonly' : '' ?>>
+                                    </div>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2"><?= __('contact_us_email_label') ?> <span class="text-rose-400">*</span></label>
-                                    <input type="email" id="contactEmail" required
-                                        class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all <?= $isLoggedIn ? 'bg-gray-50 cursor-not-allowed' : '' ?>"
-                                        placeholder="<?= htmlspecialchars(__('contact_us_email_ph')) ?>"
-                                        value="<?= $isLoggedIn ? htmlspecialchars($currentUser['email'] ?? '') : '' ?>"
-                                        <?= $isLoggedIn ? 'readonly' : '' ?>>
+                                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2"><?= __('contact_us_phone_label') ?> <span class="text-gray-400 font-normal normal-case tracking-normal"><?= __('contact_us_phone_optional') ?></span></label>
+                                    <input type="number" id="contactPhone"
+                                        class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all"
+                                        placeholder="<?= htmlspecialchars(__('contact_us_phone_ph')) ?>">
                                 </div>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2"><?= __('contact_us_phone_label') ?> <span class="text-gray-400 font-normal normal-case tracking-normal"><?= __('contact_us_phone_optional') ?></span></label>
-                                <input type="number" id="contactPhone"
-                                    class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all"
-                                    placeholder="<?= htmlspecialchars(__('contact_us_phone_ph')) ?>">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2"><?= __('contact_us_message_label') ?> <span class="text-rose-400">*</span></label>
-                                <textarea id="contactMessage" rows="4" required
-                                    class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none transition-all"
-                                    placeholder="<?= htmlspecialchars(__('contact_us_message_ph')) ?>"></textarea>
-                            </div>
-                            <button type="submit" id="contactSubmitBtn"
-                                class="w-full sm:w-auto bg-[#e8746a] hover:bg-[#d4635a] text-white font-bold px-10 py-3.5 rounded-xl transition-all text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
-                                data-submit-text="<?= htmlspecialchars(__('contact_us_submit')) ?>"
-                                data-submitting-text="<?= htmlspecialchars(__('contact_us_submitting')) ?>">
-                                <?= __('contact_us_submit') ?>
-                            </button>
-                        </form>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2"><?= __('contact_us_message_label') ?> <span class="text-rose-400">*</span></label>
+                                    <textarea id="contactMessage" rows="4" required
+                                        class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none transition-all"
+                                        placeholder="<?= htmlspecialchars(__('contact_us_message_ph')) ?>"></textarea>
+                                </div>
+                                <button type="submit" id="contactSubmitBtn"
+                                    class="w-full sm:w-auto bg-[#e8746a] hover:bg-[#d4635a] text-white font-bold px-10 py-3.5 rounded-xl transition-all text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+                                    data-submit-text="<?= htmlspecialchars(__('contact_us_submit')) ?>"
+                                    data-submitting-text="<?= htmlspecialchars(__('contact_us_submitting')) ?>">
+                                    <?= __('contact_us_submit') ?>
+                                </button>
+                            </form>
+                        <?php endif; ?>
 
                         <!-- Message -->
                         <div id="contactFormMsg" class="mt-5 hidden"></div>

@@ -46,9 +46,11 @@ $page = min($page, $totalPages);
 $offset      = ($page - 1) * $perPage;
 
 $stmt = $db->prepare("
-    SELECT r.*, u.name AS customer_name, u.email AS customer_email, r.comment AS review_text
+    SELECT r.*, u.name AS customer_name, u.email AS customer_email, r.comment AS review_text,
+           p.name AS product_name
     FROM reviews r
     JOIN users u ON r.user_id = u.id
+    LEFT JOIN products p ON r.product_id = p.id
     $where
     ORDER BY r.created_at DESC
     LIMIT $perPage OFFSET $offset
@@ -100,6 +102,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 <tr>
                     <th><?= __('admin_customer') ?></th>
                     <th><?= __('review_col_email') ?></th>
+                    <th>Product</th>
                     <th><?= __('review_col_review') ?></th>
                     <th><?= __('admin_date') ?></th>
                     <th><?= __('admin_status') ?></th>
@@ -109,7 +112,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <tbody>
                 <?php if (empty($reviews)): ?>
                     <tr>
-                        <td colspan="6">
+                        <td colspan="7">
                             <div class="empty-state">
                                 <span class="empty-state-icon">💬</span>
                                 <p class="empty-state-text"><?= __('review_no_reviews') ?></p>
@@ -127,6 +130,18 @@ require_once __DIR__ . '/../includes/admin_header.php';
                             </td>
                             <td>
                                 <span class="text-sm text-gray-500"><?= htmlspecialchars($r['customer_email']) ?></span>
+                            </td>
+                            <td>
+                                <?php if (!empty($r['product_name'])): ?>
+                                    <span class="inline-flex items-center gap-1 text-xs font-medium text-rose-700 bg-rose-50 border border-rose-100 px-2 py-1 rounded-lg">
+                                        <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                        <?= htmlspecialchars($r['product_name']) ?>
+                                    </span>
+                                <?php else: ?>
+                                    <span class="text-xs text-gray-300 italic">—</span>
+                                <?php endif; ?>
                             </td>
                             <td class="max-w-xs">
                                 <?php if ($r['rating']): ?>

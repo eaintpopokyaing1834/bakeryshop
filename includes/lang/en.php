@@ -6,7 +6,7 @@ return [
     'nav_home' => 'Home',
     'nav_products' => 'Products',
     'nav_customize' => 'Customize Cake',
-    'nav_contact' => 'Contact',
+    'nav_contact' => 'Contact Us',
     'nav_admin_panel' => 'Admin Panel',
     'nav_notifications' => 'Notifications',
     'nav_mark_all_read' => 'Mark all read',
@@ -413,10 +413,10 @@ return [
     'review_display_desc' => 'Here\'s what our sweet community has to say',
     'review_no_reviews' => 'No reviews yet. Be the first to share your experience!',
 
-    // ── Contact Us (Index) ──────────────────────────────
+    // ── Contact Us (Index) ───────────────────────────────
     'contact_us_title'        => 'Contact Us',
-    'contact_us_label'        => 'Get in Touch',
-    'contact_us_desc'         => "We'd love to hear from you. Send us a message.",
+    'contact_us_label'        => 'Get In Touch',
+    'contact_us_desc'         => "We'd love to hear from you. Send us a message and we'll get back to you.",
     'contact_us_form_label'   => 'Drop Us a Line',
     'contact_us_form_title'   => 'Send a Message',
     'contact_us_form_desc'    => "Fill in the form below and we'll respond as soon as possible.",

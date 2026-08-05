@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // includes/lang/my.php — Burmese (မြန်မာ) strings
 return [
 
@@ -226,10 +226,27 @@ return [
     'checkout_err_stock'   => 'ဝမ်းနည်းပါသည်၊ %s ကုန်သွားပါပြီ။',
     'checkout_err_payment' => 'ရွေးချယ်ထားသော ငွေပေးချေမှု နည်းလမ်း မရနိုင်ပါ။',
 
-    // ── Order Confirmation ──────────────────────────────
-    'confirm_title'        => 'အော်ဒါ အတည်ပြုပြီး — Sweet Heaven Bakery',
-    'confirm_heading'      => 'အော်ဒါ အတည်ပြုပြီး!',
-    'confirm_desc'         => "သင်၏ အော်ဒါအတွက် ကျေးဇူးတင်ပါသည်။ ချက်ချင်း ပြင်ဆင်ပါမည်!",
+    // ── Contact Us (Index) ──────────────────────────────
+    'contact_us_title'         => 'ဆက်သွယ်ရန်',
+    'contact_us_label'         => 'ဆက်သွယ်ပါ',
+    'contact_us_desc'          => 'သင်၏ မက်ဆေ့ချ်များ ပို့ပါ၊ ကျွန်ုပ်တို့ အမြန်ဆုံး ပြန်ကြားပေးပါမည်',
+    'contact_us_form_label'    => 'မက်ဆေ့ချ် ပေးပို့ပါ',
+    'contact_us_form_title'    => 'မက်ဆေ့ချ် ပို့မည်',
+    'contact_us_form_desc'     => 'အောက်ပါ ပုံစံကို ဖြည့်ပါ၊ တတ်နိုင်သမျှ အမြန်ဆုံး ပြန်ကြားပေးပါမည်။',
+    'contact_us_name_label'    => 'သင်၏ အမည်',
+    'contact_us_name_ph'       => 'ဥပမာ - အေးအေး',
+    'contact_us_email_label'   => 'အီးမေးလ်လိပ်စာ',
+    'contact_us_email_ph'      => 'you@example.com',
+    'contact_us_phone_label'   => 'ဖုန်းနံပါတ်',
+    'contact_us_phone_optional'=> '(ရွေးချယ်နိုင်)',
+    'contact_us_phone_ph'      => '09 xxxxxxx',
+    'contact_us_message_label' => 'သင်၏ မက်ဆေ့ချ်',
+    'contact_us_message_ph'    => 'ကျွန်ုပ်တို့ ဘယ်လို ကူညီနိုင်မလဲ ပြောပါ...',
+    'contact_us_submit'        => 'မက်ဆေ့ချ် ပို့မည်',
+    'contact_us_submitting'    => 'ပို့နေသည်...',
+    'contact_us_error'         => 'လိုအပ်သော အချက်အလက်များ ဖြည့်ပါ။',
+    'contact_us_err_timeout'   => 'တောင်းဆိုချိန် ကျော်လွန်ပါပြီ။ ထပ်မံ ကြိုးစားပါ။',
+    'contact_us_err_general'   => 'တစ်ခုခု မှားယွင်းနေသည်။ ထပ်မံ ကြိုးစားပါ။',
     'confirm_order_no'     => 'အော်ဒါ #%s',
     'confirm_back_home'    => 'ပင်မစာမျက်နှာ သို့ ပြန်မည်',
     'confirm_track_order'  => 'အော်ဒါ စစ်ဆေးမည်',
@@ -414,11 +431,11 @@ return [
     'review_no_reviews'         => 'သုံးသပ်ချက် မရှိသေးပါ။ ပထမဆုံး သုံးသပ်ချက်ရေးပါ!',
 
     // ── Contact Us (Index) ──────────────────────────────
-    'contact_us_title'         => 'ဆက်သွယ်ရန်',
-    'contact_us_label'         => 'ဆက်သွယ်ပါ',
-    'contact_us_desc'          => 'ကျွန်ုပ်တို့ကို မက်ဆေ့ချ် ပို့ပါ',
-    'contact_us_form_label'    => 'မက်ဆေ့ချ် ပေးပို့ပါ',
-    'contact_us_form_title'    => 'မက်ဆေ့ချ် ပို့မည်',
+    'contact_us_title'         => 'အကြံပြုချက်များ',
+    'contact_us_label'         => 'အကြံပြုနိုင်သည်',
+    'contact_us_desc'          => 'သင်၏ အကြံပြုချက်များ ပို့ပါ',
+    'contact_us_form_label'    => 'အကြံပြုချက် ပေးပို့ပါ',
+    'contact_us_form_title'    => 'အကြံပြုချက် ပို့မည်',
     'contact_us_form_desc'     => 'အောက်ပါ ပုံစံကို ဖြည့်ပါ၊ တတ်နိုင်သမျှ အမြန်ဆုံး ပြန်ကြားပေးပါမည်။',
     'contact_us_name_label'    => 'သင်၏ အမည်',
     'contact_us_name_ph'       => 'ဥပမာ - အေးအေး',
@@ -581,7 +598,7 @@ return [
     'admin_nav_discounts'       => 'လျှော့စျေးများ',
     'admin_nav_payments'        => 'ငွေပေးချေမှုများ',
     'admin_nav_reports'         => 'အစီရင်ခံစာများ',
-    'admin_nav_contact_messages' => 'ဆက်သွယ်ရန် မက်ဆေ့များ',
+    'admin_nav_contact_messages' => 'ဆက်သွယ်မှုများ',
     'admin_store'               => 'ဆိုင်',
     'admin_view_store'          => 'ဆိုင်ကြည့်မည်',
     'admin_administrator'       => 'စီမံခန့်ခွဲသူ',

@@ -32,6 +32,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonOut(false, 'Invalid request method.');
 }
 
+/* ── role guard ───────────────────────────────────────────────────────── */
+$userRole = $_SESSION['role'] ?? '';
+if (in_array($userRole, ['admin', 'cashier'], true)) {
+    jsonOut(false, 'Admins and Cashiers are not allowed to send messages from here.');
+}
+
 /* ── input ────────────────────────────────────────────────────────────── */
 $name    = trim($_POST['name']    ?? '');
 $email   = trim($_POST['email']   ?? '');
