@@ -404,7 +404,7 @@ $statusColors = [
                                                 <?= ucfirst($order['pay_status']) ?>
                                             </span>
                                         <?php endif; ?>
-                                        <?php if ($order['status'] === 'delivered'): ?>
+                                        <?php if ($order['pay_status'] === 'approved' && in_array($order['status'], ['processing', 'shipped', 'delivered'])): ?>
                                             &middot; <button onclick="openVoucher(<?= $order['id'] ?>)"
                                                 class="text-rose-500 hover:underline font-semibold"><?= __('profile_view_voucher') ?></button>
                                         <?php endif; ?>

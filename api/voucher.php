@@ -14,7 +14,7 @@ if (!$orderId || !$userId) {
 
 $order = $db->prepare("
     SELECT o.*, u.name, u.email,
-           pm.payment_name, pay.screenshot
+           pm.payment_name, pay.status AS pay_status, pay.screenshot
     FROM orders o
     JOIN users u ON o.user_id = u.id
     LEFT JOIN payment pay ON pay.order_id = o.id
@@ -24,7 +24,11 @@ $order = $db->prepare("
 $order->execute([$orderId, $userId]);
 $order = $order->fetch();
 
-if (!$order || $order['status'] !== 'delivered') {
+$allowedOrderStatuses = ['processing', 'shipped', 'delivered'];
+
+if (!$order
+    || $order['pay_status'] !== 'approved'
+    || !in_array($order['status'], $allowedOrderStatuses, true)) {
     http_response_code(403);
     echo json_encode(['error' => 'Voucher not available']);
     exit;
