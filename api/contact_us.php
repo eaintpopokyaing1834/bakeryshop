@@ -54,6 +54,9 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 if (strlen($message) < 5) {
     jsonOut(false, 'Your message is too short.');
 }
+if ($phone !== '' && !preg_match('/^09\d{9}$/', $phone)) {
+    jsonOut(false, 'Please enter a valid Myanmar phone number (09XXXXXXXXX, 11 digits).');
+}
 
 /* ── DB: save message ─────────────────────────────────────────────────── */
 $dbSaved = false;

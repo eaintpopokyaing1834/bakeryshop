@@ -1190,7 +1190,9 @@ if ($isLoggedIn) {
                                 </div>
                                 <div>
                                     <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2"><?= __('contact_us_phone_label') ?> <span class="text-gray-400 font-normal normal-case tracking-normal"><?= __('contact_us_phone_optional') ?></span></label>
-                                    <input type="number" id="contactPhone"
+                                    <input type="tel" id="contactPhone" maxlength="11"
+                                        pattern="09[0-9]{9}"
+                                        title="<?= htmlspecialchars(__('checkout_err_phone')) ?>"
                                         class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all"
                                         placeholder="<?= htmlspecialchars(__('contact_us_phone_ph')) ?>">
                                 </div>
@@ -1264,9 +1266,20 @@ if ($isLoggedIn) {
             const submittingText = btn.dataset.submittingText || 'Sending...';
             const errTimeout    = <?= json_encode(__('contact_us_err_timeout')) ?>;
             const errGeneral    = <?= json_encode(__('contact_us_err_general')) ?>;
+            const errPhone      = <?= json_encode(__('checkout_err_phone')) ?>;
             btn.disabled = true;
             btn.textContent = submittingText;
             msgBox.classList.add('hidden');
+
+            const phoneVal = document.getElementById('contactPhone').value.trim();
+            if (phoneVal !== '' && !/^09\d{9}$/.test(phoneVal)) {
+                msgBox.classList.remove('hidden');
+                msgBox.className = 'mt-5 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium';
+                msgBox.textContent = errPhone;
+                btn.disabled = false;
+                btn.textContent = submitText;
+                return;
+            }
 
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 30000);
