@@ -151,7 +151,7 @@ if ($isLoggedIn && !$isAdmin) {
                     <h1 class="font-bold text-gray-800 text-lg">
                         <?= $currentCategory ? htmlspecialchars($currentCategory) : ($search ? "Search: \"$search\"" : 'All Products') ?>
                     </h1>
-                    <p class="text-sm text-gray-400"><?= count($products) ?> <?= currentLang() === 'my' ? 'ထုတ်ကုန် ' . count($products) . ' ခု တွေ့ရှိသည်' :  ' product' . (count($products) !== 1 ? 's' : '') . ' found' ?></p>
+                    <p class="text-sm text-gray-400"><?=  currentLang() === 'my' ? 'ထုတ်ကုန် ' . count($products) . ' ခု တွေ့ရှိသည်' :  ' product' . (count($products) !== 1 ? 's' : '') . ' found' ?></p>
                 </div>
                 <div class="flex items-center gap-3">
                     <form method="GET" class="flex items-center gap-3">

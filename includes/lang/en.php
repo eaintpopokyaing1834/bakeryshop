@@ -445,10 +445,10 @@ return [
     'customize_subtitle' => 'Tell us your dream cake and we\'ll make it real!',
     'customize_size_label' => 'Cake Size *',
     'customize_size_default' => 'Select size',
-    'customize_size_6inch' => '6 inch',
-    'customize_size_8inch' => '8 inch',
-    'customize_size_10inch' => '10 inch',
-    'customize_size_12inch' => '12 inch',
+    'customize_size_6inch' => '6 inches',
+    'customize_size_8inch' => '8 inches',
+    'customize_size_10inch' => '10 inches',
+    'customize_size_12inch' => '12 inches',
     'customize_size_custom'=>'customize size',
                                     
 
