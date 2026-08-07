@@ -89,8 +89,25 @@ $relatedProducts = $relatedProducts->fetchAll();
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <style>
-        * {
-            font-family: 'Poppins', sans-serif;
+        * { font-family: 'Poppins', sans-serif; }
+
+        /* Gallery main image — smooth fade when src swaps */
+        #pdMainImage {
+            transition: opacity 0.2s ease, transform 0.5s ease;
+        }
+
+        /* Thumbnail strip — hide scrollbar but keep scroll */
+        #pdThumbStrip {
+            scrollbar-width: none;
+        }
+        #pdThumbStrip::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Thumbnail active ring pulse on first load */
+        .pd-thumb:focus-visible {
+            outline: 2px solid #f43f5e;
+            outline-offset: 3px;
         }
     </style>
 </head>
@@ -115,24 +132,87 @@ $relatedProducts = $relatedProducts->fetchAll();
         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-10">
             <div class="grid md:grid-cols-2 gap-10 items-start">
 
-                <!-- Image Gallery -->
-                <div>
-                    <div class="rounded-2xl overflow-hidden bg-rose-50 mb-4 h-80">
-                        <?php $primary = $images[0]['image_url'] ?? null; ?>
-                        <img id="mainImage" src="<?= imgUrl($primary) ?>"
-                            alt="<?= htmlspecialchars($product['name']) ?>" class="w-full h-full object-cover">
+        <!-- Image Gallery -->
+                <div class="flex flex-col gap-3">
+
+                    <?php
+                        // Build ordered image list: primary first, then extras
+                        $galleryImages = $images;
+                        if (empty($galleryImages)) {
+                            // Fallback placeholder so gallery always renders
+                            $galleryImages = [['image_url' => null]];
+                        }
+                        $totalImgs = count($galleryImages);
+                    ?>
+
+                    <!-- ── Main large display image ── -->
+                    <div class="relative rounded-2xl overflow-hidden bg-gradient-to-br from-rose-50 to-amber-50 aspect-[4/3] group shadow-sm">
+                        <img
+                            id="pdMainImage"
+                            src="<?= imgUrl($galleryImages[0]['image_url']) ?>"
+                            alt="<?= htmlspecialchars($product['name']) ?>"
+                            class="w-full h-full object-cover transition-all duration-500 ease-in-out group-hover:scale-105">
+
+                        <!-- Image counter badge (e.g. "1 / 3") -->
+                        <?php if ($totalImgs > 1): ?>
+                        <span id="pdImgCounter"
+                            class="absolute bottom-3 right-3 bg-black/50 text-white text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm">
+                            1 / <?= $totalImgs ?>
+                        </span>
+                        <?php endif; ?>
                     </div>
-                    <?php if (count($images) > 1): ?>
-                        <div class="flex gap-3 overflow-x-auto">
-                            <?php foreach ($images as $img): ?>
-                                <button onclick="document.getElementById('mainImage').src='<?= imgUrl($img['image_url']) ?>'"
-                                    class="shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 border-transparent hover:border-stone-300 transition-colors">
-                                    <img src="<?= imgUrl($img['image_url']) ?>" class="w-full h-full object-cover">
-                                </button>
-                            <?php endforeach; ?>
-                        </div>
+
+                    <!-- ── Thumbnail strip (only when 2+ images) ── -->
+                    <?php if ($totalImgs > 1): ?>
+                    <div class="flex gap-2.5 overflow-x-auto pb-1" id="pdThumbStrip">
+                        <?php foreach ($galleryImages as $idx => $img): ?>
+                        <button
+                            type="button"
+                            onclick="pdSwitchImage(this, '<?= imgUrl($img['image_url']) ?>', <?= $idx + 1 ?>, <?= $totalImgs ?>)"
+                            title="Image <?= $idx + 1 ?>"
+                            class="pd-thumb group/thumb relative shrink-0 rounded-xl overflow-hidden transition-all duration-200
+                                <?= $idx === 0
+                                    ? 'ring-2 ring-rose-400 ring-offset-2 opacity-100'
+                                    : 'ring-2 ring-transparent ring-offset-2 opacity-60 hover:opacity-100 hover:ring-stone-300' ?>"
+                            style="width:80px; height:80px;">
+                            <img
+                                src="<?= imgUrl($img['image_url']) ?>"
+                                alt="<?= htmlspecialchars($product['name']) ?> — view <?= $idx + 1 ?>"
+                                class="w-full h-full object-cover transition-transform duration-300 group-hover/thumb:scale-110">
+                        </button>
+                        <?php endforeach; ?>
+                    </div>
                     <?php endif; ?>
+
+                    <script>
+                    function pdSwitchImage(btn, src, num, total) {
+                        const main = document.getElementById('pdMainImage');
+                        const counter = document.getElementById('pdImgCounter');
+
+                        // Fade out → swap src → fade in
+                        main.style.opacity = '0';
+                        setTimeout(() => {
+                            main.src = src;
+                            main.style.opacity = '1';
+                        }, 200);
+
+                        // Update counter
+                        if (counter) counter.textContent = num + ' / ' + total;
+
+                        // Reset all thumb rings
+                        document.querySelectorAll('.pd-thumb').forEach(b => {
+                            b.classList.remove('ring-rose-400', 'opacity-100');
+                            b.classList.add('ring-transparent', 'opacity-60');
+                        });
+
+                        // Highlight clicked thumb
+                        btn.classList.remove('ring-transparent', 'opacity-60');
+                        btn.classList.add('ring-rose-400', 'opacity-100');
+                    }
+                    </script>
+
                 </div>
+
 
                 <!-- Product Info -->
                 <div>

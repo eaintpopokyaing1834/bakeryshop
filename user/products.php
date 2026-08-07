@@ -13,7 +13,7 @@ $minPrice   = (int)($_GET['min_price'] ?? 0);
 $maxPrice   = (int)($_GET['max_price'] ?? 999999);
 $discounted = (int)($_GET['discounted'] ?? 0);
 
-$where  = ["p.stock > 0"];
+$where  = ["1=1"]; // Show all products including out-of-stock (card UI shows "Out of Stock" overlay)
 $params = [];
 if ($categoryId > 0) { $where[] = "p.category_id = ?"; $params[] = $categoryId; }
 if ($search !== '') { $where[] = "(p.name LIKE ? OR p.description LIKE ?)"; $params[] = "%$search%"; $params[] = "%$search%"; }

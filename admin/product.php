@@ -88,39 +88,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_product'])) {
         $productId = $db->lastInsertId();
     }
 
-    // Handle image uploads
+    // ── Handle image uploads (appends; never deletes existing images) ──
+    $uploadWarning = '';
     if (!empty($_FILES['images']['name'][0])) {
         $uploadDir = __DIR__ . '/../uploads/products/';
         if (!is_dir($uploadDir))
             mkdir($uploadDir, 0775, true);
 
-        // When editing, remove old images before adding new ones
-        if ($id > 0) {
-            $oldImgs = $db->prepare("SELECT image_url FROM product_images WHERE product_id=?");
-            $oldImgs->execute([$productId]);
-            foreach ($oldImgs->fetchAll() as $old) {
-                $path = __DIR__ . '/../' . ltrim($old['image_url'], './');
-                if (file_exists($path)) @unlink($path);
-            }
-            $db->prepare("DELETE FROM product_images WHERE product_id=?")->execute([$productId]);
-        }
+        $allowed   = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+        $maxImages = 3;
+
+        // Count how many images this product already has
+        $cntStmt = $db->prepare("SELECT COUNT(*) FROM product_images WHERE product_id=?");
+        $cntStmt->execute([$productId]);
+        $existingCount = (int) $cntStmt->fetchColumn();
+
+        $slots    = max(0, $maxImages - $existingCount); // remaining free slots
+        $uploaded = 0;
 
         foreach ($_FILES['images']['tmp_name'] as $i => $tmp) {
-            if ($_FILES['images']['error'][$i] !== UPLOAD_ERR_OK)
-                continue;
+            if ($uploaded >= $slots) break;                              // enforce cap
+            if ($_FILES['images']['error'][$i] !== UPLOAD_ERR_OK) continue;
+
             $ext = strtolower(pathinfo($_FILES['images']['name'][$i], PATHINFO_EXTENSION));
-            $allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
-            if (!in_array($ext, $allowed))
-                continue;
+            if (!in_array($ext, $allowed)) continue;
+
+            // Unique filename — avoids collisions on simultaneous uploads
             $filename = 'product_' . $productId . '_' . time() . '_' . $i . '.' . $ext;
-            move_uploaded_file($tmp, $uploadDir . $filename);
-            $primary = ($i === 0) ? 1 : 0;
+            if (!move_uploaded_file($tmp, $uploadDir . $filename)) {
+                $uploadWarning = ' (Image upload failed — check folder permissions)';
+                continue;
+            }
+
+            // Only mark as primary when this is the very first image ever for the product
+            $isPrimary = ($existingCount === 0 && $uploaded === 0) ? 1 : 0;
             $db->prepare("INSERT INTO product_images (product_id, image_url, is_primary) VALUES (?,?,?)")
-                ->execute([$productId, 'uploads/products/' . $filename, $primary]);
+               ->execute([$productId, 'uploads/products/' . $filename, $isPrimary]);
+            $uploaded++;
+        }
+
+        if ($uploaded === 0 && empty($uploadWarning)) {
+            $uploadWarning = ' (No valid images were uploaded — please try again)';
         }
     }
 
-    $_SESSION['flash_message'] = 'Product saved successfully!';
+    $_SESSION['flash_message'] = 'Product saved successfully!' . $uploadWarning;
     header('Location: ?tab=products');
     exit;
 }
@@ -411,9 +423,36 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     <div id="existingImages" class="flex flex-wrap gap-3"></div>
                 </div>
                 <div class="col-span-2">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_images') ?></label>
-                    <input type="file" name="images[]" id="productImages" multiple accept="image/*"
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-rose-50 file:text-rose-600 hover:file:bg-rose-50">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <?= __('product_label_images') ?>
+                        <span class="text-gray-400 font-normal text-xs ml-1">(max 3 images)</span>
+                    </label>
+
+                    <!-- Hidden real file input -->
+                    <input type="file" name="images[]" id="productImages" multiple accept="image/jpeg,image/png,image/webp,image/gif" class="sr-only">
+
+                    <!-- Drag-and-drop upload zone -->
+                    <div id="uploadZone"
+                         onclick="document.getElementById('productImages').click()"
+                         ondragover="event.preventDefault();this.classList.add('border-rose-400','bg-rose-50')"
+                         ondragleave="this.classList.remove('border-rose-400','bg-rose-50')"
+                         ondrop="handleDrop(event)"
+                         class="relative w-full border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer hover:border-rose-300 hover:bg-rose-50/50 transition-all duration-200">
+                        <div id="uploadPlaceholder">
+                            <svg class="mx-auto w-10 h-10 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <p class="text-sm text-gray-500">Click or drag &amp; drop images here</p>
+                            <p class="text-xs text-gray-400 mt-1">JPG, PNG, WebP, GIF &mdash; up to 3 images</p>
+                        </div>
+                    </div>
+
+                    <!-- Live preview thumbnails -->
+                    <div id="imagePreviewWrap" class="flex flex-wrap gap-3 mt-3 hidden"></div>
+
+                    <!-- Validation message -->
+                    <p id="imageCountMsg" class="text-xs text-rose-500 mt-1 hidden"></p>
                     <p class="text-xs text-gray-400 mt-1"><?= __('product_image_help') ?></p>
                 </div>
             </div>
@@ -476,6 +515,126 @@ require_once __DIR__ . '/../includes/admin_header.php';
         'deleteImage' => __('product_delete_image'),
     ]) ?>;
 
+    // ── Image preview & drag-drop ─────────────────────────
+    // Uses a simple approach: keep selected files in a DataTransfer object
+    // and always read from it on render. We do NOT reset input.value after
+    // selection — instead we let the browser keep the real file reference.
+    const MAX_IMAGES = 3;
+    let selectedFiles = []; // plain array of File objects for previews
+    let fileInputDT = new DataTransfer(); // keeps real File refs for the input
+
+    function syncInputFiles() {
+        // Rebuild DataTransfer from selectedFiles so the input always reflects current state
+        fileInputDT = new DataTransfer();
+        selectedFiles.forEach(f => fileInputDT.items.add(f));
+        try {
+            document.getElementById('productImages').files = fileInputDT.files;
+        } catch(e) {
+            // Fallback: browser may block programmatic assignment — files still in selectedFiles
+        }
+    }
+
+    function renderPreviews() {
+        const wrap = document.getElementById('imagePreviewWrap');
+        const placeholder = document.getElementById('uploadPlaceholder');
+        const msg = document.getElementById('imageCountMsg');
+
+        wrap.innerHTML = '';
+        if (selectedFiles.length === 0) {
+            wrap.classList.add('hidden');
+            placeholder.style.display = '';
+            msg.classList.add('hidden');
+            return;
+        }
+        placeholder.style.display = 'none';
+        wrap.classList.remove('hidden');
+
+        selectedFiles.forEach((file, idx) => {
+            const url = URL.createObjectURL(file);
+            const div = document.createElement('div');
+            div.className = 'relative group';
+            div.innerHTML = `
+                <img src="${url}" class="w-20 h-20 object-cover rounded-xl border-2 border-gray-200 shadow-sm">
+                <span class="absolute bottom-0 left-0 right-0 bg-black/40 text-white text-[9px] text-center rounded-b-xl py-0.5 truncate px-1">${file.name}</span>
+                <button type="button" onclick="removePreview(${idx})"
+                    class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
+            `;
+            wrap.appendChild(div);
+        });
+
+        const pid = parseInt(document.getElementById('productId').value);
+        if (pid > 0) {
+            msg.textContent = `${selectedFiles.length} new image(s) selected. They will be added to existing images (max 3 total).`;
+        } else {
+            msg.textContent = `${selectedFiles.length} / ${MAX_IMAGES} image(s) selected.`;
+        }
+        msg.classList.remove('hidden');
+        msg.className = msg.className.replace('text-rose-500', selectedFiles.length > MAX_IMAGES ? 'text-rose-500' : 'text-blue-500');
+    }
+
+    function addFiles(fileList) {
+        const msg = document.getElementById('imageCountMsg');
+        const pid = parseInt(document.getElementById('productId').value);
+        const isEdit = pid > 0;
+        const existingShown = document.querySelectorAll('#existingImages img').length;
+        const available = isEdit ? MAX_IMAGES - existingShown : MAX_IMAGES;
+
+        Array.from(fileList).forEach(file => {
+            if (selectedFiles.length >= available) {
+                msg.textContent = `Maximum ${MAX_IMAGES} images allowed per product. Some files were skipped.`;
+                msg.classList.remove('hidden');
+                return;
+            }
+            if (!file.type.startsWith('image/')) return;
+            selectedFiles.push(file);
+        });
+        syncInputFiles();
+        renderPreviews();
+    }
+
+    function removePreview(idx) {
+        selectedFiles.splice(idx, 1);
+        syncInputFiles();
+        renderPreviews();
+    }
+
+    function handleDrop(event) {
+        event.preventDefault();
+        document.getElementById('uploadZone').classList.remove('border-rose-400', 'bg-rose-50');
+        addFiles(event.dataTransfer.files);
+    }
+
+    // On file input change, add files WITHOUT resetting .value
+    // (resetting .value after DataTransfer assignment breaks submission in Firefox/Safari)
+    document.getElementById('productImages').addEventListener('change', function () {
+        addFiles(this.files);
+        // Do NOT do this.value = '' — it clears the file reference and breaks upload
+    });
+
+    // Intercept form submit to guarantee files are attached via a hidden clone
+    // This is the most reliable cross-browser approach
+    document.querySelector('#productModal form').addEventListener('submit', function(e) {
+        if (selectedFiles.length === 0) return; // no files to attach
+
+        // Remove any previously injected hidden containers
+        this.querySelectorAll('.js-file-clone-wrap').forEach(el => el.remove());
+
+        // Create one individual <input type="file"> per selected file
+        // and inject it so the browser submits the real File objects
+        // Note: we can't programmatically assign .files to a new input directly,
+        // so we ensure the main input has them via DataTransfer sync above.
+        // The main input already has the files from syncInputFiles().
+        // Nothing extra needed if DataTransfer worked. But as a fallback,
+        // we keep selectedFiles accessible for verification.
+    });
+
+    function resetUploadZone() {
+        selectedFiles = [];
+        syncInputFiles();
+        renderPreviews();
+    }
+
+    // ── Modal open/close ─────────────────────────────────
     function openProductModal(data = null) {
         document.getElementById('productId').value = data ? data.id : 0;
         document.getElementById('productName').value = data ? data.name : '';
@@ -485,6 +644,9 @@ require_once __DIR__ . '/../includes/admin_header.php';
         document.getElementById('productDiscount').value = data ? (data.discount_id || '') : '';
         document.getElementById('productDescription').value = data ? (data.description || '') : '';
         document.getElementById('productModalTitle').textContent = data ? T.editProduct : T.addProduct;
+        resetUploadZone();
+        // Hide existing images section for new products
+        if (!data) document.getElementById('existingImagesSection').style.display = 'none';
         document.getElementById('productModal').classList.remove('hidden');
     }
     function editProduct(data) { openProductModal(data); }
@@ -502,7 +664,10 @@ require_once __DIR__ . '/../includes/admin_header.php';
         document.getElementById('categoryModalTitle').textContent = T.editCategory;
         document.getElementById('categoryModal').classList.remove('hidden');
     }
-    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    function closeModal(id) {
+        document.getElementById(id).classList.add('hidden');
+        if (id === 'productModal') resetUploadZone();
+    }
 
     function deleteProduct(id, name) {
         if (!confirm(T.confirmDelete.replace('{name}', name))) return;

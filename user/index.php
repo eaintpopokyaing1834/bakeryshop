@@ -16,17 +16,24 @@ $bestSellers = $db->query("
     SELECT p.*,
            c.name AS category_name,
            d.name AS discount_name, d.type AS discount_type, d.value AS discount_value,
-           pi.image_url AS primary_image,
            COALESCE(AVG(r.rating),0) AS avg_rating,
-           COUNT(DISTINCT oi.id) AS total_sold
+           COALESCE(SUM(oi.quantity), 0) AS total_sales,
+           GROUP_CONCAT(
+               DISTINCT CASE WHEN pi.is_primary = 1 THEN pi.image_url ELSE NULL END
+               ORDER BY pi.id SEPARATOR '|'
+           ) AS primary_image,
+           GROUP_CONCAT(
+               DISTINCT CASE WHEN pi.is_primary = 0 THEN pi.image_url ELSE NULL END
+               ORDER BY pi.id SEPARATOR '|'
+           ) AS extra_images
     FROM products p
     JOIN categories c ON p.category_id = c.id
     LEFT JOIN discounts d ON p.discount_id = d.id
-    LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_primary = 1
+    LEFT JOIN product_images pi ON pi.product_id = p.id
     LEFT JOIN reviews r ON r.product_id = p.id
     LEFT JOIN order_items oi ON oi.product_id = p.id
     GROUP BY p.id
-    ORDER BY total_sold DESC, p.created_at DESC
+    ORDER BY total_sales DESC, p.created_at DESC
     LIMIT 4
 ")->fetchAll();
 
@@ -48,17 +55,25 @@ $customerReviews = $db->query("
     ORDER BY r.created_at DESC
 ")->fetchAll();
 
-// Fetch all discounted products
+// Fetch all discounted products (with all images)
 $discountedProducts = $db->query("
     SELECT p.*,
            c.name AS category_name,
            d.name AS discount_name, d.type AS discount_type, d.value AS discount_value,
-           pi.image_url AS primary_image
+           GROUP_CONCAT(
+               CASE WHEN pi.is_primary = 1 THEN pi.image_url ELSE NULL END
+               ORDER BY pi.id SEPARATOR '|'
+           ) AS primary_image,
+           GROUP_CONCAT(
+               CASE WHEN pi.is_primary = 0 THEN pi.image_url ELSE NULL END
+               ORDER BY pi.id SEPARATOR '|'
+           ) AS extra_images
     FROM products p
     JOIN categories c ON p.category_id = c.id
     JOIN discounts d ON p.discount_id = d.id AND d.status = 1
-    LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_primary = 1
+    LEFT JOIN product_images pi ON pi.product_id = p.id
     WHERE p.discount_id IS NOT NULL
+    GROUP BY p.id
     ORDER BY d.value DESC, p.created_at DESC
 ")->fetchAll();
 
@@ -492,8 +507,19 @@ if ($isLoggedIn) {
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 <?php foreach ($bestSellers as $product): ?>
                     <?php
-                    $imgSrc = $product['primary_image']
-                        ? '/sweetheaven/' . $product['primary_image']
+                    // Normalize a DB image_url to a full web path.
+                    // Admin-uploaded images are stored as relative paths (e.g. "uploads/products/...").
+                    // Legacy/seed images start with "/" already (e.g. "/sweetheaven/images/...").
+                    $normImg = function(string $url): string {
+                        return (str_starts_with($url, '/') ? '' : '/sweetheaven/') . $url;
+                    };
+                    // primary_image may contain duplicate URLs due to multiple LEFT JOINs
+                    // (reviews + order_items multiply rows). Extract only the first unique value.
+                    $primaryImgUrl = $product['primary_image']
+                        ? (array_values(array_unique(array_filter(explode('|', $product['primary_image']))))[0] ?? null)
+                        : null;
+                    $imgSrc = $primaryImgUrl
+                        ? $normImg($primaryImgUrl)
                         : '/sweetheaven/images/maincake.jpg';
                     $hasDiscount = $product['discount_name'] && $product['discount_value'];
                     if ($hasDiscount) {
@@ -501,12 +527,36 @@ if ($isLoggedIn) {
                             ? $product['price'] * (1 - $product['discount_value'] / 100)
                             : max(0, $product['price'] - $product['discount_value']);
                     }
+                    $extraImgs   = array_filter(explode('|', $product['extra_images'] ?? ''));
+                    $allCardImgs = array_filter(array_merge([$imgSrc], array_map($normImg, $extraImgs)));
+                    $cardId = 'bs-card-' . $product['id'];
                     ?>
                     <div
-                        class="product-card group bg-white rounded-2xl border border-gray-100 overflow-hidden rouned-2xl shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-2">
-                        <div class="relative overflow-hidden bg-gradient-to-br from-rose-50 to-amber-50 aspect-[4/3]">
-                            <img src="<?= htmlspecialchars($imgSrc) ?>" alt="<?= htmlspecialchars($product['name']) ?>"
-                                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        class="product-card group bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-2">
+                        <!-- ── Image gallery area ── -->
+                        <div class="relative bg-gradient-to-br from-rose-50 to-amber-50" style="aspect-ratio:4/3">
+                            <!-- Main image -->
+                            <img id="<?= $cardId ?>-main"
+                                src="<?= htmlspecialchars($imgSrc) ?>"
+                                alt="<?= htmlspecialchars($product['name']) ?>"
+                                class="w-full h-full object-cover transition-all duration-500">
+
+                            <!-- Thumbnails (only shown if extra images exist) -->
+                            <?php if (count($allCardImgs) > 1): ?>
+                            <div class="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 px-2">
+                                <?php foreach ($allCardImgs as $ti => $tSrc): ?>
+                                <button
+                                    type="button"
+                                    onclick="event.stopPropagation(); switchCardImage('<?= $cardId ?>', '<?= htmlspecialchars($tSrc) ?>', this)"
+                                    class="card-thumb w-10 h-10 rounded-lg overflow-hidden border-2 shadow transition-all duration-200 <?= $ti === 0 ? 'border-white scale-105' : 'border-white/50 opacity-75 hover:opacity-100 hover:scale-105' ?>"
+                                    title="Image <?= $ti + 1 ?>">
+                                    <img src="<?= htmlspecialchars($tSrc) ?>" class="w-full h-full object-cover" alt="">
+                                </button>
+                                <?php endforeach; ?>
+                            </div>
+                            <?php endif; ?>
+
+                            <!-- Wishlist button -->
                             <?php if (!$isAdmin): ?>
                             <button onclick="event.stopPropagation(); toggleWishlist(<?= $product['id'] ?>, this)"
                                 class="absolute top-2 right-2 w-9 h-9 rounded-full bg-white/90 text-gray-400 shadow-md flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all duration-200 backdrop-blur-sm"
@@ -517,20 +567,17 @@ if ($isLoggedIn) {
                                 </svg>
                             </button>
                             <?php endif; ?>
+
+                            <!-- Badge -->
                             <?php if ($hasDiscount): ?>
-                                <div class="absolute top-0 left-0 bg-rose-500 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md"
-                                    viewBox="0 0 24 24">
+                                <div class="absolute top-0 left-0 bg-rose-500 text-white text-xs font-bold px-3 py-1 rounded-br-lg shadow-md">
                                     <?= htmlspecialchars($product['discount_name']) ?>
                                 </div>
                             <?php elseif ($product['stock'] < 5): ?>
-                                <div
-                                    class="absolute top-0 left-0 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                                <div class="absolute top-0 left-0 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-br-lg shadow-md">
                                     <?= __('bestsellers_low_stock') ?>
                                 </div>
                             <?php endif; ?>
-                            <div
-                                class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                            </div>
                         </div>
 
                         <div class="p-4">
@@ -670,10 +717,19 @@ if ($isLoggedIn) {
                             <span class="text-3xl mb-3 block">🎉</span>
                             <h3 class="font-bold text-gray-800 text-xl mb-2"><?= __('promo_first_order') ?></h3>
                             <p class="text-gray-500 text-sm leading-relaxed mb-5"><?= __('promo_first_desc') ?></p>
-                            <a href="/sweetheaven/auth/register.php"
-                                class="inline-block text-white font-semibold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity bg-[#e8746a]">
-                                <?= __('promo_claim') ?>
-                            </a>
+                            <?php if ($isLoggedIn): ?>
+                                <a href="/sweetheaven/user/products.php"
+                                    class="inline-block text-white font-semibold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity bg-[#e8746a]">
+                                    <?= __('promo_claim') ?>
+                                </a>
+                            <?php else: ?>
+                                <a href="/sweetheaven/auth/login.php"
+                                    id="claimDiscountBtn"
+                                    onclick="if(typeof openAuthModal==='function'){event.preventDefault();openAuthModal('login');}"
+                                    class="inline-block text-white font-semibold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity bg-[#e8746a]">
+                                    <?= __('promo_claim') ?>
+                                </a>
+                            <?php endif; ?>
                         </div>
                         <div class="hidden md:block w-40 flex-shrink-0">
                             <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=300&q=80&auto=format&fit=crop"
@@ -921,12 +977,36 @@ if ($isLoggedIn) {
                             ? sprintf(__('discount_percent_off'), (int) $dp['discount_value'])
                             : sprintf(__('discount_mmk_off'), number_format($dp['discount_value']));
                         ?>
+                        <?php
+                            $dpExtraImgs  = array_filter(explode('|', $dp['extra_images'] ?? ''));
+                            $dpAllImgs    = array_filter(array_merge([$dpImgSrc], array_map(fn($u) => '/sweetheaven/' . $u, $dpExtraImgs)));
+                            $dpCardId     = 'dp-card-' . $dp['id'];
+                        ?>
                         <div
                             class="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-pink-100">
-                            <!-- Image area -->
-                            <div class="relative bg-pink-50 flex items-center justify-center h-[180px] overflow-hidden">
-                                <img src="<?= htmlspecialchars($dpImgSrc) ?>" alt="<?= htmlspecialchars($dp['name']) ?>"
-                                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                            <!-- Image gallery area -->
+                            <div class="relative bg-pink-50 h-[180px] overflow-hidden">
+                                <!-- Main image -->
+                                <img id="<?= $dpCardId ?>-main"
+                                    src="<?= htmlspecialchars($dpImgSrc) ?>"
+                                    alt="<?= htmlspecialchars($dp['name']) ?>"
+                                    class="w-full h-full object-cover transition-all duration-500">
+
+                                <!-- Thumbnails -->
+                                <?php if (count($dpAllImgs) > 1): ?>
+                                <div class="absolute bottom-1.5 left-0 right-0 flex justify-center gap-1.5 px-2">
+                                    <?php foreach ($dpAllImgs as $ti => $tSrc): ?>
+                                    <button
+                                        type="button"
+                                        onclick="event.stopPropagation(); switchCardImage('<?= $dpCardId ?>', '<?= htmlspecialchars($tSrc) ?>', this)"
+                                        class="card-thumb w-9 h-9 rounded-md overflow-hidden border-2 shadow transition-all duration-200 <?= $ti === 0 ? 'border-white scale-105' : 'border-white/50 opacity-70 hover:opacity-100 hover:scale-105' ?>"
+                                        title="Image <?= $ti + 1 ?>">
+                                        <img src="<?= htmlspecialchars($tSrc) ?>" class="w-full h-full object-cover" alt="">
+                                    </button>
+                                    <?php endforeach; ?>
+                                </div>
+                                <?php endif; ?>
+
                                 <!-- Discount badge -->
                                 <div class="absolute top-0 left-0 px-3 py-1.5 text-xs font-extrabold text-white rounded-br-xl shadow bg-[#e8746a]">
                                     <?= htmlspecialchars($dpBadgeLabel) ?>
@@ -1565,8 +1645,27 @@ if ($isLoggedIn) {
             return Promise.resolve();
         }
 
+        /* ── Card Image Gallery ─────────────────────────────────────────────── */
+        function switchCardImage(cardId, src, thumbBtn) {
+            // Swap main image
+            const main = document.getElementById(cardId + '-main');
+            if (main) main.src = src;
+            // Reset all siblings in the same thumbnail row
+            const strip = thumbBtn.closest('.flex');
+            if (strip) {
+                strip.querySelectorAll('.card-thumb').forEach(btn => {
+                    btn.classList.remove('border-white', 'scale-105');
+                    btn.classList.add('border-white/50', 'opacity-75');
+                });
+            }
+            // Highlight active thumb
+            thumbBtn.classList.remove('border-white/50', 'opacity-75');
+            thumbBtn.classList.add('border-white', 'scale-105');
+        }
+
         /* ── Cart ──────────────────────────────────────────────────────────── */
         function addToCart(productId, productName) {
+
             fetch('/sweetheaven/api/cart.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
