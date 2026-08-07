@@ -157,7 +157,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_category'])) {
 // ── Pagination ────────────────────────────────────────
 $perPage       = 10;
 $page          = max(1, (int)($_GET['page'] ?? 1));
-$totalProducts = (int)$db->query("SELECT COUNT(*) FROM products")->fetchColumn();
+// Count using LEFT JOIN so products with deleted categories are still counted
+$totalProducts = (int)$db->query("SELECT COUNT(*) FROM products p LEFT JOIN categories c ON p.category_id = c.id")->fetchColumn();
 $totalPages    = max(1, (int)ceil($totalProducts / $perPage));
 $page          = min($page, $totalPages);
 $offset        = ($page - 1) * $perPage;
@@ -166,7 +167,7 @@ $stmt = $db->prepare("
     SELECT p.*, c.name AS category_name, d.name AS discount_name, d.type AS discount_type, d.value AS discount_value,
            (SELECT image_url FROM product_images WHERE product_id=p.id AND is_primary=1 LIMIT 1) AS primary_image
     FROM products p
-    JOIN categories c ON p.category_id = c.id
+    LEFT JOIN categories c ON p.category_id = c.id
     LEFT JOIN discounts d ON p.discount_id = d.id
     ORDER BY p.created_at DESC
     LIMIT $perPage OFFSET $offset
@@ -223,7 +224,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <table class="w-full">
                 <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
                     <tr>
-                        <th class="px-6 py-4 text-left"><?= __('product_col_id') ?></th>
+                        <th class="px-6 py-4 text-left">No.</th>
                         <th class="px-6 py-4 text-left"><?= __('product_col_product') ?></th>
                         <th class="px-6 py-4 text-left"><?= __('product_col_category') ?></th>
                         <th class="px-6 py-4 text-left"><?= __('product_col_price') ?></th>
@@ -232,10 +233,10 @@ require_once __DIR__ . '/../includes/admin_header.php';
                         <th class="px-6 py-4 text-left"><?= __('admin_actions') ?></th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50">
-                    <?php foreach ($products as $p): ?>
-                        <tr class="hover:bg-gray-50/50 transition-colors">
-                            <td class="px-6 py-4 font-mono text-gray-500 text-sm"><?= $p['id'] ?></td>
+                <tbody id="productTableBody" class="divide-y divide-gray-50">
+                    <?php foreach ($products as $loopIdx => $p): ?>
+                        <tr class="hover:bg-gray-50/50 transition-colors" data-product-id="<?= $p['id'] ?>">
+                            <td class="px-6 py-4 font-semibold text-gray-500 text-sm row-no"><?= $offset + $loopIdx + 1 ?></td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-12 h-12 rounded-xl overflow-hidden bg-rose-50 shrink-0">
@@ -675,7 +676,38 @@ require_once __DIR__ . '/../includes/admin_header.php';
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: `ajax=delete_product&id=${id}`
-        }).then(r => r.json()).then(d => { if (d.success) window.location.href = window.location.href; });
+        }).then(r => r.json()).then(d => {
+            if (!d.success) return;
+            // Remove the deleted row from the DOM
+            const row = document.querySelector(`tr[data-product-id="${id}"]`);
+            if (row) row.remove();
+            // Re-number all remaining rows sequentially
+            reNumberRows();
+            // Update the total count badge
+            const badge = document.querySelector('h3 span.text-gray-400');
+            if (badge) {
+                const current = parseInt(badge.textContent.replace(/\D/g, ''), 10);
+                if (!isNaN(current)) badge.textContent = `(${current - 1} total)`;
+            }
+            // If table is now empty, reload to show the empty state
+            const tbody = document.getElementById('productTableBody');
+            if (tbody && tbody.querySelectorAll('tr').length === 0) {
+                window.location.href = window.location.href;
+            }
+        });
+    }
+
+    function reNumberRows() {
+        // Read the starting number from the first row's current value so
+        // pagination offset is preserved (e.g. page 2 starts at 11)
+        const tbody = document.getElementById('productTableBody');
+        if (!tbody) return;
+        const firstCell = tbody.querySelector('.row-no');
+        const startNum = firstCell ? parseInt(firstCell.textContent, 10) : 1;
+        tbody.querySelectorAll('tr').forEach((tr, idx) => {
+            const cell = tr.querySelector('.row-no');
+            if (cell) cell.textContent = startNum + idx;
+        });
     }
 
     function deleteCategory(id, name) {

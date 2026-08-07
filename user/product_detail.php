@@ -25,7 +25,7 @@ $product = $db->prepare("
     SELECT p.*, c.name AS category_name,
            d.name AS discount_name, d.type AS discount_type, d.value AS discount_value
     FROM products p
-    JOIN categories c ON p.category_id = c.id
+    LEFT JOIN categories c ON p.category_id = c.id
     LEFT JOIN discounts d ON p.discount_id = d.id
     WHERE p.id = ?
 ");

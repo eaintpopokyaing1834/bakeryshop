@@ -36,7 +36,7 @@ $products = $db->prepare("
            COALESCE(AVG(r.rating),0) AS avg_rating,
            COUNT(DISTINCT oi.id) AS total_sold
     FROM products p
-    JOIN categories c ON p.category_id = c.id
+    LEFT JOIN categories c ON p.category_id = c.id
     LEFT JOIN discounts d ON p.discount_id = d.id
     LEFT JOIN reviews r ON r.product_id = p.id
     LEFT JOIN order_items oi ON oi.product_id = p.id
@@ -192,7 +192,7 @@ if ($isLoggedIn && !$isAdmin) {
                 <a href="/sweetheaven/user/products.php" class="bg-rose-500 text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-rose-600 transition-colors"><?= __('products_clear') ?></a>
             </div>
             <?php else: ?>
-            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 items-stretch">
                 <?php foreach ($products as $product): ?>
                 <?php
                 $imgSrc   = $product['primary_image'] ? '/sweetheaven/' . $product['primary_image'] : '/sweetheaven/images/maincake.jpg';
@@ -204,7 +204,7 @@ if ($isLoggedIn && !$isAdmin) {
                         : max(0, $product['price'] - $product['discount_value']);
                 }
                 ?>
-                <div class="product-card group bg-white rounded-2xl border border-gray-100 overflow-hidden  transition-all duration-500 shadow-md cursor-pointer">
+                <div class="product-card group bg-white rounded-2xl border border-gray-100 overflow-hidden transition-all duration-500 shadow-md cursor-pointer flex flex-col h-full">
                     <div class="relative overflow-hidden bg-gradient-to-br from-rose-50 to-amber-50 aspect-[4/3]">
                         <img src="<?= htmlspecialchars($imgSrc) ?>" alt="<?= htmlspecialchars($product['name']) ?>"
                              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
@@ -227,14 +227,14 @@ if ($isLoggedIn && !$isAdmin) {
                         <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                     </div>
 
-                    <div class="p-5">
-                        <p class="text-xs font-semibold uppercase tracking-wider text-rose-400 mb-2"><?= htmlspecialchars($product['category_name']) ?></p>
+                    <div class="p-5 flex flex-col flex-1">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-rose-400 mb-1"><?= htmlspecialchars($product['category_name'] ?? 'Uncategorized') ?></p>
 
                         <a href="/sweetheaven/user/product_detail.php?id=<?= $product['id'] ?>" onclick="event.stopPropagation()">
-                            <h3 class="font-bold text-gray-800 text-base hover:text-rose-500 transition-colors mb-3"><?= htmlspecialchars($product['name']) ?></h3>
+                            <h3 class="font-bold text-gray-800 text-base hover:text-rose-500 transition-colors mb-3 line-clamp-2"><?= htmlspecialchars($product['name']) ?></h3>
                         </a>
 
-                        <div class="flex items-center justify-between pt-3 mt-1 border-t border-gray-50">
+                        <div class="flex items-center justify-between pt-3 mt-auto border-t border-gray-50">
                             <span class="text-lg font-bold text-rose-500">
                                 <?php if ($hasDiscount): ?>
                                     <span class="text-xs line-through text-gray-400 font-normal mr-1"><?= number_format($product['price']) ?></span>

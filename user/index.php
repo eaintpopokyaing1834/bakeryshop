@@ -27,7 +27,7 @@ $bestSellers = $db->query("
                ORDER BY pi.id SEPARATOR '|'
            ) AS extra_images
     FROM products p
-    JOIN categories c ON p.category_id = c.id
+    LEFT JOIN categories c ON p.category_id = c.id
     LEFT JOIN discounts d ON p.discount_id = d.id
     LEFT JOIN product_images pi ON pi.product_id = p.id
     LEFT JOIN reviews r ON r.product_id = p.id
@@ -69,7 +69,7 @@ $discountedProducts = $db->query("
                ORDER BY pi.id SEPARATOR '|'
            ) AS extra_images
     FROM products p
-    JOIN categories c ON p.category_id = c.id
+    LEFT JOIN categories c ON p.category_id = c.id
     JOIN discounts d ON p.discount_id = d.id AND d.status = 1
     LEFT JOIN product_images pi ON pi.product_id = p.id
     WHERE p.discount_id IS NOT NULL
