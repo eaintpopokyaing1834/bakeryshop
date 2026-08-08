@@ -294,7 +294,7 @@ if ($customizeRequest) {
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_phone') ?> <span class="text-red-500">*</span></label>
-                                <input type="number" name="phone" required inputmode="numeric"
+                                <input type="text" name="phone" required inputmode="numeric"
                                     pattern="09[0-9]{9}" maxlength="11"
                                     placeholder="<?= __('checkout_phone_ph') ?>"
                                     oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,11)"

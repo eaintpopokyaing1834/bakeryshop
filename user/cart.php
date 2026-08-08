@@ -114,10 +114,10 @@ $grandTotal = $originalSubtotal - $totalSavings - $firstOrderDiscount;
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <button onclick="updateQty(<?= $item['id'] ?>, parseInt(document.getElementById('qty-<?= $item['id'] ?>').textContent) - 1)"
+                    <button onclick="updateQty(<?= $item['id'] ?>, parseInt(document.getElementById('qty-<?= $item['id'] ?>').textContent) - 1, <?= $item['stock'] ?>)"
                         class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold flex items-center justify-center transition-colors">−</button>
                     <span class="w-10 text-center font-bold text-gray-800" id="qty-<?= $item['id'] ?>"><?= $item['qty'] ?></span>
-                    <button onclick="updateQty(<?= $item['id'] ?>, parseInt(document.getElementById('qty-<?= $item['id'] ?>').textContent) + 1)"
+                    <button onclick="updateQty(<?= $item['id'] ?>, parseInt(document.getElementById('qty-<?= $item['id'] ?>').textContent) + 1, <?= $item['stock'] ?>)"
                         class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold flex items-center justify-center transition-colors">+</button>
                 </div>
 
@@ -272,7 +272,16 @@ function updateSummary(originalTotal) {
     if (grandEl)        grandEl.textContent        = Math.round(grand).toLocaleString('en') + _mmk;
 }
 
-function updateQty(productId, newQty) {
+function updateQty(productId, newQty, maxStock) {
+    if (typeof maxStock !== 'undefined' && newQty > maxStock) {
+        const msg = '<?= addslashes(__('cart_err_stock_limit')) ?>'.replace('%s', maxStock);
+        if (typeof showToast === 'function') {
+            showToast(msg);
+        } else {
+            alert(msg);
+        }
+        return;
+    }
     fetch('/sweetheaven/api/cart.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

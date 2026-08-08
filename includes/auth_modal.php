@@ -85,7 +85,7 @@ require_once __DIR__ . '/lang.php';
 
                 <p class="text-center text-[.8rem] text-[#b08080] mt-[18px]">
                     Don't have an account?
-                    <button onclick="switchTab('register')" class="bg-transparent border-none cursor-pointer font-bold text-[#d97070] text-inherit font-inherit p-0 ml-[3px] transition-colors duration-200 hover:text-[#b85555] hover:underline">Create one free</button>
+                    <button onclick="switchTab('register')" class="bg-transparent border-none cursor-pointer font-bold text-[#d97070] text-inherit font-inherit p-0 ml-[3px] transition-colors duration-200 hover:text-[#b85555] hover:underline">Sign up</button>
                 </p>
             </div>
 

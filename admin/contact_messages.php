@@ -10,7 +10,7 @@ $action = $_GET['action'] ?? '';
 $msgId  = (int) ($_GET['id'] ?? 0);
 
 if ($action === 'delete' && $msgId && $role === 'admin') {
-    $db->prepare("DELETE FROM contact_messages WHERE id = ?")->execute([$msgId]);
+    $db->prepare("DELETE FROM feedback WHERE id = ?")->execute([$msgId]);
     header('Location: /sweetheaven/admin/contact_messages.php?msg=Deleted');
     exit;
 }
@@ -18,12 +18,12 @@ if ($action === 'delete' && $msgId && $role === 'admin') {
 // Pagination
 $page      = max(1, (int) ($_GET['page'] ?? 1));
 $perPage   = 10;
-$totalRows = (int) $db->query("SELECT COUNT(*) FROM contact_messages")->fetchColumn();
+$totalRows = (int) $db->query("SELECT COUNT(*) FROM feedback")->fetchColumn();
 $totalPages = max(1, (int) ceil($totalRows / $perPage));
 $page = min($page, $totalPages);
 $offset = ($page - 1) * $perPage;
 
-$messages = $db->prepare("SELECT * FROM contact_messages ORDER BY created_at DESC LIMIT $perPage OFFSET $offset");
+$messages = $db->prepare("SELECT * FROM feedback ORDER BY created_at DESC LIMIT $perPage OFFSET $offset");
 $messages->execute();
 $messages = $messages->fetchAll();
 
@@ -59,7 +59,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>#</th>
                     <th><?= __('admin_customer') ?></th>
                     <th><?= __('review_col_email') ?></th>
                     <th>Phone</th>
@@ -81,10 +81,13 @@ require_once __DIR__ . '/../includes/admin_header.php';
                         </td>
                     </tr>
                 <?php else: ?>
-                    <?php foreach ($messages as $m): ?>
+                    <?php 
+                    $serialNo = $offset + 1;
+                    foreach ($messages as $m): 
+                    ?>
                         <tr>
                             <td>
-                                <span class="text-xs font-mono text-gray-400">#<?= $m['id'] ?></span>
+                                <span class="text-xs font-mono text-gray-400"><?= $serialNo++ ?></span>
                             </td>
                             <td>
                                 <div class="flex items-center gap-2.5">

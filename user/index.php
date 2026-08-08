@@ -48,11 +48,12 @@ $latestProducts = $db->query("
 ")->fetchAll();
 
 $customerReviews = $db->query("
-    SELECT u.name, r.comment AS message, r.rating, r.created_at
+    SELECT u.name, r.comment AS message, r.rating, MAX(r.created_at) as created_at
     FROM reviews r
     JOIN users u ON r.user_id = u.id
     WHERE r.status='approved'
-    ORDER BY r.created_at DESC
+    GROUP BY u.name, r.comment, r.rating
+    ORDER BY created_at DESC
 ")->fetchAll();
 
 // Fetch all discounted products (with all images)
@@ -853,12 +854,9 @@ if ($isLoggedIn) {
 
                         <!-- Giant percentage -->
                         <div class="mb-3">
-                            <span
-                                class="block text-gray-700 text-xl font-bold leading-none"><?= __('discount_up_to') ?></span>
-                            <span class="block font-black"
-                                class="block font-black text-[clamp(4rem,8vw,6rem)] text-[#e8746a] leading-none">15%</span>
-                            <span class="block text-gray-700 font-black tracking-tight"
-                                class="block text-[clamp(1.5rem,3vw,2rem)] leading-[1.1]"><?= __('discount_off') ?></span>
+                            <span class="block text-gray-800 text-3xl font-black uppercase tracking-wide leading-tight mb-1"><?= __('discount_up_to') ?></span>
+                            <span class="block font-black text-[clamp(5rem,10vw,7rem)] text-[#e8746a] leading-none drop-shadow-md">15%</span>
+                            <span class="block text-gray-800 text-[clamp(2rem,4vw,3rem)] font-black uppercase tracking-tight leading-tight mt-1"><?= __('discount_off') ?></span>
                         </div>
 
                         <p class="font-extrabold text-gray-600 uppercase tracking-widest text-xs mt-1 mb-6">
@@ -1131,30 +1129,33 @@ if ($isLoggedIn) {
                     <p class="text-4xl mb-3">💬</p>
                     <p class="text-sm"><?= __('review_no_reviews') ?></p>
                 </div>
-            <?php elseif (count($customerReviews) === 1): ?>
-                <?php $r = $customerReviews[0]; ?>
-                <div class="max-w-md mx-auto">
-                    <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm text-left">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-500 font-bold text-sm flex-shrink-0">
-                                <?= strtoupper(substr($r['name'], 0, 1)) ?>
-                            </div>
-                            <div class="min-w-0">
-                                <p class="font-semibold text-gray-700 text-sm truncate"><?= htmlspecialchars($r['name']) ?></p>
-                                <p class="text-xs text-gray-400"><?= date('M j, Y', strtotime($r['created_at'])) ?></p>
+            <?php elseif (count($customerReviews) <= 4): ?>
+                <div class="flex flex-wrap justify-center gap-6">
+                    <?php foreach ($customerReviews as $r): ?>
+                        <div class="w-full sm:w-[300px]">
+                            <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm text-left h-full">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-500 font-bold text-sm flex-shrink-0">
+                                        <?= strtoupper(substr($r['name'], 0, 1)) ?>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="font-semibold text-gray-700 text-sm truncate"><?= htmlspecialchars($r['name']) ?></p>
+                                        <p class="text-xs text-gray-400"><?= date('M j, Y', strtotime($r['created_at'])) ?></p>
+                                    </div>
+                                </div>
+                                <?php if ($r['rating']): ?>
+                                    <div class="flex items-center gap-1 mb-3">
+                                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                                            <svg class="w-4 h-4 <?= $i <= $r['rating'] ? 'text-amber-400' : 'text-gray-200' ?>" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                        <?php endfor; ?>
+                                    </div>
+                                <?php endif; ?>
+                                <p class="text-gray-500 text-sm leading-7">"<?= htmlspecialchars($r['message']) ?>"</p>
                             </div>
                         </div>
-                        <?php if ($r['rating']): ?>
-                            <div class="flex items-center gap-1 mb-3">
-                                <?php for ($i = 1; $i <= 5; $i++): ?>
-                                    <svg class="w-4 h-4 <?= $i <= $r['rating'] ? 'text-amber-400' : 'text-gray-200' ?>" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                    </svg>
-                                <?php endfor; ?>
-                            </div>
-                        <?php endif; ?>
-                        <p class="text-gray-500 text-sm leading-7">"<?= htmlspecialchars($r['message']) ?>"</p>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
             <?php else: ?>
                 <div class="flex items-center gap-4">
@@ -1813,7 +1814,7 @@ if ($isLoggedIn) {
 
                     <p class="text-center text-[.8rem] text-[#b08080] mt-[18px]">
                         Don't have an account?
-                        <button onclick="switchTab('register')" class="bg-transparent border-none cursor-pointer font-bold text-[#d97070] text-inherit font-inherit p-0 ml-[3px] transition-colors duration-200 hover:text-[#b85555] hover:underline">Create one free</button>
+                        <button onclick="switchTab('register')" class="bg-transparent border-none cursor-pointer font-bold text-[#d97070] text-inherit font-inherit p-0 ml-[3px] transition-colors duration-200 hover:text-[#b85555] hover:underline">Sign up</button>
                     </p>
                 </div>
 

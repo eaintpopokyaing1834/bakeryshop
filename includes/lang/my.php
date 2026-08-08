@@ -1,12 +1,12 @@
-﻿<?php
+<?php
 // includes/lang/my.php — Burmese (မြန်မာ) strings
 return [
 
     // ── Navigation ──────────────────────────────────────
     'nav_home'            => 'ပင်မစာမျက်နှာ',
     'nav_products'        => 'ထုတ်ကုန်များ',
-    'nav_customize'       => 'စိတ်ကြိုက်ကိတ်ပြုလုပ်ရန်',
-    'nav_contact'         => 'ဆက်သွယ်ရန်',
+    'nav_customize'       => 'စိတ်ကြိုက်ကိတ်လုပ်ရန်',
+    'nav_contact'         => 'အကြံပြုရန်',
     'nav_admin_panel'     => 'စီမံခန့်ခွဲမှု',
     'nav_notifications'   => 'အသိပေးချက်များ',
     'nav_mark_all_read'   => 'အားလုံး ဖတ်ပြီးအဖြစ် မှတ်မည်',
@@ -27,7 +27,7 @@ return [
     'footer_quick_links'   => 'အမြန်လင့်များ',
     'footer_my_cart'       => 'ကျွန်ုပ်၏ခြင်းတောင်း',
     'footer_my_account'    => 'ကျွန်ုပ်၏ အကောင့်',
-    'footer_contact_us'    => 'ဆက်သွယ်ရန်',
+    'footer_contact_us'    => 'အကြံပြုချက်',
     'footer_hours'         => 'တနင်္လာ-တနင်္ဂနွေ: နံနက် ၇:၀၀ – ည ၈:၀၀',
     'footer_privacy'       => 'ကိုယ်ရေးကိုယ်တာ မူဝါဒ',
     'footer_terms'         => 'ဝန်ဆောင်မှု စည်းမျဉ်းများ',
@@ -224,10 +224,11 @@ return [
     'checkout_err_filetype'=> 'JPG, JPEG, PNG နှင့် WEBP ဖိုင်များသာ ခွင့်ပြုသည်။',
     'checkout_err_invalid_cr'=> 'စိတ်ကြိုက်ကိတ်မုန့် တောင်းဆိုမှု မမှန်ပါ။',
     'checkout_err_stock'   => 'ဝမ်းနည်းပါသည်၊ %s ကုန်သွားပါပြီ။',
+    'cart_err_stock_limit' => 'ပစ္စည်းလက်ကျန် (%s) ထက်ပို၍ ထည့်၍မရပါ။',
     'checkout_err_payment' => 'ရွေးချယ်ထားသော ငွေပေးချေမှု နည်းလမ်း မရနိုင်ပါ။',
 
     // ── Contact Us (Index) ──────────────────────────────
-    'contact_us_title'         => 'ဆက်သွယ်ရန်',
+    'contact_us_title'         => 'အကြံပြုချက်',
     'contact_us_label'         => 'ဆက်သွယ်ပါ',
     'contact_us_desc'          => 'သင်၏ မက်ဆေ့ချ်များ ပို့ပါ၊ ကျွန်ုပ်တို့ အမြန်ဆုံး ပြန်ကြားပေးပါမည်',
     'contact_us_form_label'    => 'မက်ဆေ့ချ် ပေးပို့ပါ',
@@ -483,6 +484,18 @@ return [
     'customize_flavor_custom'       => 'အခြား (မှတ်ချက်တွင် ရေးပါ)',
     'customize_color_label'     => 'ကိတ်မုန့် အရောင် / ဒီဇိုင်း',
     'customize_color_ph'        => 'ဥပမာ ပန်းရောင်&အဖြူ၊ သက်တံ့၊ အပြာ...',
+    'customize_color_default' => 'အရောင် ရွေးပါ',
+    'customize_color_white' => 'အဖြူ',
+    'customize_color_pink' => 'ပန်းရောင်',
+    'customize_color_red' => 'အနီ',
+    'customize_color_blue' => 'အပြာ',
+    'customize_color_green' => 'အစိမ်း',
+    'customize_color_yellow' => 'အဝါ',
+    'customize_color_black' => 'အမည်း',
+    'customize_color_purple' => 'ခရမ်း',
+    'customize_color_brown' => 'အညို‌',
+    'customize_color_orange' => 'လိမ္မော်',
+    'customize_color_custom' => 'အခြား (မှတ်ချက်တွင် ရေးပါ)',
     'customize_msg_label'       => 'ကိတ်မုန့်ပေါ်က စာသား',
     'customize_msg_ph'          => 'ဥပမာ မေမေ့မွေးနေ့မှာ ပျော်ရွှင်ပါစေ!',
     'customize_image_label'     => 'နမူနာကိတ်ပုံ (ဆန္ဒရှိပါက)',
@@ -491,6 +504,7 @@ return [
     'customize_date_label'      => 'ပေးပို့/ယူမည့် ရက် *',
     'customize_notes_label'     => 'နောက်ထပ် မှတ်ချက်များ',
     'customize_notes_optional'  => '(ဆန္ဒရှိပါက)',
+    'customize_custom_note_required' => 'အရွယ်အစား၊ အရသာ၊ သို့မဟုတ် အရောင်ကို "အခြား" ဟု ရွေးချယ်ထားသောကြောင့် ကျေးဇူးပြု၍ မှတ်ချက်တွင် အသေးစိတ်ကို ရေးပေးပါ။',
     'customize_notes_ph'        => 'အထူးတောင်းဆိုမှုများ၊ ဓာတ်မတည့်မှုဆိုင်ရာ ကန့်သတ်ချက်များ...',
     'customize_submit_btn'      => 'တောင်းဆိုမှု တင်သွင်းမည်',
     'customize_my_requests_sub' => 'သင်၏ ကိတ်မုန့်ဖွဲ့ တောင်းဆိုမှုများကို စစ်ဆေးပါ',
@@ -598,7 +612,7 @@ return [
     'admin_nav_discounts'       => 'လျှော့စျေးများ',
     'admin_nav_payments'        => 'ငွေပေးချေမှုများ',
     'admin_nav_reports'         => 'အစီရင်ခံစာများ',
-    'admin_nav_contact_messages' => 'ဆက်သွယ်မှုများ',
+    'admin_nav_contact_messages' => 'အကြံပြုချက်များ',
     'admin_store'               => 'ဆိုင်',
     'admin_view_store'          => 'ဆိုင်ကြည့်မည်',
     'admin_administrator'       => 'စီမံခန့်ခွဲသူ',

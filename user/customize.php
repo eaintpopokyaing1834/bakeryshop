@@ -23,14 +23,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$size || !$flavor || !$deliveryDate) {
         $error = __('customize_err_fields');
+    } elseif (($size === 'Custom' || $flavor === 'Custom' || $color === 'Custom') && empty($additionalNotes)) {
+        $error = __('customize_custom_note_required');
     } elseif ($deliveryDate < $minDate) {
         $error = sprintf(__('customize_err_date'), CUSTOMIZE_LEAD_DAYS);
     } else {
-        // ── Server-side guard: block duplicate submissions ──────────────
-        $activeCheck = $db->prepare("SELECT id FROM customize_requests WHERE user_id=? AND status IN ('pending','approved') LIMIT 1");
+        // ── Server-side guard: block if user has 3 or more active requests ──────────────
+        $activeCheck = $db->prepare("SELECT COUNT(*) FROM customize_requests WHERE user_id=? AND status IN ('pending','approved')");
         $activeCheck->execute([$_SESSION['user_id']]);
-        if ($activeCheck->fetch()) {
-            $error = 'You already have an active customize request. Please wait for it to be processed before submitting a new one.';
+        if ($activeCheck->fetchColumn() >= 3) {
+            $error = 'You can only have up to 3 active customize requests at a time. Please wait for them to be processed.';
         } else {
             $referenceImage = null;
             if (!empty($_FILES['reference_image']['tmp_name'])) {
@@ -73,14 +75,14 @@ $myRequests = $db->prepare("SELECT * FROM customize_requests WHERE user_id=? ORD
 $myRequests->execute([$_SESSION['user_id']]);
 $myRequests = $myRequests->fetchAll();
 
-// Check if user already has an active (pending/approved) request — block new submissions
-$hasActiveRequest = false;
+// Check if user already has 3 active (pending/approved) requests — block new submissions
+$activeCount = 0;
 foreach ($myRequests as $r) {
     if (in_array($r['status'], ['pending', 'approved'])) {
-        $hasActiveRequest = true;
-        break;
+        $activeCount++;
     }
 }
+$hasActiveRequest = ($activeCount >= 3);
 
 // Show success message after redirect
 if (isset($_GET['submitted'])) {
@@ -147,22 +149,24 @@ $reqStatusColors = [
                                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-800 mb-2">You have an active request</h3>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">Maximum requests reached</h3>
                     <p class="text-sm text-gray-500 mb-5">
-                        You already have a <strong>pending</strong> or <strong>approved</strong> customize request.
-                        Please wait for it to be processed, or place your order if it has been approved.
-                        Once it is ordered or rejected, you can submit a new request.
+                        You already have <strong>3 pending or approved</strong> customize requests.
+                        Please wait for them to be processed, or place your order if they have been approved.
+                        Once an order is placed or a request is rejected, you can submit new requests.
                     </p>
-                    <a href="#my-requests" class="inline-flex items-center gap-2 text-sm font-semibold text-rose-500 hover:text-rose-600 transition-colors">
+                    <a href="#my-requests"
+                        class="inline-flex items-center gap-2 text-sm font-semibold text-rose-500 hover:text-rose-600 transition-colors">
                         View my requests ↓
                     </a>
                 </div>
             <?php else: ?>
-                <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                <form id="customizeForm" method="POST" enctype="multipart/form-data" class="space-y-6">
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
                         <div class="grid sm:grid-cols-2 gap-5">
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_size_label') ?></label>
+                                <label
+                                    class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_size_label') ?></label>
                                 <select name="size" required
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                                     <option value=""><?= __('customize_size_default') ?></option>
@@ -175,7 +179,8 @@ $reqStatusColors = [
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_flavor_label') ?></label>
+                                <label
+                                    class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_flavor_label') ?></label>
                                 <select name="flavor" required
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                                     <option value=""><?= __('customize_flavor_default') ?></option>
@@ -195,19 +200,35 @@ $reqStatusColors = [
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_color_label') ?></label>
-                            <input type="text" name="color" placeholder="<?= __('customize_color_ph') ?>"
+                            <label
+                                class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_color_label') ?></label>
+                            <select name="color"
                                 class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
+                                <option value=""><?= __('customize_color_default') ?></option>
+                                <option value="White"><?= __('customize_color_white') ?></option>
+                                <option value="Pink"><?= __('customize_color_pink') ?></option>
+                                <option value="Red"><?= __('customize_color_red') ?></option>
+                                <option value="Blue"><?= __('customize_color_blue') ?></option>
+                                <option value="Green"><?= __('customize_color_green') ?></option>
+                                <option value="Yellow"><?= __('customize_color_yellow') ?></option>
+                                <option value="Black"><?= __('customize_color_black') ?></option>
+                                <option value="Purple"><?= __('customize_color_purple') ?></option>
+                                <option value="Brown"><?= __('customize_color_brown') ?></option>
+                                <option value="Orange"><?= __('customize_color_orange') ?></option>
+                                <option value="Custom"><?= __('customize_color_custom') ?></option>
+                            </select>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_msg_label') ?></label>
+                            <label
+                                class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_msg_label') ?></label>
                             <textarea name="cake_message" rows="2" placeholder="<?= __('customize_msg_ph') ?>"
                                 class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"></textarea>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_image_label') ?></label>
+                            <label
+                                class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_image_label') ?></label>
                             <div class="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center hover:border-rose-300 transition-colors cursor-pointer"
                                 id="uploadDropzone">
                                 <input type="file" name="reference_image" id="referenceImage"
@@ -230,16 +251,18 @@ $reqStatusColors = [
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_date_label') ?></label>
+                            <label
+                                class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_date_label') ?></label>
                             <input type="date" name="delivery_date" required min="<?= $minDate ?>"
                                 class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
-                            <p class="text-xs text-gray-400 mt-1"><?= sprintf(__('customize_date_hint'), date('M j, Y', strtotime($minDate))) ?></p>
+                            <p class="text-xs text-gray-400 mt-1">
+                                <?= sprintf(__('customize_date_hint'), date('M j, Y', strtotime($minDate))) ?></p>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_notes_label') ?> <span class="text-gray-400 font-normal"><?= __('customize_notes_optional') ?></span></label>
-                            <textarea name="additional_notes" rows="3"
-                                placeholder="<?= __('customize_notes_ph') ?>"
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('customize_notes_label') ?>
+                                <span class="text-gray-400 font-normal"><?= __('customize_notes_optional') ?></span></label>
+                            <textarea name="additional_notes" rows="3" placeholder="<?= __('customize_notes_ph') ?>"
                                 class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"></textarea>
                         </div>
                     </div>
@@ -286,22 +309,28 @@ $reqStatusColors = [
                                 <div class="grid sm:grid-cols-2 gap-4 text-sm">
                                     <div class="space-y-1">
                                         <p><span class="font-semibold text-gray-600"><?= __('customize_req_size') ?></span>
-                                            <?= htmlspecialchars($req['size']) ?></p>
+                                            <?= htmlspecialchars($req['size']) ?>
+                                        </p>
                                         <p><span class="font-semibold text-gray-600"><?= __('customize_req_flavor') ?></span>
-                                            <?= htmlspecialchars($req['flavor']) ?></p>
+                                            <?= htmlspecialchars($req['flavor']) ?>
+                                        </p>
                                         <?php if ($req['color']): ?>
                                             <p><span class="font-semibold text-gray-600"><?= __('customize_req_color') ?></span>
-                                                <?= htmlspecialchars($req['color']) ?></p><?php endif; ?>
+                                                <?= htmlspecialchars($req['color']) ?>
+                                            </p><?php endif; ?>
                                         <?php if ($req['cake_message']): ?>
                                             <p><span class="font-semibold text-gray-600"><?= __('customize_req_message') ?></span>
-                                                <?= htmlspecialchars($req['cake_message']) ?></p><?php endif; ?>
+                                                <?= htmlspecialchars($req['cake_message']) ?>
+                                            </p><?php endif; ?>
                                         <p><span class="font-semibold text-gray-600"><?= __('customize_req_delivery') ?></span>
-                                            <?= date('M j, Y', strtotime($req['delivery_date'])) ?></p>
+                                            <?= date('M j, Y', strtotime($req['delivery_date'])) ?>
+                                        </p>
                                     </div>
                                     <div class="space-y-1">
                                         <?php if ($req['reference_image']): ?>
                                             <div>
-                                                <span class="font-semibold text-gray-600"><?= __('customize_req_reference') ?></span>
+                                                <span
+                                                    class="font-semibold text-gray-600"><?= __('customize_req_reference') ?></span>
                                                 <a href="/sweetheaven/<?= htmlspecialchars($req['reference_image']) ?>"
                                                     target="_blank" class="block mt-1">
                                                     <img src="/sweetheaven/<?= htmlspecialchars($req['reference_image']) ?>"
@@ -310,13 +339,17 @@ $reqStatusColors = [
                                             </div>
                                         <?php endif; ?>
                                         <?php if ($req['status'] === 'approved' && $req['admin_price']): ?>
-                                            <p class="mt-2"><span class="font-semibold text-gray-600"><?= __('customize_req_price') ?></span> <span
+                                            <p class="mt-2"><span
+                                                    class="font-semibold text-gray-600"><?= __('customize_req_price') ?></span>
+                                                <span
                                                     class="text-rose-500 font-bold text-base"><?= number_format($req['admin_price']) ?>
                                                     <?= __('common_mmk') ?></span></p>
                                         <?php endif; ?>
                                         <?php if ($req['admin_note']): ?>
-                                            <p><span class="font-semibold text-gray-600"><?= __('customize_req_admin_note') ?></span>
-                                                <?= htmlspecialchars($req['admin_note']) ?></p>
+                                            <p><span
+                                                    class="font-semibold text-gray-600"><?= __('customize_req_admin_note') ?></span>
+                                                <?= htmlspecialchars($req['admin_note']) ?>
+                                            </p>
                                         <?php endif; ?>
                                     </div>
                                 </div>
@@ -410,6 +443,52 @@ $reqStatusColors = [
             placeholder.classList.remove('hidden');
             preview.classList.add('hidden');
         });
+
+        const customizeForm = document.getElementById('customizeForm');
+        if (customizeForm) {
+            const sizeSelect = customizeForm.querySelector('[name="size"]');
+            const flavorSelect = customizeForm.querySelector('[name="flavor"]');
+            const colorSelect = customizeForm.querySelector('[name="color"]');
+            const notesInput = customizeForm.querySelector('[name="additional_notes"]');
+            const notesLabel = notesInput.previousElementSibling;
+
+            function checkCustomRequired() {
+                const isCustom = sizeSelect.value === 'Custom' || flavorSelect.value === 'Custom' || colorSelect.value === 'Custom';
+                
+                // Visual feedback: Add/remove asterisk on the label
+                if (isCustom) {
+                    if (!notesLabel.querySelector('.req-star')) {
+                        notesLabel.innerHTML += ' <span class="text-rose-500 req-star">*</span>';
+                    }
+                } else {
+                    const star = notesLabel.querySelector('.req-star');
+                    if (star) star.remove();
+                }
+
+                // Native HTML5 validation
+                if (isCustom && notesInput.value.trim() === '') {
+                    notesInput.setCustomValidity('<?= addslashes(__('customize_custom_note_required')) ?>');
+                } else {
+                    notesInput.setCustomValidity('');
+                }
+            }
+
+            // Run check when selections change
+            sizeSelect.addEventListener('change', checkCustomRequired);
+            flavorSelect.addEventListener('change', checkCustomRequired);
+            colorSelect.addEventListener('change', checkCustomRequired);
+            notesInput.addEventListener('input', checkCustomRequired);
+
+            // Run check on submit just to be safe
+            customizeForm.addEventListener('submit', function(e) {
+                checkCustomRequired();
+                if (!customizeForm.checkValidity()) {
+                    e.preventDefault();
+                    notesInput.reportValidity();
+                }
+            });
+        }
     </script>
 </body>
+
 </html>

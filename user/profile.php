@@ -579,29 +579,14 @@ $statusColors = [
                             </div>
                         </div>
 
-                        <!-- Two Equal Columns -->
-                        <div class="flex gap-4 mb-4 text-xs" style="display:flex;width:100%;">
-                            <!-- Left Column: Customer Information -->
-                            <div style="flex: 1 1 50%; min-width: 0;">
-                                <h2 class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide border-b border-gray-100 pb-1 mb-2"><?= __('voucher_customer_info') ?></h2>
-                                <div class="space-y-1">
-                                    <p><span class="text-gray-500 inline-block w-20"><?= __('voucher_customer_name') ?>:</span> <span class="font-semibold text-gray-800" id="vCustName"></span></p>
-                                    <p><span class="text-gray-500 inline-block w-20"><?= __('voucher_email') ?>:</span> <span class="text-gray-800 overflow-hidden text-ellipsis whitespace-nowrap align-bottom" id="vCustEmail"></span></p>
-                                    <p><span class="text-gray-500 inline-block w-20"><?= __('voucher_phone') ?>:</span> <span class="text-gray-800" id="vCustPhone"></span></p>
-                                    <p><span class="text-gray-500 inline-block w-20"><?= __('voucher_shipping_method') ?>:</span> <span class="text-gray-800" id="vShipping"></span></p>
-                                </div>
-                            </div>
-
-                            <!-- Right Column: Payment Information -->
-                            <div style="flex: 1 1 50%; min-width: 0;">
-                                <h2 class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide border-b border-gray-100 pb-1 mb-2">Payment Information</h2>
-                                <div class="space-y-1">
-                                    <p><span class="text-gray-500 inline-block w-24">Method:</span> <span class="font-semibold text-gray-800" id="vPaymentMethod"></span></p>
-                                    <div class="mt-1 flex items-start gap-2" id="vPaymentScreenshotContainer" style="display:none;">
-                                        <span class="text-gray-500 inline-block w-24 shrink-0">Screenshot:</span>
-                                        <img id="vPaymentScreenshot" src="" alt="Payment Screenshot" class="w-full max-w-[60px] max-h-[70px] rounded border border-gray-200 object-contain aspect-auto shadow-sm">
-                                    </div>
-                                </div>
+                        <!-- Customer Information -->
+                        <div class="mb-4 text-xs">
+                            <h2 class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide border-b border-gray-100 pb-1 mb-2"><?= __('voucher_customer_info') ?></h2>
+                            <div class="space-y-1">
+                                <p><span class="text-gray-500 inline-block w-20"><?= __('voucher_customer_name') ?>:</span> <span class="font-semibold text-gray-800" id="vCustName"></span></p>
+                                <p><span class="text-gray-500 inline-block w-20"><?= __('voucher_email') ?>:</span> <span class="text-gray-800 overflow-hidden text-ellipsis whitespace-nowrap align-bottom" id="vCustEmail"></span></p>
+                                <p><span class="text-gray-500 inline-block w-20"><?= __('voucher_phone') ?>:</span> <span class="text-gray-800" id="vCustPhone"></span></p>
+                                <p><span class="text-gray-500 inline-block w-20"><?= __('voucher_shipping_method') ?>:</span> <span class="text-gray-800" id="vShipping"></span></p>
                             </div>
                         </div>
 
@@ -775,15 +760,6 @@ $statusColors = [
             document.getElementById('vCustOrderId').textContent = '#' + String(data.order_id).padStart(4, '0');
             document.getElementById('vCustEmail').textContent = data.email;
             document.getElementById('vCustPhone').textContent = data.phone || 'N/A';
-
-            document.getElementById('vPaymentMethod').textContent = data.payment_name;
-            const screenshotContainer = document.getElementById('vPaymentScreenshotContainer');
-            if (data.screenshot) {
-                screenshotContainer.style.display = 'block';
-                document.getElementById('vPaymentScreenshot').src = '/sweetheaven/' + data.screenshot;
-            } else {
-                screenshotContainer.style.display = 'none';
-            }
 
             const itemsHtml = data.items.map(item => {
                 const total = Number(item.discounted_price) * Number(item.quantity);

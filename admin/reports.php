@@ -91,11 +91,11 @@ $statusColors = [
         <div id="customDateRange" class="hidden flex gap-2 items-end">
             <div>
                 <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2"><?= __('reports_filter_start') ?></label>
-                <input type="date" id="startDate" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none">
+                <input type="date" id="startDate" max="<?= date('Y-m-d') ?>" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none">
             </div>
             <div>
                 <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2"><?= __('reports_filter_end') ?></label>
-                <input type="date" id="endDate" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none" value="<?= date('Y-m-d') ?>">
+                <input type="date" id="endDate" max="<?= date('Y-m-d') ?>" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none" value="<?= date('Y-m-d') ?>">
             </div>
         </div>
 

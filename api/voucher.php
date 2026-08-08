@@ -14,7 +14,7 @@ if (!$orderId || !$userId) {
 
 $order = $db->prepare("
     SELECT o.*, u.name, u.email,
-           pm.payment_name, pay.status AS pay_status, pay.screenshot
+           pay.status AS pay_status
     FROM orders o
     JOIN users u ON o.user_id = u.id
     LEFT JOIN payment pay ON pay.order_id = o.id
@@ -91,8 +91,6 @@ $voucher = [
     'shipping_fee' => $shippingFee,
     'total_amount' => (float)$order['total_amount'],
     'order_date' => $order['order_date'],
-    'payment_name' => $order['payment_name'] ?? 'N/A',
-    'screenshot' => $order['screenshot'] ?? null,
 ];
 
 echo json_encode($voucher);

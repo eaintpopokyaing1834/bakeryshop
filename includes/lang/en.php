@@ -6,7 +6,7 @@ return [
     'nav_home' => 'Home',
     'nav_products' => 'Products',
     'nav_customize' => 'Customize Cake',
-    'nav_contact' => 'Contact Us',
+    'nav_contact' => 'Feedback',
     'nav_admin_panel' => 'Admin Panel',
     'nav_notifications' => 'Notifications',
     'nav_mark_all_read' => 'Mark all read',
@@ -27,7 +27,7 @@ return [
     'footer_quick_links' => 'Quick Links',
     'footer_my_cart' => 'My Cart',
     'footer_my_account' => 'My Account',
-    'footer_contact_us' => 'Contact Us',
+    'footer_contact_us' => 'Feedback',
     'footer_hours' => 'Mon-Sun: 7:00 AM – 7:00 PM',
     'footer_privacy' => 'Privacy Policy',
     'footer_terms' => 'Terms of Service',
@@ -224,6 +224,7 @@ return [
     'checkout_err_filetype' => 'Only JPG, JPEG, PNG & WEBP files are allowed.',
     'checkout_err_invalid_cr' => 'Invalid customize request.',
     'checkout_err_stock' => 'Sorry, %s is out of stock.',
+    'cart_err_stock_limit' => 'Cannot add more than available stock (%s).',
     'checkout_err_payment' => 'Selected payment method is unavailable.',
 
     // ── Order Confirmation ──────────────────────────────
@@ -414,7 +415,7 @@ return [
     'review_no_reviews' => 'No reviews yet. Be the first to share your experience!',
 
     // ── Contact Us (Index) ───────────────────────────────
-    'contact_us_title'        => 'Contact Us',
+    'contact_us_title'        => 'Feedback',
     'contact_us_label'        => 'Get In Touch',
     'contact_us_desc'         => "We'd love to hear from you. Send us a message and we'll get back to you.",
     'contact_us_form_label'   => 'Drop Us a Line',
@@ -449,12 +450,8 @@ return [
     'customize_size_8inch' => '8 inches',
     'customize_size_10inch' => '10 inches',
     'customize_size_12inch' => '12 inches',
-    'customize_size_custom'=>'customize size',
+    'customize_size_custom'=>'custom (specify in notes)',
                                     
-
-
-
-
     'customize_flavor_label' => 'Cake Flavor *',
     'customize_flavor_default' => 'Select flavor',
     'customize_flavor_chocolate' => 'Chocolate',
@@ -470,6 +467,18 @@ return [
     'customize_flavor_custom' => 'Custom (specify in notes)',
     'customize_color_label' => 'Cake Color / Theme',
     'customize_color_ph' => 'e.g. Pink & White, Rainbow, Blue...',
+    'customize_color_default' => 'Select color',
+    'customize_color_white' => 'White',
+    'customize_color_pink' => 'Pink',
+    'customize_color_red' => 'Red',
+    'customize_color_blue' => 'Blue',
+    'customize_color_green' => 'Green',
+    'customize_color_yellow' => 'Yellow',
+    'customize_color_black' => 'Black',
+    'customize_color_purple' => 'Purple',
+    'customize_color_brown' => 'Brown',
+    'customize_color_orange' => 'Orange',
+    'customize_color_custom' => 'Custom (specify in notes)',
     'customize_msg_label' => 'Message on the Cake',
     'customize_msg_ph' => 'e.g. Happy Birthday Mom!',
     'customize_image_label' => 'Reference Cake Image (optional)',
@@ -478,6 +487,7 @@ return [
     'customize_date_label' => 'Preferred Delivery/Pickup Date *',
     'customize_notes_label' => 'Additional Notes',
     'customize_notes_optional' => '(optional)',
+    'customize_custom_note_required' => 'Please provide details in the Additional Notes since you selected "Custom" for size, flavor, or color.',
     'customize_notes_ph' => 'Any special requests, dietary restrictions, or additional details...',
     'customize_submit_btn' => 'Submit Customization Request',
     'customize_my_requests' => 'My Requests',
@@ -596,7 +606,7 @@ return [
     'admin_nav_discounts'   => 'Discounts',
     'admin_nav_payments'    => 'Payments',
     'admin_nav_reports'     => 'Reports',
-    'admin_nav_contact_messages' => 'Contact Messages',
+    'admin_nav_contact_messages' => 'Feedback',
     'admin_store'           => 'Store',
     'admin_view_store'      => 'View Store',
     'admin_administrator'   => 'Administrator',

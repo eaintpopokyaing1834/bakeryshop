@@ -1,7 +1,7 @@
 <?php
 /**
  * Contact Us API
- * - Saves message to DB (contact_messages table)
+ * - Saves message to DB (feedback table)
  * - Sends email via Gmail SMTP (SSL, port 465) — no library needed
  * - Falls back to PHP mail() if SMTP fails
  * - Output-buffered so PHP notices never corrupt the JSON response
@@ -64,7 +64,7 @@ try {
     require_once __DIR__ . '/../config/db.php';
     $db = getDB();
 
-    $db->exec("CREATE TABLE IF NOT EXISTS contact_messages (
+    $db->exec("CREATE TABLE IF NOT EXISTS feedback (
         id         INT AUTO_INCREMENT PRIMARY KEY,
         name       VARCHAR(120)  NOT NULL,
         email      VARCHAR(150)  NOT NULL,
@@ -74,7 +74,7 @@ try {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
     $stmt = $db->prepare(
-        "INSERT INTO contact_messages (name, email, phone, message) VALUES (?, ?, ?, ?)"
+        "INSERT INTO feedback (name, email, phone, message) VALUES (?, ?, ?, ?)"
     );
     $stmt->execute([$name, $email, $phone, $message]);
     $dbSaved = true;
