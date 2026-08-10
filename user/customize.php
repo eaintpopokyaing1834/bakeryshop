@@ -342,8 +342,7 @@ $reqStatusColors = [
                                             <p class="mt-2"><span
                                                     class="font-semibold text-gray-600"><?= __('customize_req_price') ?></span>
                                                 <span
-                                                    class="text-rose-500 font-bold text-base"><?= number_format($req['admin_price']) ?>
-                                                    <?= __('common_mmk') ?></span></p>
+                                                    class="text-rose-500 font-bold text-base"><?= formatPrice($req['admin_price']) ?></span></p>
                                         <?php endif; ?>
                                         <?php if ($req['admin_note']): ?>
                                             <p><span

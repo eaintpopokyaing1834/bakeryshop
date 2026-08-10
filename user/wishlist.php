@@ -70,7 +70,7 @@ $wishlist = $wishlist->fetchAll();
                     <?php endfor; ?>
                 </div>
                 <div class="flex items-center justify-between">
-                    <span class="text-lg font-bold text-rose-500"><?= number_format($item['price']) ?> <span class="text-xs font-normal text-gray-400"><?= __('common_mmk') ?></span></span>
+                    <span class="text-lg font-bold text-rose-500"><?= formatPrice($item['price']) ?></span>
                     <?php if ($item['stock'] > 0): ?>
                     <button onclick="addToCart(<?= $item['id'] ?>, '<?= addslashes($item['name']) ?>')"
                         class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-full text-xs font-semibold transition-colors">

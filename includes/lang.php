@@ -50,3 +50,27 @@ function __($key, ...$args) {
 function currentLang(): string {
     return $GLOBALS['_lang_code'];
 }
+
+/**
+ * Return the localized category name with English fallback
+ */
+function getLocalizedCategoryName($categoryData, $nameKey = 'name', $nameMyKey = 'name_my'): string {
+    if (currentLang() === 'my' && !empty($categoryData[$nameMyKey])) {
+        return $categoryData[$nameMyKey];
+    }
+    return $categoryData[$nameKey] ?? '';
+}
+
+/**
+ * Format price and append currency dynamically based on current language
+ */
+function formatPrice($amount): string {
+    $formatted = number_format((float)$amount);
+    if (currentLang() === 'my') {
+        $en_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        $my_digits = ['၀', '၁', '၂', '၃', '၄', '၅', '၆', '၇', '၈', '၉'];
+        $formatted = str_replace($en_digits, $my_digits, $formatted);
+        return $formatted . ' ကျပ်';
+    }
+    return $formatted . ' MMK';
+}

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // includes/admin_header.php — Admin layout partial
 if (session_status() === PHP_SESSION_NONE)
     session_start();
@@ -471,7 +471,7 @@ $totalNotifications = (int) $db->query("SELECT COUNT(*) FROM notifications WHERE
     <?php require_once __DIR__ . '/sidebar.php'; ?>
 
     <!-- Main Content Wrapper -->
-    <div class="flex-1 lg:ml-64 flex flex-col min-h-screen">
+    <div class="flex-1 lg:ml-64 flex flex-col min-h-screen min-w-0">
 
         <!-- Top Bar -->
         <header class="admin-topbar px-8 py-4 flex items-center justify-between sticky top-0 z-30">

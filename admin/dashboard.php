@@ -97,7 +97,7 @@ $statusColors = [
             </div>
             <span class="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full"><?= __('admin_revenue') ?></span>
         </div>
-        <p class="text-2xl font-bold text-gray-900 tracking-tight"><?= number_format($totalRevenue) ?> <span class="text-sm font-medium text-gray-400"><?= __('admin_mmk') ?></span></p>
+        <p class="text-2xl font-bold text-gray-900 tracking-tight"><?= formatPrice($totalRevenue) ?></p>
         <p class="text-xs text-gray-400 mt-1 font-medium"><?= __('admin_total_sales_revenue') ?></p>
     </div>
 
@@ -326,8 +326,7 @@ $statusColors = [
                             </div>
                         </td>
                         <td>
-                            <span class="text-sm font-bold text-gray-800"><?= number_format($order['total_amount']) ?></span>
-                            <span class="text-xs text-gray-400 ml-1"><?= __('admin_mmk') ?></span>
+                            <span class="text-sm font-bold text-gray-800"><?= formatPrice($order['total_amount']) ?></span>
                         </td>
                         <td>
                             <span class="status-badge <?= $statusColors[$order['status']] ?? 'badge-pending' ?>">

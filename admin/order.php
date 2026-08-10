@@ -199,8 +199,7 @@ $statusColors = [
                     </div>
                 </td>
                 <td>
-                    <span class="text-sm font-bold text-gray-800"><?= number_format($order['total_amount']) ?></span>
-                    <span class="text-xs text-gray-400 ml-0.5"><?= __('admin_mmk') ?></span>
+                    <span class="text-sm font-bold text-gray-800"><?= formatPrice($order['total_amount']) ?></span>
                 </td>
                 <td>
                     <span class="text-sm text-gray-600"><?= match($order['shipping_method']) {

@@ -101,7 +101,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                         </span>
                     </td>
                     <td class="px-6 py-4 font-bold text-gray-700 text-sm">
-                        <?= $d['type'] === 'percentage' ? $d['value'] . '%' : number_format($d['value']) . ' ' . __('admin_mmk') ?>
+                        <?= $d['type'] === 'percentage' ? $d['value'] . '%' : formatPrice($d['value']) ?>
                     </td>
                     <td class="px-6 py-4">
                         <span class="text-xs font-bold px-2.5 py-1 rounded-full <?= $d['status'] ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' ?>">

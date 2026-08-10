@@ -101,33 +101,37 @@ $grandTotal = $originalSubtotal - $totalSavings - $firstOrderDiscount;
         <div class="lg:col-span-2 space-y-4" id="cartItemsContainer">
             <?php foreach ($cartProducts as $item): ?>
             <?php $imgSrc = $item['primary_image'] ? '/sweetheaven/'.$item['primary_image'] : '/sweetheaven/images/maincake.jpg'; ?>
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex gap-5 items-center"
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 flex flex-wrap sm:flex-nowrap gap-4 sm:gap-5 items-center relative"
                  id="cart-item-<?= $item['id'] ?>"
                  data-savings-per-unit="<?= $item['savings_per_unit'] ?>">
-                <div class="w-20 h-20 rounded-xl overflow-hidden bg-rose-50 shrink-0">
-                    <img src="<?= htmlspecialchars($imgSrc) ?>" class="w-full h-full object-cover" alt="<?= htmlspecialchars($item['name']) ?>">
+                
+                <div class="flex items-center gap-4 w-full sm:w-auto sm:flex-1">
+                    <div class="w-20 h-20 rounded-xl overflow-hidden bg-rose-50 shrink-0">
+                        <img src="<?= htmlspecialchars($imgSrc) ?>" class="w-full h-full object-cover" alt="<?= htmlspecialchars($item['name']) ?>">
+                    </div>
+
+                    <div class="flex-1 min-w-0 pr-6 sm:pr-0">
+                        <h3 class="font-bold text-gray-800 mb-1 line-clamp-2 sm:line-clamp-1"><?= htmlspecialchars($item['name']) ?></h3>
+                        <p class="text-rose-500 font-semibold text-sm"><?= formatPrice($item['price']) ?> <?= __('cart_each') ?></p>
+                    </div>
                 </div>
 
-                <div class="flex-1 min-w-0">
-                    <h3 class="font-bold text-gray-800 mb-1 line-clamp-1"><?= htmlspecialchars($item['name']) ?></h3>
-                    <p class="text-rose-500 font-semibold text-sm"><?= number_format($item['price']) ?> <?= __('common_mmk') ?> <?= __('cart_each') ?></p>
-                </div>
+                <div class="flex items-center justify-between w-full sm:w-auto gap-4">
+                    <div class="flex items-center gap-2">
+                        <button onclick="updateQty(<?= $item['id'] ?>, parseInt(document.getElementById('qty-<?= $item['id'] ?>').textContent) - 1, <?= $item['stock'] ?>)"
+                            class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold flex items-center justify-center transition-colors">−</button>
+                        <span class="w-10 text-center font-bold text-gray-800" id="qty-<?= $item['id'] ?>"><?= $item['qty'] ?></span>
+                        <button onclick="updateQty(<?= $item['id'] ?>, parseInt(document.getElementById('qty-<?= $item['id'] ?>').textContent) + 1, <?= $item['stock'] ?>)"
+                            class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold flex items-center justify-center transition-colors">+</button>
+                    </div>
 
-                <div class="flex items-center gap-2">
-                    <button onclick="updateQty(<?= $item['id'] ?>, parseInt(document.getElementById('qty-<?= $item['id'] ?>').textContent) - 1, <?= $item['stock'] ?>)"
-                        class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold flex items-center justify-center transition-colors">−</button>
-                    <span class="w-10 text-center font-bold text-gray-800" id="qty-<?= $item['id'] ?>"><?= $item['qty'] ?></span>
-                    <button onclick="updateQty(<?= $item['id'] ?>, parseInt(document.getElementById('qty-<?= $item['id'] ?>').textContent) + 1, <?= $item['stock'] ?>)"
-                        class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold flex items-center justify-center transition-colors">+</button>
-                </div>
-
-                <div class="flex justify-center items-center gap-2 text-right min-w-[100px]">
-                    <p class="font-bold text-gray-800" id="subtotal-<?= $item['id'] ?>"><?= number_format($item['item_total']) ?></p>
-                    <p class="text-xs  text-gray-800"><?= __('common_mmk') ?></p>
+                    <div class="flex justify-end items-center gap-1 text-right min-w-[100px]">
+                        <p class="font-bold text-gray-800" id="subtotal-<?= $item['id'] ?>"><?= formatPrice($item['item_total']) ?></p>
+                    </div>
                 </div>
 
                 <button onclick="removeItem(<?= $item['id'] ?>)"
-                    class="text-gray-300 hover:text-red-500 transition-colors ml-2">
+                    class="absolute top-4 right-4 sm:relative sm:top-auto sm:right-auto text-gray-300 hover:text-red-500 transition-colors sm:ml-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -157,11 +161,11 @@ $grandTotal = $originalSubtotal - $totalSavings - $firstOrderDiscount;
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-medium text-gray-700 line-clamp-1"><?= htmlspecialchars($item['name']) ?></p>
                             <p class="text-xs text-gray-400">
-                                <span id="summary-price-<?= $item['id'] ?>"><?= number_format($item['price']) ?> × <?= $item['qty'] ?></span><?= $discountLabel ?>
+                                <span id="summary-price-<?= $item['id'] ?>"><?= formatPrice($item['price']) ?> × <?= $item['qty'] ?></span><?= $discountLabel ?>
                             </p>
                         </div>
                         <div class="text-right shrink-0">
-                            <p class="text-sm font-bold text-gray-700" id="summary-total-<?= $item['id'] ?>"><?= number_format($item['item_total']) ?></p>
+                            <p class="text-sm font-bold text-gray-700" id="summary-total-<?= $item['id'] ?>"><?= formatPrice($item['item_total']) ?></p>
                         </div>
                     </div>
                     <?php endforeach; ?>
@@ -171,13 +175,13 @@ $grandTotal = $originalSubtotal - $totalSavings - $firstOrderDiscount;
                 <div class="border-t border-gray-100 pt-4 space-y-2 text-sm">
                     <div class="flex justify-between text-gray-500">
                         <span><?= __('cart_subtotal') ?></span>
-                        <span id="subtotalDisplay"><?= number_format($originalSubtotal) ?> <?= __('common_mmk') ?></span>
+                        <span id="subtotalDisplay"><?= formatPrice($originalSubtotal) ?></span>
                     </div>
 
                     <?php if ($totalSavings > 0): ?>
                     <div class="flex justify-between text-green-600 font-medium" id="discountSavingsRow">
                         <span><?= __('checkout_product_discounts') ?></span>
-                        <span id="discountDisplay">-<?= number_format($totalSavings) ?> <?= __('common_mmk') ?></span>
+                        <span id="discountDisplay">-<?= formatPrice($totalSavings) ?></span>
                     </div>
                     <?php else: ?>
                     <div class="flex justify-between text-green-600 font-medium hidden" id="discountSavingsRow">
@@ -189,7 +193,7 @@ $grandTotal = $originalSubtotal - $totalSavings - $firstOrderDiscount;
                     <?php if ($firstOrderDiscount > 0): ?>
                     <div class="flex justify-between text-blue-600 font-medium" id="firstOrderDiscountRow">
                         <span><?= __('checkout_first_order_discount') ?></span>
-                        <span id="firstOrderDiscountDisplay">-<?= number_format($firstOrderDiscount) ?> <?= __('common_mmk') ?></span>
+                        <span id="firstOrderDiscountDisplay">-<?= formatPrice($firstOrderDiscount) ?></span>
                     </div>
                     <?php else: ?>
                     <div class="flex justify-between text-blue-600 font-medium hidden" id="firstOrderDiscountRow">
@@ -205,7 +209,7 @@ $grandTotal = $originalSubtotal - $totalSavings - $firstOrderDiscount;
 
                     <div class="flex justify-between font-bold text-gray-800 text-base border-t border-gray-100 pt-2">
                         <span><?= __('cart_total') ?></span>
-                        <span id="grandTotal"><?= number_format($grandTotal) ?> <?= __('common_mmk') ?></span>
+                        <span id="grandTotal"><?= formatPrice($grandTotal) ?></span>
                     </div>
                 </div>
 
@@ -238,7 +242,6 @@ $grandTotal = $originalSubtotal - $totalSavings - $firstOrderDiscount;
 
 <script>
 const _isFirstOrder = <?= $firstOrderDiscount > 0 ? 'true' : 'false' ?>;
-const _mmk = ' <?= __('common_mmk') ?>';
 
 // Recalculate total product-level savings from DOM data attributes
 function recalcSavings() {
@@ -264,12 +267,12 @@ function updateSummary(originalTotal) {
     const firstOrderEl  = document.getElementById('firstOrderDiscountDisplay');
     const grandEl     = document.getElementById('grandTotal');
 
-    if (subtotalEl)     subtotalEl.textContent     = originalTotal.toLocaleString('en') + _mmk;
-    if (discountEl)     discountEl.textContent     = '-' + Math.round(savings).toLocaleString('en') + _mmk;
+    if (subtotalEl)     subtotalEl.textContent     = formatPriceJS(originalTotal);
+    if (discountEl)     discountEl.textContent     = '-' + formatPriceJS(Math.round(savings));
     if (discountRow)    discountRow.classList.toggle('hidden', savings <= 0);
-    if (firstOrderEl)   firstOrderEl.textContent   = '-' + Math.round(firstOrderDiscount).toLocaleString('en') + _mmk;
+    if (firstOrderEl)   firstOrderEl.textContent   = '-' + formatPriceJS(Math.round(firstOrderDiscount));
     if (firstOrderRow)  firstOrderRow.classList.toggle('hidden', firstOrderDiscount <= 0);
-    if (grandEl)        grandEl.textContent        = Math.round(grand).toLocaleString('en') + _mmk;
+    if (grandEl)        grandEl.textContent        = formatPriceJS(Math.round(grand));
 }
 
 function updateQty(productId, newQty, maxStock) {
@@ -297,18 +300,16 @@ function updateQty(productId, newQty, maxStock) {
             const qtyEl = document.getElementById(`qty-${productId}`);
             const subEl = document.getElementById(`subtotal-${productId}`);
             if (qtyEl) qtyEl.textContent = newQty;
-            if (subEl) subEl.textContent = Math.round(data.subtotal).toLocaleString('en');
+            if (subEl) subEl.textContent = formatPriceJS(data.cart_item.price * newQty);
 
             // Update right-side order summary item
             const summaryItem = document.getElementById(`summary-item-${productId}`);
             if (summaryItem) {
                 const unitPrice = parseFloat(summaryItem.dataset.unitPrice) || 0;
-                const discountLabel = summaryItem.dataset.discountLabel || '';
-                const priceText = numberFormat(unitPrice) + ' × ' + newQty;
                 const summaryPriceEl = document.getElementById(`summary-price-${productId}`);
                 const summaryTotalEl = document.getElementById(`summary-total-${productId}`);
-                if (summaryPriceEl) summaryPriceEl.textContent = priceText;
-                if (summaryTotalEl) summaryTotalEl.textContent = numberFormat(unitPrice * newQty);
+                if (summaryPriceEl) summaryPriceEl.textContent = `${formatPriceJS(unitPrice)} × ${newQty}`;
+                if (summaryTotalEl) summaryTotalEl.textContent = formatPriceJS(unitPrice * newQty);
             }
         }
         // data.total = sum of (original session price × qty) across all items

@@ -148,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $db->prepare("INSERT INTO notifications (type, title, message) VALUES ('new_order', ?, ?)")
                         ->execute([
                             $orderLabel,
-                            sprintf(__('checkout_notif_body'), htmlspecialchars($name), $orderId, number_format($totalAmount))
+                            sprintf(__('checkout_notif_body'), htmlspecialchars($name), $orderId, formatPrice($totalAmount))
                         ]);
 
                     // Customer notification
@@ -157,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ->execute([
                             $_SESSION['user_id'],
                             $orderId,
-                            sprintf(__('checkout_success_msg'), $orderNo, number_format($totalAmount))
+                            sprintf(__('checkout_success_msg'), $orderNo, formatPrice($totalAmount))
                         ]);
 
                     $db->commit();
@@ -475,11 +475,11 @@ if ($customizeRequest) {
                                             <?= htmlspecialchars($item['name']) ?>
                                         </p>
                                         <p class="text-xs text-gray-400">
-                                            <?= number_format($item['price']) ?> × <?= $item['qty'] ?><?= $discountLabel ?>
+                                            <?= formatPrice($item['price']) ?> × <?= $item['qty'] ?><?= $discountLabel ?>
                                         </p>
                                     </div>
                                     <div class="text-right shrink-0">
-                                        <p class="text-sm font-bold text-gray-700"><?= number_format($item['item_total']) ?></p>
+                                        <p class="text-sm font-bold text-gray-700"><?= formatPrice($item['item_total']) ?></p>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -488,12 +488,12 @@ if ($customizeRequest) {
                         <div class="border-t border-gray-100 pt-4 space-y-2 text-sm">
                             <div class="flex justify-between text-gray-500">
                                 <span><?= __('checkout_subtotal') ?></span>
-                                <span id="subtotalDisplay"><?= number_format($originalSubtotal) ?> <?= __('common_mmk') ?></span>
+                                <span id="subtotalDisplay"><?= formatPrice($originalSubtotal) ?></span>
                             </div>
                             <?php if ($totalSavings > 0): ?>
                             <div class="flex justify-between text-green-600 font-medium" id="discountSavingsRow">
                                 <span><?= __('checkout_product_discounts') ?></span>
-                                <span id="discountDisplay">-<?= number_format($totalSavings) ?> <?= __('common_mmk') ?></span>
+                                <span id="discountDisplay">-<?= formatPrice($totalSavings) ?></span>
                             </div>
                             <?php else: ?>
                             <div class="flex justify-between text-green-600 font-medium hidden" id="discountSavingsRow">
@@ -504,7 +504,7 @@ if ($customizeRequest) {
                             <?php if ($firstOrderDiscount > 0): ?>
                             <div class="flex justify-between text-blue-600 font-medium">
                                 <span><?= __('checkout_first_order_discount') ?></span>
-                                <span>-<?= number_format($firstOrderDiscount) ?> <?= __('common_mmk') ?></span>
+                                <span>-<?= formatPrice($firstOrderDiscount) ?></span>
                             </div>
                             <?php endif; ?>
                             <div class="flex justify-between text-gray-500">
@@ -514,7 +514,7 @@ if ($customizeRequest) {
                             <div
                                 class="flex justify-between font-bold text-gray-800 text-base border-t border-gray-100 pt-2">
                                 <span><?= __('checkout_total') ?></span>
-                                <span id="totalDisplay"><?= number_format($originalSubtotal - $totalSavings - $firstOrderDiscount) ?> <?= __('common_mmk') ?></span>
+                                <span id="totalDisplay"><?= formatPrice($originalSubtotal - $totalSavings - $firstOrderDiscount) ?></span>
                             </div>
                         </div>
 

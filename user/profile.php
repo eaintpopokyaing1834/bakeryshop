@@ -377,8 +377,7 @@ $statusColors = [
                                     </span>
                                 </div>
                                 <div class="text-right">
-                                    <p class="font-bold text-rose-500"><?= number_format($order['total_amount']) ?>
-                                        <?= __('common_mmk') ?></p>
+                                    <p class="font-bold text-rose-500"><?= formatPrice($order['total_amount']) ?></p>
                                     <p class="text-xs text-gray-400"><?= date('M j, Y', strtotime($order['order_date'])) ?></p>
                                 </div>
                             </div>
@@ -389,8 +388,7 @@ $statusColors = [
                                             <span class="text-gray-600"><?= htmlspecialchars($item['name']) ?> ×
                                                 <?= $item['quantity'] ?></span>
                                             <span
-                                                class="font-semibold text-gray-700"><?= number_format($item['price'] * $item['quantity']) ?>
-                                                <?= __('common_mmk') ?></span>
+                                                class="font-semibold text-gray-700"><?= formatPrice($item['price'] * $item['quantity']) ?></span>
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
@@ -477,9 +475,9 @@ $statusColors = [
                                             </div>
                                         <?php endif; ?>
                                         <?php if ($cr['admin_price']): ?>
-                                            <p><span class="font-semibold text-gray-600"><?= __('profile_price') ?></span> <span
-                                                    class="text-rose-500 font-bold"><?= number_format($cr['admin_price']) ?>
-                                                    <?= __('common_mmk') ?></span></p>
+                                                <p><span class="font-semibold text-gray-600"><?= __('customize_price_label') ?></span>
+                                                <span
+                                                    class="text-rose-500 font-bold"><?= formatPrice($cr['admin_price']) ?></span></p>
                                         <?php endif; ?>
                                         <?php if ($cr['admin_note']): ?>
                                             <p><span class="font-semibold text-gray-600"><?= __('profile_note') ?></span>
@@ -521,8 +519,7 @@ $statusColors = [
                             <div class="p-4">
                                 <p class="font-bold text-gray-700 text-sm mb-1 line-clamp-1"><?= htmlspecialchars($item['name']) ?>
                                 </p>
-                                <p class="text-rose-500 font-bold text-sm mb-3"><?= number_format($item['price']) ?>
-                                    <?= __('common_mmk') ?></p>
+                                <p class="text-rose-500 font-bold text-sm mb-3"><?= formatPrice($item['price']) ?></p>
                                 <div class="flex gap-2">
                                     <button onclick="addToCart(<?= $item['id'] ?>)"
                                         class="flex-1 bg-pink-500 text-white text-xs font-semibold py-2 rounded-xl hover:bg-rose-600 transition-colors"><?= __('profile_add_cart') ?></button>
@@ -776,18 +773,18 @@ $statusColors = [
             }).join('');
             document.getElementById('vItems').innerHTML = itemsHtml;
 
-            document.getElementById('vOriginalSubtotal').textContent = Number(data.original_subtotal).toLocaleString() + ' MMK';
-            document.getElementById('vTotal').textContent = Number(data.total_amount).toLocaleString() + ' MMK';
+            document.getElementById('vOriginalSubtotal').textContent = formatPriceJS(data.original_subtotal);
+            document.getElementById('vTotal').textContent = formatPriceJS(data.total_amount);
 
             const shipLabel = shippingLabels[data.shipping_method] || data.shipping_method;
             document.getElementById('vShipping').textContent = shipLabel;
             
-            document.getElementById('vShippingFee').textContent = data.shipping_fee > 0 ? Number(data.shipping_fee).toLocaleString() + ' MMK' : 'Free';
+            document.getElementById('vShippingFee').textContent = data.shipping_fee > 0 ? formatPriceJS(data.shipping_fee) : 'Free';
 
             const prodDiscRow = document.getElementById('vProductDiscountRow');
             if (data.product_discount > 0) {
                 prodDiscRow.style.display = 'flex';
-                document.getElementById('vProductDiscount').textContent = '-' + Number(data.product_discount).toLocaleString() + ' MMK';
+                document.getElementById('vProductDiscount').textContent = '-' + formatPriceJS(data.product_discount);
             } else {
                 prodDiscRow.style.display = 'none';
             }
@@ -795,7 +792,7 @@ $statusColors = [
             const firstOrderRow = document.getElementById('vFirstOrderRow');
             if (data.first_order_discount > 0) {
                 firstOrderRow.style.display = 'flex';
-                document.getElementById('vFirstOrderDiscount').textContent = '-' + Number(data.first_order_discount).toLocaleString() + ' MMK';
+                document.getElementById('vFirstOrderDiscount').textContent = '-' + formatPriceJS(data.first_order_discount);
             } else {
                 firstOrderRow.style.display = 'none';
             }

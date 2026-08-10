@@ -14,7 +14,7 @@ $categories = $db->query("SELECT * FROM categories ORDER BY name")->fetchAll();
 
 $bestSellers = $db->query("
     SELECT p.*,
-           c.name AS category_name,
+           c.name AS category_name, c.name_my AS category_name_my,
            d.name AS discount_name, d.type AS discount_type, d.value AS discount_value,
            COALESCE(AVG(r.rating),0) AS avg_rating,
            COALESCE(SUM(oi.quantity), 0) AS total_sales,
@@ -59,7 +59,7 @@ $customerReviews = $db->query("
 // Fetch all discounted products (with all images)
 $discountedProducts = $db->query("
     SELECT p.*,
-           c.name AS category_name,
+           c.name AS category_name, c.name_my AS category_name_my,
            d.name AS discount_name, d.type AS discount_type, d.value AS discount_value,
            GROUP_CONCAT(
                CASE WHEN pi.is_primary = 1 THEN pi.image_url ELSE NULL END
@@ -183,7 +183,7 @@ if ($isLoggedIn) {
 
 
             <!-- Left: Text -->
-            <div class="animate-[fadeUp_0.7s_ease_both] z-10 [animation-delay:.2s] relative hidden md:block">
+            <div class="animate-[fadeUp_0.7s_ease_both] z-10 [animation-delay:.2s] relative">
                 <div><img src="../images/spot2.png" class="absolute -top-28 -left-36 w-80 h-80 opacity-80">
                     </div>
 
@@ -224,7 +224,7 @@ if ($isLoggedIn) {
             </div>
 
             <!-- Right: Photo Collage -->
-            <div class="animate-[fadeUp_0.7s_ease_both] [animation-delay:.2s] relative hidden md:block">
+            <div class="animate-[fadeUp_0.7s_ease_both] [animation-delay:.2s] relative mt-10 md:mt-0">
                 <!-- Decorative circle -->
                 <div class="absolute -top-8 -right-8 w-72 h-72 rounded-full bg-[#fdf0ee] z-0"></div>
                     <div><img src="../images/balloon.png" class="absolute -top-14 -left-36 w-72 h-70 opacity-50">
@@ -310,7 +310,7 @@ if ($isLoggedIn) {
                                     </div>
                                     <p
                                         class="font-semibold text-gray-600 text-sm group-hover:text-rose-500 transition-colors">
-                                        <?= htmlspecialchars($cat['name']) ?>
+                                        <?= htmlspecialchars(getLocalizedCategoryName($cat)) ?>
                                     </p>
                                 </a>
                             </div>
@@ -583,7 +583,7 @@ if ($isLoggedIn) {
 
                         <div class="p-4">
                             <p class="text-xs font-semibold uppercase tracking-wider text-rose-400 mb-2">
-                                <?= htmlspecialchars($product['category_name']) ?>
+                                <?= htmlspecialchars(getLocalizedCategoryName($product, 'category_name', 'category_name_my')) ?>
                             </p>
 
                             <a href="/sweetheaven/user/product_detail.php?id=<?= $product['id'] ?>">
@@ -595,13 +595,12 @@ if ($isLoggedIn) {
                             <div class="flex flex-col gap-3  border-t border-gray-50">
                                 <span class="font-bold text-[15px] text-rose-500">
                                     <?php if ($hasDiscount): ?>
-                                        <span
-                                            class="text-xs line-through text-gray-400 font-normal mr-1"><?= number_format($product['price']) ?></span>
-                                        <?= number_format($discountedPrice) ?>
+                                        <span class="text-xs line-through text-gray-400 font-normal mr-1"><?= formatPrice($product['price']) ?></span>
+                                        <?= formatPrice($discountedPrice) ?>
                                     <?php else: ?>
-                                        <?= number_format($product['price']) ?>
+                                        <?= formatPrice($product['price']) ?>
                                     <?php endif; ?>
-                                    <span class="text-xs font-normal text-gray-400"><?= __('common_mmk') ?></span></span>
+                                </span>
 
 
                                 <div class="flex gap-2">
@@ -664,7 +663,7 @@ if ($isLoggedIn) {
                     <p class="text-gray-500 leading-relaxed text-lg">
                         <?= __('customize_desc') ?>
                     </p>
-                    <div class="grid grid-cols-3 gap-3 text-sm">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-3 text-sm">
                         <div class="flex items-center gap-3">
                             <span
                                 class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center text-rose-500 text-lg">🎂</span>

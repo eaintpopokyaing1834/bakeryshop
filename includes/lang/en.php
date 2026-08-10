@@ -551,8 +551,8 @@ return [
     'checkout_place_order' => 'Place Order',
     'checkout_custom_cake' => 'Custom %s %s Cake',
     'checkout_notif_title' => 'New Order Received',
-    'checkout_notif_body' => 'Customer %s placed order #%s for %s MMK',
-    'checkout_success_msg' => 'Your order %s has been placed successfully! Total: %s MMK. We\'ll notify you when it\'s processed. 🎉',
+    'checkout_notif_body' => 'Customer %s placed order #%s for %s',
+    'checkout_success_msg' => 'Your order %s has been placed successfully! Total: %s. We\'ll notify you when it\'s processed. 🎉',
     'checkout_qr_alt' => '%s QR',
 
     // ── New Checkout Errors ──────────────────────────────

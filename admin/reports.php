@@ -505,7 +505,7 @@ function exportToExcel() {
 
 // ── Helpers ──────────────────────────────────────────
 function formatMMK(val) {
-    return parseFloat(val || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' <?= __('admin_mmk') ?>';
+    return formatPriceJS(val);
 }
 
 function escapeHtml(str) {

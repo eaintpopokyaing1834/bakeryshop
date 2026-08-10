@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $db->prepare("INSERT INTO notifications (user_id, type, message, is_seen) VALUES (?, 'customize_approved', ?, 0)")
                 ->execute([
                     $reqData['user_id'],
-                    "Your cake customization request #" . str_pad($requestId, 4, '0', STR_PAD_LEFT) . " has been approved! Price: " . number_format($adminPrice) . " MMK. You can now proceed to order."
+                    "Your cake customization request #" . str_pad($requestId, 4, '0', STR_PAD_LEFT) . " has been approved! Price: " . formatPrice($adminPrice) . ". You can now proceed to order."
                 ]);
         }
     } elseif ($action === 'reject') {
@@ -206,7 +206,7 @@ $statusColors = [
                                             <?php if ($req['cake_message']): ?><p><span class="font-semibold text-gray-600"><?= __('customize_message_label') ?></span> <?= htmlspecialchars($req['cake_message']) ?></p><?php endif; ?>
                                             <p><span class="font-semibold text-gray-600"><?= __('customize_delivery_date') ?></span> <?= date('M j, Y', strtotime($req['delivery_date'])) ?></p>
                                             <?php if ($req['additional_notes']): ?><p><span class="font-semibold text-gray-600"><?= __('customize_notes_label') ?></span> <?= htmlspecialchars($req['additional_notes']) ?></p><?php endif; ?>
-                                            <?php if ($req['admin_price']): ?><p><span class="font-semibold text-gray-600"><?= __('customize_price_label') ?></span> <?= number_format($req['admin_price']) ?> <?= __('admin_mmk') ?></p><?php endif; ?>
+                                            <?php if ($req['admin_price']): ?><p><span class="font-semibold text-gray-600"><?= __('customize_price_label') ?></span> <?= formatPrice($req['admin_price']) ?></p><?php endif; ?>
                                             <?php if ($req['admin_note']): ?><p><span class="font-semibold text-gray-600"><?= __('customize_admin_note_label') ?></span> <?= htmlspecialchars($req['admin_note']) ?></p><?php endif; ?>
                                         </div>
                                     </div>
@@ -256,7 +256,7 @@ $statusColors = [
                                             <div class="mt-4 p-4 bg-green-50 rounded-xl border border-green-200">
                                                 <p class="text-sm font-semibold text-green-700">✅ <?= __('status_approved') ?></p>
                                                 <?php if ($req['admin_price']): ?>
-                                                    <p class="text-sm text-green-600 mt-1"><?= __('customize_price_label') ?> <?= number_format($req['admin_price']) ?> <?= __('admin_mmk') ?></p>
+                                                    <p class="text-sm text-green-600 mt-1"><?= __('customize_price_label') ?> <?= formatPrice($req['admin_price']) ?></p>
                                                 <?php endif; ?>
                                             </div>
                                         <?php elseif ($req['status'] === 'rejected'): ?>

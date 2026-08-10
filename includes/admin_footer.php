@@ -82,6 +82,20 @@
             document.getElementById('notifDropdown')?.classList.add('hidden');
         }
     });
+
+    window.formatPriceJS = function(amount) {
+        let formatted = Number(amount).toLocaleString();
+        const currentLang = '<?= currentLang() ?>';
+        if (currentLang === 'my') {
+            const en = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            const my = ['၀', '၁', '၂', '၃', '၄', '၅', '၆', '၇', '၈', '၉'];
+            for (let i = 0; i < 10; i++) {
+                formatted = formatted.split(en[i]).join(my[i]);
+            }
+            return formatted + ' ကျပ်';
+        }
+        return formatted + ' MMK';
+    };
 </script>
 </body>
 

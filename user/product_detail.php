@@ -269,13 +269,11 @@ $relatedProducts = $relatedProducts->fetchAll();
                                 <?php $finalPrice = $product['discount_type'] === 'percentage'
                                     ? $product['price'] * (1 - $product['discount_value'] / 100)
                                     : max(0, $product['price'] - $product['discount_value']); ?>
-                                <span
-                                    class="text-xl line-through text-gray-400 font-normal mr-2"><?= number_format($product['price']) ?></span>
-                                <?= number_format($finalPrice) ?>
+                                <span class="text-xl line-through text-gray-400 font-normal mr-2"><?= formatPrice($product['price']) ?></span>
+                                <?= formatPrice($finalPrice) ?>
                             <?php else: ?>
-                                <?= number_format($product['price']) ?>
+                                <?= formatPrice($product['price']) ?>
                             <?php endif; ?>
-                            <span class="text-lg font-normal text-gray-400"><?= __('common_mmk') ?></span>
                         </div>
 
                         <p class="text-gray-500 leading-relaxed mb-8">
@@ -445,10 +443,9 @@ $relatedProducts = $relatedProducts->fetchAll();
                                 </p>
                                 <p class="text-rose-500 font-bold text-sm">
                                     <?php if ($rpDiscount): ?>
-                                        <span
-                                            class="text-xs line-through text-gray-400 font-normal mr-1"><?= number_format($rp['price']) ?></span>
+                                        <span class="text-xs line-through text-gray-400 font-normal mr-1"><?= formatPrice($rp['price']) ?></span>
                                     <?php endif; ?>
-                                    <?= number_format($rpPrice) ?>         <?= __('common_mmk') ?>
+                                    <?= formatPrice($rpPrice) ?>
                                 </p>
                             </div>
                         </a>

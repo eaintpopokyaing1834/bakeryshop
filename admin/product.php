@@ -142,12 +142,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_category'])) {
     $id = (int) ($_POST['category_id'] ?? 0);
     $name = trim($_POST['name']);
     $description = trim($_POST['description']);
+    $name_my = trim($_POST['name_my'] ?? '');
+    $description_my = trim($_POST['description_my'] ?? '');
     if ($id > 0) {
-        $db->prepare("UPDATE categories SET name=?,description=? WHERE id=?")
-            ->execute([$name, $description, $id]);
+        $db->prepare("UPDATE categories SET name=?,description=?,name_my=?,description_my=? WHERE id=?")
+            ->execute([$name, $description, $name_my, $description_my, $id]);
     } else {
-        $db->prepare("INSERT INTO categories (name,description) VALUES (?,?)")
-            ->execute([$name, $description]);
+        $db->prepare("INSERT INTO categories (name,description,name_my,description_my) VALUES (?,?,?,?)")
+            ->execute([$name, $description, $name_my, $description_my]);
     }
     $_SESSION['flash_message'] = 'Category saved successfully!';
     header('Location: ?tab=categories');
@@ -164,7 +166,7 @@ $page          = min($page, $totalPages);
 $offset        = ($page - 1) * $perPage;
 
 $stmt = $db->prepare("
-    SELECT p.*, c.name AS category_name, d.name AS discount_name, d.type AS discount_type, d.value AS discount_value,
+    SELECT p.*, c.name AS category_name, c.name_my AS category_name_my, d.name AS discount_name, d.type AS discount_type, d.value AS discount_value,
            (SELECT image_url FROM product_images WHERE product_id=p.id AND is_primary=1 LIMIT 1) AS primary_image
     FROM products p
     LEFT JOIN categories c ON p.category_id = c.id
@@ -222,7 +224,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">
-                <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
+                <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider whitespace-nowrap">
                     <tr>
                         <th class="px-6 py-4 text-left">No.</th>
                         <th class="px-6 py-4 text-left"><?= __('product_col_product') ?></th>
@@ -255,8 +257,8 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-600"><?= htmlspecialchars($p['category_name']) ?></td>
-                            <td class="px-6 py-4 font-bold text-gray-700 text-sm"><?= number_format($p['price']) ?> <?= __('admin_mmk') ?></td>
+                            <td class="px-6 py-4 text-sm text-gray-600"><?= htmlspecialchars(getLocalizedCategoryName($p, 'category_name', 'category_name_my')) ?></td>
+                            <td class="px-6 py-4 font-bold text-gray-700 text-sm"><?= formatPrice($p['price']) ?></td>
                             <td class="px-6 py-4">
                                 <?php if ($p['discount_name']): ?>
                                     <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-700">
@@ -328,7 +330,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">
-                <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
+                <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider whitespace-nowrap">
                     <tr>
                         <th class="px-6 py-4 text-left"><?= __('product_col_id') ?></th>
                         <th class="px-6 py-4 text-left"><?= __('product_col_name') ?></th>
@@ -340,14 +342,14 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     <?php foreach ($categories as $cat): ?>
                         <tr class="hover:bg-gray-50/50 transition-colors">
                             <td class="px-6 py-4 font-mono text-gray-500 text-sm"><?= $cat['id'] ?></td>
-                            <td class="px-6 py-4 font-semibold text-gray-700 text-sm"><?= htmlspecialchars($cat['name']) ?></td>
+                            <td class="px-6 py-4 font-semibold text-gray-700 text-sm"><?= htmlspecialchars(getLocalizedCategoryName($cat)) ?></td>
                             <td class="px-6 py-4 text-sm text-gray-500">
                                 <?= htmlspecialchars(substr($cat['description'] ?? '', 0, 80)) ?></td>
                             <td class="px-6 py-4">
                                 <?php if ($isAdmin): ?>
                                 <div class="flex items-center gap-2">
                                     <button
-                                        onclick="editCategory(<?= $cat['id'] ?>, '<?= addslashes($cat['name']) ?>', '<?= addslashes($cat['description'] ?? '') ?>')"
+                                        onclick="editCategory(<?= $cat['id'] ?>, '<?= addslashes($cat['name']) ?>', '<?= addslashes($cat['description'] ?? '') ?>', '<?= addslashes($cat['name_my'] ?? '') ?>', '<?= addslashes($cat['description_my'] ?? '') ?>')"
                                         class="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1.5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"><?= __('admin_edit') ?></button>
                                     <button onclick="deleteCategory(<?= $cat['id'] ?>, '<?= addslashes($cat['name']) ?>')"
                                         class="text-red-600 hover:text-red-800 text-sm font-medium px-3 py-1.5 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"><?= __('admin_delete') ?></button>
@@ -483,13 +485,23 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <input type="hidden" name="save_category" value="1">
             <input type="hidden" name="category_id" id="categoryId" value="0">
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_cat_label_name') ?> *</label>
+                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_cat_label_name') ?> (EN) *</label>
                 <input type="text" name="name" id="categoryName" required placeholder="<?= __('product_cat_ph_name') ?>"
                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
             </div>
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_desc') ?></label>
+                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_cat_label_name') ?> (Myanmar)</label>
+                <input type="text" name="name_my" id="categoryNameMy" placeholder="အမည် (မြန်မာ)"
+                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_desc') ?> (EN)</label>
                 <textarea name="description" id="categoryDescription" rows="3" placeholder="<?= __('product_cat_ph_desc') ?>"
+                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"></textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_desc') ?> (Myanmar)</label>
+                <textarea name="description_my" id="categoryDescriptionMy" rows="3" placeholder="ဖော်ပြချက် (မြန်မာ)"
                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"></textarea>
             </div>
             <div class="flex gap-3 pt-2">
@@ -654,14 +666,18 @@ require_once __DIR__ . '/../includes/admin_header.php';
     function openCategoryModal() {
         document.getElementById('categoryId').value = 0;
         document.getElementById('categoryName').value = '';
+        document.getElementById('categoryNameMy').value = '';
         document.getElementById('categoryDescription').value = '';
+        document.getElementById('categoryDescriptionMy').value = '';
         document.getElementById('categoryModalTitle').textContent = T.addCategory;
         document.getElementById('categoryModal').classList.remove('hidden');
     }
-    function editCategory(id, name, desc) {
+    function editCategory(id, name, desc, nameMy, descMy) {
         document.getElementById('categoryId').value = id;
         document.getElementById('categoryName').value = name;
+        document.getElementById('categoryNameMy').value = nameMy;
         document.getElementById('categoryDescription').value = desc;
+        document.getElementById('categoryDescriptionMy').value = descMy;
         document.getElementById('categoryModalTitle').textContent = T.editCategory;
         document.getElementById('categoryModal').classList.remove('hidden');
     }

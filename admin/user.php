@@ -301,7 +301,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
     </div>
     <div class="overflow-x-auto">
         <table class="w-full">
-            <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
+            <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider whitespace-nowrap">
                 <tr>
                     <th class="px-6 py-4 text-left">ID</th>
                     <th class="px-6 py-4 text-left">Name</th>

@@ -30,7 +30,7 @@ $sortSQL = match($sort) {
 
 $products = $db->prepare("
     SELECT p.*,
-           c.name AS category_name,
+           c.name AS category_name, c.name_my AS category_name_my,
            d.name AS discount_name, d.type AS discount_type, d.value AS discount_value,
            (SELECT image_url FROM product_images WHERE product_id=p.id AND is_primary=1 LIMIT 1) AS primary_image,
            COALESCE(AVG(r.rating),0) AS avg_rating,
@@ -48,8 +48,12 @@ $products->execute($params);
 $products = $products->fetchAll();
 
 $categories       = $db->query("SELECT * FROM categories ORDER BY name")->fetchAll();
-$currentCategory  = $categoryId ? $db->prepare("SELECT name FROM categories WHERE id=?") : null;
-if ($currentCategory) { $currentCategory->execute([$categoryId]); $currentCategory = $currentCategory->fetchColumn(); }
+$currentCategory  = $categoryId ? $db->prepare("SELECT name, name_my FROM categories WHERE id=?") : null;
+if ($currentCategory) { 
+    $currentCategory->execute([$categoryId]); 
+    $catRow = $currentCategory->fetch();
+    $currentCategory = $catRow ? getLocalizedCategoryName($catRow) : null;
+}
 
 $isLoggedIn = isset($_SESSION['user_id']);
 $isAdmin = ($isLoggedIn && $_SESSION['role'] === 'admin');
@@ -98,7 +102,7 @@ if ($isLoggedIn && !$isAdmin) {
                             <a href="/sweetheaven/user/products.php?category_id=<?= $cat['id'] ?>&search=<?= urlencode($search) ?>&sort=<?= $sort ?>"
                                class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-colors
                                <?= $categoryId === (int)$cat['id'] ? 'bg-rose-500 text-white font-semibold' : 'text-gray-600 hover:bg-rose-50 hover:text-rose-500' ?>">
-                               <span><?= htmlspecialchars($cat['name']) ?></span>
+                               <span><?= htmlspecialchars(getLocalizedCategoryName($cat)) ?></span>
                             </a>
                         </li>
                         <?php endforeach; ?>
@@ -228,7 +232,7 @@ if ($isLoggedIn && !$isAdmin) {
                     </div>
 
                     <div class="p-5 flex flex-col flex-1">
-                        <p class="text-xs font-semibold uppercase tracking-wider text-rose-400 mb-1"><?= htmlspecialchars($product['category_name'] ?? 'Uncategorized') ?></p>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-rose-400 mb-1"><?= htmlspecialchars(getLocalizedCategoryName($product, 'category_name', 'category_name_my') ?: 'Uncategorized') ?></p>
 
                         <a href="/sweetheaven/user/product_detail.php?id=<?= $product['id'] ?>" onclick="event.stopPropagation()">
                             <h3 class="font-bold text-gray-800 text-base hover:text-rose-500 transition-colors mb-3 line-clamp-2"><?= htmlspecialchars($product['name']) ?></h3>
@@ -237,12 +241,11 @@ if ($isLoggedIn && !$isAdmin) {
                         <div class="flex items-center justify-between pt-3 mt-auto border-t border-gray-50">
                             <span class="text-lg font-bold text-rose-500">
                                 <?php if ($hasDiscount): ?>
-                                    <span class="text-xs line-through text-gray-400 font-normal mr-1"><?= number_format($product['price']) ?></span>
-                                    <?= number_format($discountedPrice) ?>
+                                    <span class="text-xs line-through text-gray-400 font-normal mr-1"><?= formatPrice($product['price']) ?></span>
+                                    <?= formatPrice($discountedPrice) ?>
                                 <?php else: ?>
-                                    <?= number_format($product['price']) ?>
+                                    <?= formatPrice($product['price']) ?>
                                 <?php endif; ?>
-                                <span class="text-xs font-normal text-gray-400"><?= __('common_mmk') ?></span>
                             </span>
                             <div class="flex gap-2">
                                 <a href="/sweetheaven/user/product_detail.php?id=<?= $product['id'] ?>"

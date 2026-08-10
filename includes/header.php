@@ -147,7 +147,7 @@ $sort = trim($_GET['sort'] ?? '');
             </a>
 
             <!-- Desktop Nav -->
-            <ul class="hidden md:flex items-center gap-6 text-stone-600 font-medium text-sm">
+            <ul class="hidden lg:flex items-center gap-6 text-stone-600 font-medium text-sm">
                 <li><a href="/sweetheaven/user/index.php"
                         class="nav-link hover:text-rose-500 transition-colors"><?= __('nav_home') ?></a></li>
                 <li><a href="/sweetheaven/user/products.php"
@@ -377,14 +377,14 @@ $sort = trim($_GET['sort'] ?? '');
                 <?php else: ?>
                     <a href="/sweetheaven/auth/login.php"
                         onclick="if(typeof openAuthModal==='function'){event.preventDefault();openAuthModal('login');}"
-                        class="text-stone-600 hover:text-rose-500 font-medium text-sm transition-colors"><?= __('nav_login') ?></a>
+                        class="hidden lg:block text-stone-600 hover:text-rose-500 font-medium text-sm transition-colors"><?= __('nav_login') ?></a>
                     <a href="/sweetheaven/auth/register.php"
                         onclick="if(typeof openAuthModal==='function'){event.preventDefault();openAuthModal('register');}"
-                        class="bg-rose-500 hover:bg-rose-600 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors"><?= __('nav_signup') ?></a>
+                        class="hidden lg:block bg-rose-500 hover:bg-rose-600 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors"><?= __('nav_signup') ?></a>
                 <?php endif; ?>
 
                 <!-- Mobile Menu Button -->
-                <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-stone-400 hover:text-stone-600">
+                <button onclick="toggleMobileMenu()" class="lg:hidden p-2 text-stone-400 hover:text-stone-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 6h16M4 12h16M4 18h16" />
@@ -394,7 +394,7 @@ $sort = trim($_GET['sort'] ?? '');
         </div>
 
         <!-- Mobile Menu -->
-        <div id="mobileMenu" class="hidden md:hidden pb-4 border-t border-stone-100 mt-2">
+        <div id="mobileMenu" class="hidden lg:hidden pb-4 border-t border-stone-100 mt-2">
             <ul class="space-y-1 pt-3">
                 <li><a href="/sweetheaven/user/index.php"
                         class="block px-4 py-2.5 text-stone-600 hover:text-rose-500 font-medium rounded-lg hover:bg-stone-50 text-sm"><?= __('nav_home') ?></a>
