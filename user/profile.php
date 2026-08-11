@@ -748,7 +748,8 @@ $statusColors = [
             const parts = String(value).split(' ')[0].split('-');
             if (parts.length !== 3) return value;
             const date = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            const formattedDate = date.toLocaleDateString('en-CA'); // YYYY-MM-DD
+            return window.localizeNumberJS ? window.localizeNumberJS(formattedDate) : formattedDate;
         }
 
         function populateVoucher(data) {
@@ -756,7 +757,8 @@ $statusColors = [
             document.getElementById('vCustDate').textContent = formatVoucherDate(data.order_date);
             document.getElementById('vCustOrderId').textContent = '#' + String(data.order_id).padStart(4, '0');
             document.getElementById('vCustEmail').textContent = data.email;
-            document.getElementById('vCustPhone').textContent = data.phone || 'N/A';
+            const phone = data.phone || 'N/A';
+            document.getElementById('vCustPhone').textContent = window.localizeNumberJS && phone !== 'N/A' ? window.localizeNumberJS(phone) : phone;
 
             const itemsHtml = data.items.map(item => {
                 const total = Number(item.discounted_price) * Number(item.quantity);
@@ -766,9 +768,9 @@ $statusColors = [
                         <img src="${imgSrc}" class="w-7 h-7 object-cover rounded border border-gray-100" alt="Product" onerror="this.src='/sweetheaven/images/default_cake.png'">
                     </td>
                     <td class="py-1.5 align-middle font-medium text-gray-800">${escHtml(item.product_name)}</td>
-                    <td class="py-1.5 align-middle text-center text-gray-600">${item.quantity}</td>
-                    <td class="py-1.5 align-middle text-right text-gray-600">${Number(item.discounted_price).toLocaleString()}</td>
-                    <td class="py-1.5 align-middle text-right font-semibold text-gray-800">${Number(total).toLocaleString()}</td>
+                    <td class="py-1.5 align-middle text-center text-gray-600">${window.localizeNumberJS ? window.localizeNumberJS(item.quantity) : item.quantity}</td>
+                    <td class="py-1.5 align-middle text-right text-gray-600">${formatPriceJS(item.discounted_price)}</td>
+                    <td class="py-1.5 align-middle text-right font-semibold text-gray-800">${formatPriceJS(total)}</td>
                 </tr>`;
             }).join('');
             document.getElementById('vItems').innerHTML = itemsHtml;

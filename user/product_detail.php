@@ -118,9 +118,9 @@ $relatedProducts = $relatedProducts->fetchAll();
     <div class="max-w-7xl mx-auto px-6 py-10">
         <!-- Breadcrumb -->
         <nav class="text-sm text-gray-400 mb-8 flex items-center gap-2">
-            <a href="/sweetheaven/user/index.php" class="hover:text-rose-500">Home</a>
+            <a href="/sweetheaven/user/index.php" class="hover:text-rose-500"><?= __('nav_home') ?></a>
             <span>/</span>
-            <a href="/sweetheaven/user/products.php" class="hover:text-rose-500">Products</a>
+            <a href="/sweetheaven/user/products.php" class="hover:text-rose-500"><?= __('nav_products') ?></a>
             <span>/</span>
             <a href="/sweetheaven/user/products.php?category_id=<?= $product['category_id'] ?>"
                 class="hover:text-rose-500"><?= htmlspecialchars(getLocalizedCategoryName($product, 'category_name', 'category_name_my')) ?></a>
@@ -224,11 +224,11 @@ $relatedProducts = $relatedProducts->fetchAll();
                                     class="bg-rose-50 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full"><?= htmlspecialchars(getLocalizedCategoryName($product, 'category_name', 'category_name_my')) ?></span>
                                 <span
                                     class="<?= $product['stock'] > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' ?> text-xs font-semibold px-3 py-1 rounded-full">
-                                    <?= $product['stock'] > 0 ? "In Stock ({$product['stock']})" : 'Out of Stock' ?>
+                                    <?= $product['stock'] > 0 ? sprintf(__('detail_in_stock_qty'), localizeNumber($product['stock'])) : __('detail_out_of_stock') ?>
                                 </span>
                                 <?php if ($product['discount_name'] && $product['discount_value']): ?>
                                     <span class="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
-                                        🏷️ <?= htmlspecialchars($product['discount_name']) ?>
+                                        🏷️ <?= htmlspecialchars(getLocalizedDiscountLabel($product)) ?>
                                     </span>
                                 <?php endif; ?>
                             </div>
@@ -259,9 +259,8 @@ $relatedProducts = $relatedProducts->fetchAll();
                                     </svg>
                                 <?php endfor; ?>
                             </div>
-                            <span class="text-sm text-gray-500"><?= number_format($avgRating, 1) ?>
-                                (<?= count($reviews) ?>
-                                review<?= count($reviews) !== 1 ? 's' : '' ?>)</span>
+                            <span class="text-sm text-gray-500"><?= localizeNumber(number_format($avgRating, 1)) ?>
+                                (<?= sprintf(__('detail_reviews_count'), localizeNumber(count($reviews)), count($reviews) !== 1 ? 's' : '') ?>)</span>
                         </div>
 
                         <div class="text-4xl font-bold text-rose-500 mb-6">
@@ -300,7 +299,7 @@ $relatedProducts = $relatedProducts->fetchAll();
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                         </svg>
-                                        Add to Cart
+                                        <?= __('detail_add_cart') ?>
                                     </button>
                                 </div>
                             <?php elseif (!isset($_SESSION['user_id'])): ?>
@@ -309,8 +308,8 @@ $relatedProducts = $relatedProducts->fetchAll();
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
-                                    <p class="text-gray-700 font-semibold text-sm mb-1">Members Only Purchase</p>
-                                    <p class="text-gray-500 text-xs mb-4">Only registered customers can purchase products.</p>
+                                    <p class="text-gray-700 font-semibold text-sm mb-1"><?= __('detail_members_only') ?></p>
+                                    <p class="text-gray-500 text-xs mb-4"><?= __('detail_members_only_desc') ?></p>
                                     <div class="flex gap-3 justify-center flex-wrap">
                                         <a href="/sweetheaven/auth/login.php"
                                            onclick="if(typeof openAuthModal==='function'){event.preventDefault();openAuthModal('login');}"
@@ -319,7 +318,7 @@ $relatedProducts = $relatedProducts->fetchAll();
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                                             </svg>
-                                            Log In
+                                            <?= __('nav_login') ?>
                                         </a>
                                         <a href="/sweetheaven/auth/register.php"
                                            onclick="if(typeof openAuthModal==='function'){event.preventDefault();openAuthModal('register');}"
@@ -328,17 +327,17 @@ $relatedProducts = $relatedProducts->fetchAll();
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                                             </svg>
-                                            Create Account
+                                            <?= __('nav_signup') ?>
                                         </a>
                                     </div>
                                 </div>
                             <?php else: ?>
                                 <div class="bg-blue-50 border border-blue-100 text-blue-700 p-4 rounded-2xl text-center font-semibold text-sm">
-                                    Admin accounts cannot purchase products.
+                                    <?= __('detail_admin_no_purchase') ?>
                                 </div>
                             <?php endif; ?>
                         <?php else: ?>
-                            <div class="bg-red-50 text-red-600 p-4 rounded-2xl text-center font-semibold">This product is currently out of stock</div>
+                            <div class="bg-red-50 text-red-600 p-4 rounded-2xl text-center font-semibold"><?= __('detail_out_of_stock_msg') ?></div>
                         <?php endif; ?>
                 </div>
             </div>
@@ -346,12 +345,12 @@ $relatedProducts = $relatedProducts->fetchAll();
 
         <!-- Reviews Section -->
         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-10">
-            <h2 class="text-2xl font-bold text-gray-800 mb-8">Customer Reviews</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-8"><?= __('detail_customer_reviews') ?></h2>
 
             <!-- Submit Review Form -->
             <?php if (isset($_SESSION['user_id']) && $isCustomer && !$userReview): ?>
                 <div class="bg-rose-50 rounded-2xl p-6 mb-8 border border-stone-100">
-                    <h3 class="font-bold text-gray-700 mb-4">Write a Review</h3>
+                    <h3 class="font-bold text-gray-700 mb-4"><?= __('detail_write_review') ?></h3>
                     <div class="flex items-center gap-2 mb-4" id="starPicker">
                         <?php for ($s = 1; $s <= 5; $s++): ?>
                             <button onclick="setRating(<?= $s ?>)" data-star="<?= $s ?>"
@@ -359,26 +358,26 @@ $relatedProducts = $relatedProducts->fetchAll();
                         <?php endfor; ?>
                     </div>
                     <input type="hidden" id="ratingInput" value="0">
-                    <textarea id="reviewComment" rows="3" placeholder="Share your experience with this product..."
+                    <textarea id="reviewComment" rows="3" placeholder="<?= __('detail_review_placeholder') ?>"
                         class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none mb-4"></textarea>
                     <button onclick="submitReview(<?= $product['id'] ?>)"
                         class="bg-rose-500 hover:bg-rose-600 text-white px-6 py-3 rounded-xl text-sm font-semibold transition-colors">
-                        Submit Review
+                        <?= __('detail_submit_review') ?>
                     </button>
                     <p id="reviewMsg" class="text-sm mt-2"></p>
                 </div>
             <?php elseif (!isset($_SESSION['user_id'])): ?>
                 <div class="bg-gray-50 rounded-2xl p-6 mb-8 text-center">
-                    <p class="text-gray-500 mb-3">Please log in to leave a review.</p>
+                    <p class="text-gray-500 mb-3"><?= __('detail_login_to_review') ?></p>
                     <a href="/sweetheaven/user/index.php?show_login=1"
-                        class="bg-rose-500 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-rose-600 transition-colors">Login</a>
+                        class="bg-rose-500 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-rose-600 transition-colors"><?= __('nav_login') ?></a>
                 </div>
             <?php endif; ?>
 
             <!-- Reviews List -->
             <div id="reviewsList" class="space-y-6">
                 <?php if (empty($reviews)): ?>
-                    <p class="text-gray-400 text-center py-8">No reviews yet. Be the first to review this product!</p>
+                    <p class="text-gray-400 text-center py-8"><?= __('detail_no_reviews_yet') ?></p>
                 <?php else: ?>
                     <?php foreach ($reviews as $review): ?>
                         <div class="border-b border-gray-50 pb-6">
@@ -413,7 +412,7 @@ $relatedProducts = $relatedProducts->fetchAll();
         <!-- Related Products -->
         <?php if (!empty($relatedProducts)): ?>
             <div>
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">You May Also Like</h2>
+                <h2 class="text-2xl font-bold text-gray-800 mb-6"><?= __('detail_related_products') ?></h2>
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
                     <?php foreach ($relatedProducts as $rp): ?>
                         <?php
@@ -432,7 +431,7 @@ $relatedProducts = $relatedProducts->fetchAll();
                             <?php if ($rpDiscount): ?>
                                 <div
                                     class="absolute top-2 left-2 bg-gradient-to-r from-green-400 to-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md z-10">
-                                    <?= htmlspecialchars($rp['discount_name']) ?>
+                                    <?= htmlspecialchars(getLocalizedDiscountLabel($rp)) ?>
                                 </div>
                             <?php endif; ?>
                             <img src="<?= htmlspecialchars($imgSrc) ?>" class="w-full h-60 object-cover"

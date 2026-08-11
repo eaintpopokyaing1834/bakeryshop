@@ -106,9 +106,9 @@ $statusColors = [
             <div class="metric-icon blue">
                 <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
             </div>
-            <span class="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded-full"><?= $pendingOrders ?> <?= __('admin_pending') ?></span>
+            <span class="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded-full"><?= localizeNumber($pendingOrders) ?> <?= __('admin_pending') ?></span>
         </div>
-        <p class="text-2xl font-bold text-gray-900 tracking-tight"><?= $totalOrders ?></p>
+        <p class="text-2xl font-bold text-gray-900 tracking-tight"><?= localizeNumber($totalOrders) ?></p>
         <p class="text-xs text-gray-400 mt-1 font-medium"><?= __('admin_total_orders') ?></p>
     </div>
 
@@ -118,7 +118,7 @@ $statusColors = [
                 <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
             </div>
         </div>
-        <p class="text-2xl font-bold text-gray-900 tracking-tight"><?= $totalUsers ?></p>
+        <p class="text-2xl font-bold text-gray-900 tracking-tight"><?= localizeNumber($totalUsers) ?></p>
         <p class="text-xs text-gray-400 mt-1 font-medium"><?= __('admin_registered_customers') ?></p>
     </div>
 
@@ -131,7 +131,7 @@ $statusColors = [
             <span class="text-xs font-semibold text-red-600 bg-red-50 px-2 py-1 rounded-full animate-pulse"><?= __('admin_alert') ?></span>
             <?php endif; ?>
         </div>
-        <p class="text-2xl font-bold text-gray-900 tracking-tight"><?= $lowStock ?></p>
+        <p class="text-2xl font-bold text-gray-900 tracking-tight"><?= localizeNumber($lowStock) ?></p>
         <p class="text-xs text-gray-400 mt-1 font-medium"><?= __('admin_low_stock_products') ?></p>
     </div>
 </div>
@@ -145,7 +145,7 @@ $statusColors = [
                 <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
             </div>
         </div>
-        <p class="text-2xl font-bold text-gray-900 tracking-tight"><?= $totalProducts ?></p>
+        <p class="text-2xl font-bold text-gray-900 tracking-tight"><?= localizeNumber($totalProducts) ?></p>
         <p class="text-xs text-gray-400 mt-1 font-medium"><?= __('admin_total_products') ?></p>
     </div>
 
@@ -155,7 +155,7 @@ $statusColors = [
                 <svg class="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
         </div>
-        <p class="text-2xl font-bold text-gray-900 tracking-tight"><?= $pendingOrders ?></p>
+        <p class="text-2xl font-bold text-gray-900 tracking-tight"><?= localizeNumber($pendingOrders) ?></p>
         <p class="text-xs text-gray-400 mt-1 font-medium"><?= __('admin_pending_orders') ?></p>
     </div>
 
@@ -165,7 +165,7 @@ $statusColors = [
                 <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
         </div>
-        <p class="text-2xl font-bold text-gray-900 tracking-tight"><?= $completedOrders ?></p>
+        <p class="text-2xl font-bold text-gray-900 tracking-tight"><?= localizeNumber($completedOrders) ?></p>
         <p class="text-xs text-gray-400 mt-1 font-medium"><?= __('admin_completed_orders') ?></p>
     </div>
 
@@ -175,7 +175,7 @@ $statusColors = [
                 <svg class="w-6 h-6 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
             </div>
         </div>
-        <p class="text-2xl font-bold text-gray-900 tracking-tight"><?= $totalUsers ?></p>
+        <p class="text-2xl font-bold text-gray-900 tracking-tight"><?= localizeNumber($totalUsers) ?></p>
         <p class="text-xs text-gray-400 mt-1 font-medium"><?= __('admin_total_customers') ?></p>
     </div>
 </div>
@@ -188,9 +188,9 @@ $statusColors = [
         <div class="chart-card-header">
             <div>
                 <h3><?= __('admin_monthly_revenue') ?></h3>
-                <p><?= sprintf(__('admin_overview'), date('Y')) ?></p>
+                <p><?= sprintf(__('admin_overview'), localizeNumber(date('Y'))) ?></p>
             </div>
-            <span class="text-xs font-semibold text-rose-500 bg-rose-50 px-3 py-1.5 rounded-full"><?= date('Y') ?></span>
+            <span class="text-xs font-semibold text-rose-500 bg-rose-50 px-3 py-1.5 rounded-full"><?= localizeNumber(date('Y')) ?></span>
         </div>
         <div class="chart-card-body">
             <div id="revenueChart"></div>
@@ -263,14 +263,14 @@ $statusColors = [
                 $barPct = round(($product['total_sold'] / $maxSold) * 100);
             ?>
             <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors">
-                <div class="rank-badge <?= $rankClass ?>"><?= $i + 1 ?></div>
+                <div class="rank-badge <?= $rankClass ?>"><?= localizeNumber($i + 1) ?></div>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-semibold text-gray-700 truncate"><?= htmlspecialchars($product['name']) ?></p>
                     <div class="flex items-center gap-2 mt-1">
                         <div class="stock-bar-track flex-1">
                             <div class="stock-bar-fill bg-rose-400" style="width:<?= $barPct ?>%"></div>
                         </div>
-                        <span class="text-xs text-gray-400 font-medium whitespace-nowrap"><?= $product['total_sold'] ?> <?= __('reports_units') ?></span>
+                        <span class="text-xs text-gray-400 font-medium whitespace-nowrap"><?= localizeNumber($product['total_sold']) ?> <?= __('reports_units') ?></span>
                     </div>
                 </div>
             </div>
@@ -317,7 +317,7 @@ $statusColors = [
                     <?php foreach ($recentOrders as $order): ?>
                     <tr>
                         <td>
-                            <span class="font-mono text-sm font-bold text-rose-500">#<?= str_pad($order['id'], 4, '0', STR_PAD_LEFT) ?></span>
+                            <span class="font-mono text-sm font-bold text-rose-500">#<?= localizeNumber(str_pad($order['id'], 4, '0', STR_PAD_LEFT)) ?></span>
                         </td>
                         <td>
                             <div class="flex items-center gap-2.5">
@@ -334,7 +334,7 @@ $statusColors = [
                             </span>
                         </td>
                         <td>
-                            <span class="text-sm text-gray-400"><?= date('M j, Y', strtotime($order['order_date'])) ?></span>
+                            <span class="text-sm text-gray-400"><?= localizeDate($order['order_date'], 'M j, Y') ?></span>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -374,7 +374,7 @@ $statusColors = [
                         </div>
                     </div>
                     <span class="text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0 <?= $product['stock'] == 0 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700' ?>">
-                        <?= sprintf(__('admin_left'), $product['stock']) ?>
+                        <?= sprintf(__('admin_left'), localizeNumber($product['stock'])) ?>
                     </span>
                 </div>
                 <?php endforeach; ?>
@@ -403,7 +403,7 @@ $statusColors = [
                         <div class="user-avatar"><?= strtoupper(substr($r['name'], 0, 1)) ?></div>
                         <div>
                             <p class="text-sm font-semibold text-gray-700"><?= htmlspecialchars($r['name']) ?></p>
-                            <p class="text-xs text-gray-400"><?= date('M j, Y', strtotime($r['created_at'])) ?></p>
+                            <p class="text-xs text-gray-400"><?= localizeDate($r['created_at'], 'M j, Y') ?></p>
                         </div>
                     </div>
                     <?php if ($r['rating']): ?>
@@ -413,7 +413,7 @@ $statusColors = [
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                         </svg>
                         <?php endfor; ?>
-                        <span class="text-xs text-gray-400 ml-1"><?= $r['rating'] ?>/5</span>
+                        <span class="text-xs text-gray-400 ml-1"><?= localizeNumber($r['rating']) ?>/<?= localizeNumber(5) ?></span>
                     </div>
                     <?php endif; ?>
                     <p class="text-xs text-gray-500 leading-relaxed italic">"<?= htmlspecialchars($r['message']) ?>"</p>

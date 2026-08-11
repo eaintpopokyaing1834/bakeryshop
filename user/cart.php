@@ -12,7 +12,7 @@ $subtotal = 0;
 if (!empty($cart)) {
     $ids  = implode(',', array_map('intval', array_keys($cart)));
     $rows = $db->query("
-        SELECT p.id, p.name, p.price, p.stock,
+        SELECT p.id, p.name, p.name_my, p.price, p.stock,
                d.name  AS discount_name,
                d.type  AS discount_type,
                d.value AS discount_value,
@@ -81,7 +81,7 @@ $grandTotal = $originalSubtotal - $totalSavings - $firstOrderDiscount;
 <div class="max-w-6xl mx-auto px-6 py-10">
     <div class="flex items-center gap-3 mb-8">
         <h1 class="text-3xl font-bold text-gray-800"><?= __('cart_heading') ?></h1>
-        <span id="cartCountText" class="bg-rose-50 text-rose-600 text-sm font-semibold px-3 py-1 rounded-full"><?= sprintf(__('cart_items'), count($cartProducts), count($cartProducts) !== 1 ? 's' : '') ?></span>
+        <span id="cartCountText" class="bg-rose-50 text-rose-600 text-sm font-semibold px-3 py-1 rounded-full"><?= __('cart_items', localizeNumber(count($cartProducts)), count($cartProducts) !== 1 ? 's' : '') ?></span>
     </div>
 
     <?php if (empty($cartProducts)): ?>
@@ -111,17 +111,17 @@ $grandTotal = $originalSubtotal - $totalSavings - $firstOrderDiscount;
                     </div>
 
                     <div class="flex-1 min-w-0 pr-6 sm:pr-0">
-                        <h3 class="font-bold text-gray-800 mb-1 line-clamp-2 sm:line-clamp-1"><?= htmlspecialchars($item['name']) ?></h3>
+                        <h3 class="font-bold text-gray-800 mb-1 line-clamp-2 sm:line-clamp-1"><?= htmlspecialchars(getLocalizedProductName($item)) ?></h3>
                         <p class="text-rose-500 font-semibold text-sm"><?= formatPrice($item['price']) ?> <?= __('cart_each') ?></p>
                     </div>
                 </div>
 
                 <div class="flex items-center justify-between w-full sm:w-auto gap-4">
                     <div class="flex items-center gap-2">
-                        <button onclick="updateQty(<?= $item['id'] ?>, parseInt(document.getElementById('qty-<?= $item['id'] ?>').textContent) - 1, <?= $item['stock'] ?>)"
+                        <button onclick="updateQty(<?= $item['id'] ?>, parseInt(document.getElementById('qty-<?= $item['id'] ?>').dataset.qty) - 1, <?= $item['stock'] ?>)"
                             class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold flex items-center justify-center transition-colors">−</button>
-                        <span class="w-10 text-center font-bold text-gray-800" id="qty-<?= $item['id'] ?>"><?= $item['qty'] ?></span>
-                        <button onclick="updateQty(<?= $item['id'] ?>, parseInt(document.getElementById('qty-<?= $item['id'] ?>').textContent) + 1, <?= $item['stock'] ?>)"
+                        <span class="w-10 text-center font-bold text-gray-800" id="qty-<?= $item['id'] ?>" data-qty="<?= $item['qty'] ?>"><?= localizeNumber($item['qty']) ?></span>
+                        <button onclick="updateQty(<?= $item['id'] ?>, parseInt(document.getElementById('qty-<?= $item['id'] ?>').dataset.qty) + 1, <?= $item['stock'] ?>)"
                             class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold flex items-center justify-center transition-colors">+</button>
                     </div>
 
@@ -148,20 +148,20 @@ $grandTotal = $originalSubtotal - $totalSavings - $firstOrderDiscount;
                     <?php foreach ($cartProducts as $item):
                         $imgSrc = $item['primary_image'] ? '/sweetheaven/'.$item['primary_image'] : '/sweetheaven/images/maincake.jpg';
                         $discountLabel = '';
-                        if (!empty($item['discount_name'])) {
-                            $discountLabel = ' (' . htmlspecialchars($item['discount_name']) . ')';
+                        if (!empty($item['discount_value'])) {
+                            $discountLabel = ' (' . htmlspecialchars(getLocalizedDiscountLabel($item)) . ')';
                         }
                     ?>
                     <div class="flex items-center gap-3" id="summary-item-<?= $item['id'] ?>"
                          data-unit-price="<?= $item['price'] ?>"
-                         data-discount-label="<?= $discountLabel ?>">
+                         data-discount-label="<?= htmlspecialchars($discountLabel) ?>">
                         <div class="w-12 h-12 rounded-xl overflow-hidden bg-rose-50 shrink-0">
-                            <img src="<?= htmlspecialchars($imgSrc) ?>" class="w-full h-full object-cover" alt="<?= htmlspecialchars($item['name']) ?>">
+                            <img src="<?= htmlspecialchars($imgSrc) ?>" class="w-full h-full object-cover" alt="<?= htmlspecialchars(getLocalizedProductName($item)) ?>">
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-700 line-clamp-1"><?= htmlspecialchars($item['name']) ?></p>
+                            <p class="text-sm font-medium text-gray-700 line-clamp-1"><?= htmlspecialchars(getLocalizedProductName($item)) ?></p>
                             <p class="text-xs text-gray-400">
-                                <span id="summary-price-<?= $item['id'] ?>"><?= formatPrice($item['price']) ?> × <?= $item['qty'] ?></span><?= $discountLabel ?>
+                                <span id="summary-price-<?= $item['id'] ?>"><?= formatPrice($item['price']) ?> × <?= localizeNumber($item['qty']) ?></span><?= $discountLabel ?>
                             </p>
                         </div>
                         <div class="text-right shrink-0">
@@ -248,7 +248,7 @@ function recalcSavings() {
     let total = 0;
     document.querySelectorAll('#cartItemsContainer > div[data-savings-per-unit]').forEach(row => {
         const id  = row.id.replace('cart-item-', '');
-        const qty = parseInt(document.getElementById('qty-' + id)?.textContent) || 0;
+        const qty = parseInt(document.getElementById('qty-' + id)?.dataset.qty) || 0;
         total    += (parseFloat(row.dataset.savingsPerUnit) || 0) * qty;
     });
     return total;
@@ -299,7 +299,10 @@ function updateQty(productId, newQty, maxStock) {
             // Update left-side cart item
             const qtyEl = document.getElementById(`qty-${productId}`);
             const subEl = document.getElementById(`subtotal-${productId}`);
-            if (qtyEl) qtyEl.textContent = newQty;
+            if (qtyEl) {
+                qtyEl.dataset.qty = newQty;
+                qtyEl.textContent = window.localizeNumberJS ? window.localizeNumberJS(newQty) : newQty;
+            }
             if (subEl) subEl.textContent = formatPriceJS(data.cart_item.price * newQty);
 
             // Update right-side order summary item
@@ -308,7 +311,10 @@ function updateQty(productId, newQty, maxStock) {
                 const unitPrice = parseFloat(summaryItem.dataset.unitPrice) || 0;
                 const summaryPriceEl = document.getElementById(`summary-price-${productId}`);
                 const summaryTotalEl = document.getElementById(`summary-total-${productId}`);
-                if (summaryPriceEl) summaryPriceEl.textContent = `${formatPriceJS(unitPrice)} × ${newQty}`;
+                if (summaryPriceEl) {
+                    let summaryQty = window.localizeNumberJS ? window.localizeNumberJS(newQty) : newQty;
+                    summaryPriceEl.textContent = `${formatPriceJS(unitPrice)} × ${summaryQty}`;
+                }
                 if (summaryTotalEl) summaryTotalEl.textContent = formatPriceJS(unitPrice * newQty);
             }
         }
@@ -345,7 +351,9 @@ function updateCartCountText() {
     const el = document.getElementById('cartCountText');
     if (!el) return;
     const count = document.querySelectorAll('#cartItemsContainer > div').length;
-    el.textContent = count + ' item' + (count !== 1 ? 's' : '');
+    let itemsStr = '<?= addslashes(__('cart_items', '%d', '%s')) ?>';
+    let locCount = window.localizeNumberJS ? window.localizeNumberJS(count) : count;
+    el.textContent = itemsStr.replace('%d', locCount).replace('%s', count !== 1 ? 's' : '');
 }
 </script>
 </body>

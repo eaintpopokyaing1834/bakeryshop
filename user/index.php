@@ -572,7 +572,7 @@ if ($isLoggedIn) {
                             <!-- Badge -->
                             <?php if ($hasDiscount): ?>
                                 <div class="absolute top-0 left-0 bg-rose-500 text-white text-xs font-bold px-3 py-1 rounded-br-lg shadow-md">
-                                    <?= htmlspecialchars($product['discount_name']) ?>
+                                    <?= htmlspecialchars(getLocalizedDiscountLabel($product)) ?>
                                 </div>
                             <?php elseif ($product['stock'] < 5): ?>
                                 <div class="absolute top-0 left-0 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-br-lg shadow-md">
@@ -854,7 +854,7 @@ if ($isLoggedIn) {
                         <!-- Giant percentage -->
                         <div class="mb-3">
                             <span class="block text-gray-800 text-3xl font-black uppercase tracking-wide leading-tight mb-1"><?= __('discount_up_to') ?></span>
-                            <span class="block font-black text-[clamp(5rem,10vw,7rem)] text-[#e8746a] leading-none drop-shadow-md">15%</span>
+                            <span class="block font-black text-[clamp(5rem,10vw,7rem)] text-[#e8746a] leading-none drop-shadow-md"><?= localizeNumber('15') ?>%</span>
                             <span class="block text-gray-800 text-[clamp(2rem,4vw,3rem)] font-black uppercase tracking-tight leading-tight mt-1"><?= __('discount_off') ?></span>
                         </div>
 
@@ -970,9 +970,7 @@ if ($isLoggedIn) {
                         $dpFinalPrice = $dp['discount_type'] === 'percentage'
                             ? $dp['price'] * (1 - $dp['discount_value'] / 100)
                             : max(0, $dp['price'] - $dp['discount_value']);
-                        $dpBadgeLabel = $dp['discount_type'] === 'percentage'
-                            ? sprintf(__('discount_percent_off'), currentLang() === 'my' ? convertToMyanmarDigits((int) $dp['discount_value']) : (int) $dp['discount_value'])
-                            : sprintf(__('discount_mmk_off'), currentLang() === 'my' ? convertToMyanmarDigits(number_format($dp['discount_value'])) : number_format($dp['discount_value']));
+                        $dpBadgeLabel = getLocalizedDiscountLabel($dp);
                         ?>
                         <?php
                             $dpExtraImgs  = array_filter(explode('|', $dp['extra_images'] ?? ''));

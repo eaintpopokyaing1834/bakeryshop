@@ -101,3 +101,43 @@ function formatPrice($amount): string {
     }
     return $formatted . ' MMK';
 }
+
+/**
+ * Localize a number to Myanmar digits if current language is 'my'
+ */
+function localizeNumber($number): string {
+    if (currentLang() === 'my') {
+        return convertToMyanmarDigits($number);
+    }
+    return (string)$number;
+}
+
+/**
+ * Localize a date/time string. 
+ */
+function localizeDate($dateString, $format = 'M j, Y g:i A'): string {
+    if (!$dateString) return '';
+    $timestamp = strtotime($dateString);
+    $formatted = date($format, $timestamp);
+    if (currentLang() === 'my') {
+        return convertToMyanmarDigits($formatted);
+    }
+    return $formatted;
+}
+
+/**
+ * Format a discount label dynamically
+ */
+function getLocalizedDiscountLabel($product): string {
+    if (empty($product['discount_type']) || empty($product['discount_value'])) {
+        return $product['discount_name'] ?? '';
+    }
+    
+    if ($product['discount_type'] === 'percentage') {
+        $val = currentLang() === 'my' ? convertToMyanmarDigits((int) $product['discount_value']) : (int) $product['discount_value'];
+        return sprintf(__('discount_percent_off'), $val);
+    } else {
+        $val = currentLang() === 'my' ? convertToMyanmarDigits(number_format($product['discount_value'])) : number_format($product['discount_value']);
+        return sprintf(__('discount_mmk_off'), $val);
+    }
+}

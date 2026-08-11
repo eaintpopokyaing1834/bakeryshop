@@ -223,7 +223,7 @@ if ($isLoggedIn && !$isAdmin) {
                         </button>
                         <?php if ($hasDiscount): ?>
                         <div class="absolute top-3 left-3 bg-gradient-to-r from-green-400 to-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
-                            <?= htmlspecialchars($product['discount_name']) ?>
+                            <?= htmlspecialchars(getLocalizedDiscountLabel($product)) ?>
                         </div>
                         <?php endif; ?>
                         <?php if ($product['stock'] === 0): ?>

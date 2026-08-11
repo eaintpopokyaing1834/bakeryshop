@@ -200,7 +200,7 @@ if ($customizeRequest) {
     // Build cart items from DB
     $ids = implode(',', array_map('intval', array_keys($cart)));
     $items = $db->query("
-        SELECT p.id, p.name, p.price,
+        SELECT p.id, p.name, p.name_my, p.price,
                d.name AS discount_name, d.type AS discount_type, d.value AS discount_value,
                (SELECT image_url FROM product_images WHERE product_id=p.id AND is_primary=1 LIMIT 1) AS primary_image
         FROM products p
@@ -462,8 +462,8 @@ if ($customizeRequest) {
                             <?php foreach ($cartDetails as $item):
                                 $imgSrc = $item['primary_image'] ? '/sweetheaven/' . $item['primary_image'] : '/sweetheaven/images/maincake.jpg';
                                 $discountLabel = '';
-                                if (!empty($item['discount_name_display'])) {
-                                    $discountLabel = ' (' . htmlspecialchars($item['discount_name_display']) . ')';
+                                if (!empty($item['discount_value'])) {
+                                    $discountLabel = ' (' . htmlspecialchars(getLocalizedDiscountLabel($item)) . ')';
                                 }
                             ?>
                                 <div class="flex items-center gap-3">
@@ -472,10 +472,10 @@ if ($customizeRequest) {
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <p class="text-sm font-medium text-gray-700 line-clamp-1">
-                                            <?= htmlspecialchars($item['name']) ?>
+                                            <?= htmlspecialchars(getLocalizedProductName($item)) ?>
                                         </p>
                                         <p class="text-xs text-gray-400">
-                                            <?= formatPrice($item['price']) ?> × <?= $item['qty'] ?><?= $discountLabel ?>
+                                            <?= formatPrice($item['price']) ?> × <?= localizeNumber($item['qty']) ?><?= $discountLabel ?>
                                         </p>
                                     </div>
                                     <div class="text-right shrink-0">
@@ -543,8 +543,8 @@ if ($customizeRequest) {
             const total = originalSubtotal - totalSavings - firstOrderDiscount + cost;
             const shippingEl = document.getElementById('shippingDisplay');
             const totalEl    = document.getElementById('totalDisplay');
-            shippingEl.textContent = cost === 0 ? label : cost.toLocaleString('en') + ' <?= __('common_mmk') ?>';
-            totalEl.textContent    = total > 0 ? total.toLocaleString('en') + ' <?= __('common_mmk') ?>' : '0 <?= __('common_mmk') ?>';
+            shippingEl.textContent = cost === 0 ? label : formatPriceJS(cost);
+            totalEl.textContent    = total > 0 ? formatPriceJS(total) : formatPriceJS(0);
         }
 
         document.querySelectorAll('input[name="shipping_method"]').forEach(radio => {

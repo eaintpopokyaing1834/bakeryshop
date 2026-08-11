@@ -35,17 +35,17 @@ $wishlist = $wishlist->fetchAll();
 
 <div class="max-w-6xl mx-auto px-6 py-10">
     <div class="flex items-center gap-3 mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">My Wishlist</h1>
-        <span id="wishlistCountText" class="bg-rose-50 text-rose-600 text-sm font-semibold px-3 py-1 rounded-full"><?= count($wishlist) ?> item<?= count($wishlist) !== 1 ? 's' : '' ?></span>
+        <h1 class="text-3xl font-bold text-gray-800"><?= __('wishlist_heading') ?></h1>
+        <span id="wishlistCountText" class="bg-rose-50 text-rose-600 text-sm font-semibold px-3 py-1 rounded-full"><?= __('wishlist_items', localizeNumber(count($wishlist)), count($wishlist) !== 1 ? 's' : '') ?></span>
     </div>
 
     <?php if (empty($wishlist)): ?>
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-20 text-center">
         <p class="text-6xl mb-6">❤️</p>
-        <h2 class="text-2xl font-bold text-gray-700 mb-3">Your wishlist is empty</h2>
-        <p class="text-gray-400 mb-8">Save items you love by clicking the heart icon on any product.</p>
+        <h2 class="text-2xl font-bold text-gray-700 mb-3"><?= __('wishlist_empty') ?></h2>
+        <p class="text-gray-400 mb-8"><?= __('wishlist_empty_desc') ?></p>
         <a href="/sweetheaven/user/products.php" class="bg-rose-500 hover:bg-rose-600 text-white px-8 py-4 rounded-2xl font-semibold transition-colors shadow-sm shadow-rose-100">
-            Explore Products
+            <?= __('wishlist_browse') ?>
         </a>
     </div>
     <?php else: ?>
@@ -62,7 +62,7 @@ $wishlist = $wishlist->fetchAll();
             </div>
             <div class="p-5">
                 <a href="/sweetheaven/user/product_detail.php?id=<?= $item['id'] ?>">
-                    <h3 class="font-bold text-gray-800 mb-1 hover:text-rose-500 transition-colors line-clamp-1"><?= htmlspecialchars($item['name']) ?></h3>
+                    <h3 class="font-bold text-gray-800 mb-1 hover:text-rose-500 transition-colors line-clamp-1"><?= htmlspecialchars(getLocalizedProductName($item)) ?></h3>
                 </a>
                 <div class="flex gap-0.5 mb-3">
                     <?php $stars = round($item['avg_rating']); for($s=1;$s<=5;$s++): ?>
@@ -72,12 +72,12 @@ $wishlist = $wishlist->fetchAll();
                 <div class="flex items-center justify-between">
                     <span class="text-lg font-bold text-rose-500"><?= formatPrice($item['price']) ?></span>
                     <?php if ($item['stock'] > 0): ?>
-                    <button onclick="addToCart(<?= $item['id'] ?>, '<?= addslashes($item['name']) ?>')"
+                    <button onclick="addToCart(<?= $item['id'] ?>, '<?= addslashes(getLocalizedProductName($item)) ?>')"
                         class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-full text-xs font-semibold transition-colors">
-                        Add to Cart
+                        <?= __('wishlist_add_cart') ?>
                     </button>
                     <?php else: ?>
-                    <span class="text-xs text-red-500 font-semibold">Out of Stock</span>
+                    <span class="text-xs text-red-500 font-semibold"><?= __('products_out_of_stock') ?></span>
                     <?php endif; ?>
                 </div>
             </div>
@@ -101,7 +101,15 @@ function addToCart(productId, name) {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `action=add&product_id=${productId}&qty=1`
     }).then(r=>r.json()).then(data=>{
-        if (data.success) { showToast(`${name} added to cart!`); const b=document.getElementById('cartBadge'); if(b){b.textContent=data.cart_count;b.classList.remove('hidden');} }
+        if (data.success) { 
+            const msg = '<?= addslashes(__('toast_added_to_cart', '%s')) ?>'.replace('%s', name);
+            showToast(msg); 
+            const b=document.getElementById('cartBadge'); 
+            if(b){
+                b.textContent=window.localizeNumberJS ? window.localizeNumberJS(data.cart_count) : data.cart_count;
+                b.classList.remove('hidden');
+            } 
+        }
     });
 }
 
@@ -113,10 +121,14 @@ function removeFromWishlist(productId, btn) {
     }).then(r=>r.json()).then(data=>{
         if (data.success) {
             document.getElementById(`wishlist-item-${productId}`)?.remove();
-            showToast('Removed from wishlist');
+            showToast('<?= addslashes(__('toast_removed_wishlist')) ?>');
             if (typeof updateWishlistBadge === 'function') updateWishlistBadge(data.wishlist_count);
             const countText = document.getElementById('wishlistCountText');
-            if (countText) countText.textContent = data.wishlist_count + ' item' + (data.wishlist_count !== 1 ? 's' : '');
+            if (countText) {
+                let itemsStr = '<?= addslashes(__('wishlist_items', '%d', '%s')) ?>';
+                let locCount = window.localizeNumberJS ? window.localizeNumberJS(data.wishlist_count) : data.wishlist_count;
+                countText.textContent = itemsStr.replace('%d', locCount).replace('%s', data.wishlist_count !== 1 ? 's' : '');
+            }
             if (data.wishlist_count === 0) {
                 const grid = document.querySelector('.grid');
                 if (grid) grid.remove();
@@ -124,9 +136,9 @@ function removeFromWishlist(productId, btn) {
                 const heading = container?.querySelector('.flex');
                 const emptyHtml = '<div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-20 text-center">' +
                     '<p class="text-6xl mb-6">❤️</p>' +
-                    '<h2 class="text-2xl font-bold text-gray-700 mb-3">Your wishlist is empty</h2>' +
-                    '<p class="text-gray-400 mb-8">Save items you love by clicking the heart icon on any product.</p>' +
-                    '<a href="/sweetheaven/user/products.php" class="bg-rose-500 hover:bg-rose-600 text-white px-8 py-4 rounded-2xl font-semibold transition-colors shadow-sm shadow-rose-100">Explore Products</a>' +
+                    '<h2 class="text-2xl font-bold text-gray-700 mb-3"><?= addslashes(__('wishlist_empty')) ?></h2>' +
+                    '<p class="text-gray-400 mb-8"><?= addslashes(__('wishlist_empty_desc')) ?></p>' +
+                    '<a href="/sweetheaven/user/products.php" class="bg-rose-500 hover:bg-rose-600 text-white px-8 py-4 rounded-2xl font-semibold transition-colors shadow-sm shadow-rose-100"><?= addslashes(__('wishlist_browse')) ?></a>' +
                     '</div>';
                 container?.insertAdjacentHTML('beforeend', emptyHtml);
             }

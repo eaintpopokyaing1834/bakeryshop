@@ -124,7 +124,7 @@ $reqStatusColors = [
                 </svg>
             </div>
             <div>
-                <h1 class="text-3xl font-bold text-gray-800"><?= __('customize_page_head') ?></h1>
+                <h1 class="text-2xl font-bold text-gray-800"><?= __('customize_page_head') ?></h1>
                 <p class="text-gray-400 text-sm"><?= __('customize_subtitle') ?></p>
             </div>
         </div>
