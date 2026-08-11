@@ -22,7 +22,7 @@ if (!$productId) {
 }
 
 $product = $db->prepare("
-    SELECT p.*, c.name AS category_name,
+    SELECT p.*, c.name AS category_name, c.name_my AS category_name_my,
            d.name AS discount_name, d.type AS discount_type, d.value AS discount_value
     FROM products p
     LEFT JOIN categories c ON p.category_id = c.id
@@ -84,7 +84,7 @@ $relatedProducts = $relatedProducts->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($product['name']) ?> — Sweet Heaven Bakery</title>
+    <title><?= htmlspecialchars(getLocalizedProductName($product)) ?> — Sweet Heaven Bakery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -123,9 +123,9 @@ $relatedProducts = $relatedProducts->fetchAll();
             <a href="/sweetheaven/user/products.php" class="hover:text-rose-500">Products</a>
             <span>/</span>
             <a href="/sweetheaven/user/products.php?category_id=<?= $product['category_id'] ?>"
-                class="hover:text-rose-500"><?= htmlspecialchars($product['category_name']) ?></a>
+                class="hover:text-rose-500"><?= htmlspecialchars(getLocalizedCategoryName($product, 'category_name', 'category_name_my')) ?></a>
             <span>/</span>
-            <span class="text-gray-600"><?= htmlspecialchars($product['name']) ?></span>
+            <span class="text-gray-600"><?= htmlspecialchars(getLocalizedProductName($product)) ?></span>
         </nav>
 
         <!-- Product Detail -->
@@ -150,7 +150,7 @@ $relatedProducts = $relatedProducts->fetchAll();
                         <img
                             id="pdMainImage"
                             src="<?= imgUrl($galleryImages[0]['image_url']) ?>"
-                            alt="<?= htmlspecialchars($product['name']) ?>"
+                            alt="<?= htmlspecialchars(getLocalizedProductName($product)) ?>"
                             class="w-full h-full object-cover transition-all duration-500 ease-in-out group-hover:scale-105">
 
                         <!-- Image counter badge (e.g. "1 / 3") -->
@@ -177,7 +177,7 @@ $relatedProducts = $relatedProducts->fetchAll();
                             style="width:80px; height:80px;">
                             <img
                                 src="<?= imgUrl($img['image_url']) ?>"
-                                alt="<?= htmlspecialchars($product['name']) ?> — view <?= $idx + 1 ?>"
+                                alt="<?= htmlspecialchars(getLocalizedProductName($product)) ?> — view <?= $idx + 1 ?>"
                                 class="w-full h-full object-cover transition-transform duration-300 group-hover/thumb:scale-110">
                         </button>
                         <?php endforeach; ?>
@@ -221,7 +221,7 @@ $relatedProducts = $relatedProducts->fetchAll();
 
                             <div class="flex items-center gap-2 mb-3 flex-wrap">
                                 <span
-                                    class="bg-rose-50 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full"><?= htmlspecialchars($product['category_name']) ?></span>
+                                    class="bg-rose-50 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full"><?= htmlspecialchars(getLocalizedCategoryName($product, 'category_name', 'category_name_my')) ?></span>
                                 <span
                                     class="<?= $product['stock'] > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' ?> text-xs font-semibold px-3 py-1 rounded-full">
                                     <?= $product['stock'] > 0 ? "In Stock ({$product['stock']})" : 'Out of Stock' ?>
@@ -245,7 +245,7 @@ $relatedProducts = $relatedProducts->fetchAll();
                             </div>
                         </div>
 
-                        <h1 class="text-3xl font-bold text-gray-800 mb-3"><?= htmlspecialchars($product['name']) ?></h1>
+                        <h1 class="text-3xl font-bold text-gray-800 mb-3"><?= htmlspecialchars(getLocalizedProductName($product)) ?></h1>
 
                         <!-- Rating summary -->
                         <div class="flex items-center gap-3 mb-4">
@@ -277,7 +277,7 @@ $relatedProducts = $relatedProducts->fetchAll();
                         </div>
 
                         <p class="text-gray-500 leading-relaxed mb-8">
-                            <?= nl2br(htmlspecialchars($product['description'])) ?>
+                            <?= nl2br(htmlspecialchars(getLocalizedProductDescription($product))) ?>
                         </p>
 
                         <!-- Qty + Actions -->
@@ -436,10 +436,10 @@ $relatedProducts = $relatedProducts->fetchAll();
                                 </div>
                             <?php endif; ?>
                             <img src="<?= htmlspecialchars($imgSrc) ?>" class="w-full h-60 object-cover"
-                                alt="<?= htmlspecialchars($rp['name']) ?>">
+                                alt="<?= htmlspecialchars(getLocalizedProductName($rp)) ?>">
                             <div class="p-4">
                                 <p class="font-semibold text-gray-700 text-sm mb-1 line-clamp-1">
-                                    <?= htmlspecialchars($rp['name']) ?>
+                                    <?= htmlspecialchars(getLocalizedProductName($rp)) ?>
                                 </p>
                                 <p class="text-rose-500 font-bold text-sm">
                                     <?php if ($rpDiscount): ?>

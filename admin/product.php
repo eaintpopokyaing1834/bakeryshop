@@ -71,20 +71,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_product'])) {
     $id = (int) ($_POST['product_id'] ?? 0);
     $name = trim($_POST['name']);
+    $name_my = trim($_POST['name_my'] ?? '');
     $category_id = (int) $_POST['category_id'];
     $price = (float) $_POST['price'];
     $stock = (int) $_POST['stock'];
     $description = trim($_POST['description']);
+    $description_my = trim($_POST['description_my'] ?? '');
 
     $discount_id = !empty($_POST['discount_id']) ? (int)$_POST['discount_id'] : null;
 
     if ($id > 0) {
-        $db->prepare("UPDATE products SET name=?,category_id=?,price=?,discount_id=?,stock=?,description=?,updated_at=NOW() WHERE id=?")
-            ->execute([$name, $category_id, $price, $discount_id, $stock, $description, $id]);
+        $db->prepare("UPDATE products SET name=?,name_my=?,category_id=?,price=?,discount_id=?,stock=?,description=?,description_my=?,updated_at=NOW() WHERE id=?")
+            ->execute([$name, $name_my, $category_id, $price, $discount_id, $stock, $description, $description_my, $id]);
         $productId = $id;
     } else {
-        $db->prepare("INSERT INTO products (name,category_id,price,discount_id,stock,description) VALUES (?,?,?,?,?,?)")
-            ->execute([$name, $category_id, $price, $discount_id, $stock, $description]);
+        $db->prepare("INSERT INTO products (name,name_my,category_id,price,discount_id,stock,description,description_my) VALUES (?,?,?,?,?,?,?,?)")
+            ->execute([$name, $name_my, $category_id, $price, $discount_id, $stock, $description, $description_my]);
         $productId = $db->lastInsertId();
     }
 
@@ -387,6 +389,11 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     <input type="text" name="name" id="productName" required placeholder="<?= __('product_ph_name') ?>"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                 </div>
+                <div class="col-span-2">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_name') ?> (Myanmar)</label>
+                    <input type="text" name="name_my" id="productNameMy" placeholder="အမည် (မြန်မာ)"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
+                </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_category') ?> *</label>
                     <select name="category_id" id="productCategory" required
@@ -419,6 +426,11 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 <div class="col-span-2">
                     <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_desc') ?></label>
                     <textarea name="description" id="productDescription" rows="3" placeholder="<?= __('product_ph_desc') ?>"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"></textarea>
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_desc') ?> (Myanmar)</label>
+                    <textarea name="description_my" id="productDescriptionMy" rows="3" placeholder="ဖော်ပြချက် (မြန်မာ)"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"></textarea>
                 </div>
                 <div class="col-span-2" id="existingImagesSection" style="display:none;">
@@ -651,11 +663,13 @@ require_once __DIR__ . '/../includes/admin_header.php';
     function openProductModal(data = null) {
         document.getElementById('productId').value = data ? data.id : 0;
         document.getElementById('productName').value = data ? data.name : '';
+        document.getElementById('productNameMy').value = data ? (data.name_my || '') : '';
         document.getElementById('productCategory').value = data ? data.category_id : '';
         document.getElementById('productPrice').value = data ? data.price : '';
         document.getElementById('productStock').value = data ? data.stock : '';
         document.getElementById('productDiscount').value = data ? (data.discount_id || '') : '';
         document.getElementById('productDescription').value = data ? (data.description || '') : '';
+        document.getElementById('productDescriptionMy').value = data ? (data.description_my || '') : '';
         document.getElementById('productModalTitle').textContent = data ? T.editProduct : T.addProduct;
         resetUploadZone();
         // Hide existing images section for new products

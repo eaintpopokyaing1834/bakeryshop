@@ -386,7 +386,7 @@ return [
     'common_out_of_stock'  => 'မရှိတော့ပါ',
     'common_only_left'     => '%d ခုသာ ကျန်',
     'common_low_stock'     => 'နည်းနေပြီ',
-    'common_add_cart'      => '+ တောင်း',
+    'common_add_cart'      => 'ခြင်းတောင်းထဲထည့်မည်',
 
     // ── Discount Section (Index) ─────────────────────────
     'discount_section_label'    => 'အထူးလျှော့စျေးများ',

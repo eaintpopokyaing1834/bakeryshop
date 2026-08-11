@@ -16,7 +16,7 @@ $discounted = (int)($_GET['discounted'] ?? 0);
 $where  = ["1=1"]; // Show all products including out-of-stock (card UI shows "Out of Stock" overlay)
 $params = [];
 if ($categoryId > 0) { $where[] = "p.category_id = ?"; $params[] = $categoryId; }
-if ($search !== '') { $where[] = "(p.name LIKE ? OR p.description LIKE ?)"; $params[] = "%$search%"; $params[] = "%$search%"; }
+if ($search !== '') { $where[] = "(p.name LIKE ? OR p.description LIKE ? OR p.name_my LIKE ? OR p.description_my LIKE ?)"; $params[] = "%$search%"; $params[] = "%$search%"; $params[] = "%$search%"; $params[] = "%$search%"; }
 if ($minPrice > 0) { $where[] = "p.price >= ?"; $params[] = $minPrice; }
 if ($maxPrice < 999999) { $where[] = "p.price <= ?"; $params[] = $maxPrice; }
 if ($discounted) { $where[] = "p.discount_id IS NOT NULL"; }
@@ -153,9 +153,14 @@ if ($isLoggedIn && !$isAdmin) {
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                 <div>
                     <h1 class="font-bold text-gray-800 text-lg">
-                        <?= $currentCategory ? htmlspecialchars($currentCategory) : ($search ? "Search: \"$search\"" : 'All Products') ?>
+                        <?= $currentCategory ? htmlspecialchars($currentCategory) : ($search ? "Search: \"$search\"" : (currentLang() === 'my' ? 'ထုတ်ကုန်အားလုံး' : 'All Products')) ?>
                     </h1>
-                    <p class="text-sm text-gray-400"><?=  currentLang() === 'my' ? 'ထုတ်ကုန် ' . count($products) . ' ခု တွေ့ရှိသည်' :  ' product' . (count($products) !== 1 ? 's' : '') . ' found' ?></p>
+                    <p class="text-sm text-gray-400"><?php 
+                        $count = count($products);
+                        echo currentLang() === 'my' 
+                            ? 'ထုတ်ကုန် ' . convertToMyanmarDigits($count) . ' ခုတွေ့ရှိသည်' 
+                            : $count . ' product' . ($count !== 1 ? 's' : '') . ' found';
+                    ?></p>
                 </div>
                 <div class="flex items-center gap-3">
                     <form method="GET" class="flex items-center gap-3">
@@ -210,7 +215,7 @@ if ($isLoggedIn && !$isAdmin) {
                 ?>
                 <div class="product-card group bg-white rounded-2xl border border-gray-100 overflow-hidden transition-all duration-500 shadow-md cursor-pointer flex flex-col h-full">
                     <div class="relative overflow-hidden bg-gradient-to-br from-rose-50 to-amber-50 aspect-[4/3]">
-                        <img src="<?= htmlspecialchars($imgSrc) ?>" alt="<?= htmlspecialchars($product['name']) ?>"
+                        <img src="<?= htmlspecialchars($imgSrc) ?>" alt="<?= htmlspecialchars(getLocalizedProductName($product)) ?>"
                              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
                         <button onclick="event.stopPropagation(); toggleWishlist(<?= $product['id'] ?>, this)"
                             class="absolute top-3 right-3 w-9 h-9 rounded-full <?= $isWished ? 'bg-rose-500 text-white' : 'bg-white/90 text-gray-400' ?> shadow-md flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all duration-200 backdrop-blur-sm">
@@ -235,7 +240,7 @@ if ($isLoggedIn && !$isAdmin) {
                         <p class="text-xs font-semibold uppercase tracking-wider text-rose-400 mb-1"><?= htmlspecialchars(getLocalizedCategoryName($product, 'category_name', 'category_name_my') ?: 'Uncategorized') ?></p>
 
                         <a href="/sweetheaven/user/product_detail.php?id=<?= $product['id'] ?>" onclick="event.stopPropagation()">
-                            <h3 class="font-bold text-gray-800 text-base hover:text-rose-500 transition-colors mb-3 line-clamp-2"><?= htmlspecialchars($product['name']) ?></h3>
+                            <h3 class="font-bold text-gray-800 text-base hover:text-rose-500 transition-colors mb-3 line-clamp-2"><?= htmlspecialchars(getLocalizedProductName($product)) ?></h3>
                         </a>
 
                         <div class="flex items-center justify-between pt-3 mt-auto border-t border-gray-50">
@@ -254,7 +259,7 @@ if ($isLoggedIn && !$isAdmin) {
                                     <?= __('products_view') ?>
                                 </a>
                                 <?php if ($product['stock'] > 0 && !$isAdmin): ?>
-                                <button onclick="event.stopPropagation(); addToCart(<?= $product['id'] ?>, '<?= addslashes($product['name']) ?>')"
+                                <button onclick="event.stopPropagation(); addToCart(<?= $product['id'] ?>, '<?= addslashes(getLocalizedProductName($product)) ?>')"
                                     class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-2 rounded-xl text-xs font-semibold transition-colors shadow-sm shadow-rose-200">
                                     <?= __('products_add_cart') ?>
                                 </button>
