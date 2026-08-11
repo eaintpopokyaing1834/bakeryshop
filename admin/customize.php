@@ -137,7 +137,7 @@ $statusColors = [
  <section class="px-4">
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-        <h3 class="font-bold text-gray-800"><?= __('customize_requests') ?> <span class="text-gray-400 font-normal text-sm ml-2">(<?= $totalRequests ?> <?= __('admin_total') ?>)</span></h3>
+        <h3 class="font-bold text-gray-800"><?= __('customize_requests') ?> <span class="text-gray-400 font-normal text-sm ml-2">(<?= localizeNumber($totalRequests) ?> <?= __('admin_total') ?>)</span></h3>
     </div>
 
     <div class="overflow-x-auto">
@@ -162,7 +162,7 @@ $statusColors = [
                 <?php else: ?>
                     <?php foreach ($requests as $req): ?>
                         <tr class="hover:bg-gray-50/50 transition-colors" id="request-row-<?= $req['id'] ?>">
-                            <td class="px-6 py-4 font-mono text-rose-500 font-bold text-sm">#<?= str_pad($req['id'], 4, '0', STR_PAD_LEFT) ?></td>
+                            <td class="px-6 py-4 font-mono text-rose-500 font-bold text-sm">#<?= localizeNumber(str_pad($req['id'], 4, '0', STR_PAD_LEFT)) ?></td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-8 h-8 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 font-bold text-sm">
@@ -179,13 +179,13 @@ $statusColors = [
                                 <p><span class="font-semibold"><?= __('customize_flavor_label') ?></span> <?= htmlspecialchars($req['flavor']) ?></p>
                                 <?php if ($req['color']): ?><p><span class="font-semibold"><?= __('customize_color_label') ?></span> <?= htmlspecialchars($req['color']) ?></p><?php endif; ?>
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-600"><?= date('M j, Y', strtotime($req['delivery_date'])) ?></td>
+                            <td class="px-6 py-4 text-sm text-gray-600"><?= localizeDate($req['delivery_date'], 'M j, Y') ?></td>
                             <td class="px-6 py-4">
                                 <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold <?= $statusColors[$req['status']] ?? 'bg-gray-100 text-gray-600' ?>">
                                     <?= ucfirst(__("status_{$req['status']}")) ?>
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-400"><?= date('M j, Y', strtotime($req['created_at'])) ?></td>
+                            <td class="px-6 py-4 text-sm text-gray-400"><?= localizeDate($req['created_at'], 'M j, Y') ?></td>
                             <td class="px-6 py-4">
                                 <button onclick="toggleRequestDetails(<?= $req['id'] ?>)"
                                     class="text-sm text-rose-500 hover:text-rose-600 font-medium flex items-center gap-1">
@@ -204,7 +204,7 @@ $statusColors = [
                                             <p><span class="font-semibold text-gray-600"><?= __('customize_flavor_label') ?></span> <?= htmlspecialchars($req['flavor']) ?></p>
                                             <?php if ($req['color']): ?><p><span class="font-semibold text-gray-600"><?= __('customize_color_theme') ?></span> <?= htmlspecialchars($req['color']) ?></p><?php endif; ?>
                                             <?php if ($req['cake_message']): ?><p><span class="font-semibold text-gray-600"><?= __('customize_message_label') ?></span> <?= htmlspecialchars($req['cake_message']) ?></p><?php endif; ?>
-                                            <p><span class="font-semibold text-gray-600"><?= __('customize_delivery_date') ?></span> <?= date('M j, Y', strtotime($req['delivery_date'])) ?></p>
+                                            <p><span class="font-semibold text-gray-600"><?= __('customize_delivery_date') ?></span> <?= localizeDate($req['delivery_date'], 'M j, Y') ?></p>
                                             <?php if ($req['additional_notes']): ?><p><span class="font-semibold text-gray-600"><?= __('customize_notes_label') ?></span> <?= htmlspecialchars($req['additional_notes']) ?></p><?php endif; ?>
                                             <?php if ($req['admin_price']): ?><p><span class="font-semibold text-gray-600"><?= __('customize_price_label') ?></span> <?= formatPrice($req['admin_price']) ?></p><?php endif; ?>
                                             <?php if ($req['admin_note']): ?><p><span class="font-semibold text-gray-600"><?= __('customize_admin_note_label') ?></span> <?= htmlspecialchars($req['admin_note']) ?></p><?php endif; ?>

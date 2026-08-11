@@ -213,7 +213,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden ">
         <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between ">
             <h3 class="font-bold text-gray-800"><?= __('product_all_products') ?> <span
-                    class="text-gray-400 font-normal text-sm ml-2">(<?= $totalProducts ?> total)</span></h3>
+                    class="text-gray-400 font-normal text-sm ml-2">(<?= localizeNumber($totalProducts) ?> <?= __('admin_total') ?>)</span></h3>
             <?php if ($isAdmin): ?>
             <button onclick="openProductModal()"
                 class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2">
@@ -240,7 +240,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 <tbody id="productTableBody" class="divide-y divide-gray-50">
                     <?php foreach ($products as $loopIdx => $p): ?>
                         <tr class="hover:bg-gray-50/50 transition-colors" data-product-id="<?= $p['id'] ?>">
-                            <td class="px-6 py-4 font-semibold text-gray-500 text-sm row-no"><?= $offset + $loopIdx + 1 ?></td>
+                            <td class="px-6 py-4 font-semibold text-gray-500 text-sm row-no"><?= localizeNumber($offset + $loopIdx + 1) ?></td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-12 h-12 rounded-xl overflow-hidden bg-rose-50 shrink-0">
@@ -262,9 +262,9 @@ require_once __DIR__ . '/../includes/admin_header.php';
                             <td class="px-6 py-4 text-sm text-gray-600"><?= htmlspecialchars(getLocalizedCategoryName($p, 'category_name', 'category_name_my')) ?></td>
                             <td class="px-6 py-4 font-bold text-gray-700 text-sm"><?= formatPrice($p['price']) ?></td>
                             <td class="px-6 py-4">
-                                <?php if ($p['discount_name']): ?>
+                                <?php if ($p['discount_type'] && $p['discount_value']): ?>
                                     <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-700">
-                                        <?= htmlspecialchars($p['discount_name']) ?>
+                                        <?= htmlspecialchars(getLocalizedDiscountLabel($p)) ?>
                                     </span>
                                 <?php else: ?>
                                     <span class="text-xs text-gray-400">—</span>
@@ -273,7 +273,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                             <td class="px-6 py-4">
                                 <span
                                     class="text-xs font-bold px-2.5 py-1 rounded-full <?= $p['stock'] < 10 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700' ?>">
-                                    <?= $p['stock'] ?>
+                                    <?= localizeNumber($p['stock']) ?>
                                 </span>
                             </td>
                             <td class="px-6 py-4">
@@ -319,7 +319,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <h3 class="font-bold text-gray-800"><?= __('product_all_categories') ?> <span
-                    class="text-gray-400 font-normal text-sm ml-2">(<?= count($categories) ?>)</span></h3>
+                    class="text-gray-400 font-normal text-sm ml-2">(<?= localizeNumber(count($categories)) ?> <?= __('admin_total') ?>)</span></h3>
             <?php if ($isAdmin): ?>
             <button onclick="openCategoryModal()"
                 class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2">
@@ -343,7 +343,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 <tbody class="divide-y divide-gray-50">
                     <?php foreach ($categories as $cat): ?>
                         <tr class="hover:bg-gray-50/50 transition-colors">
-                            <td class="px-6 py-4 font-mono text-gray-500 text-sm"><?= $cat['id'] ?></td>
+                            <td class="px-6 py-4 font-mono text-gray-500 text-sm"><?= localizeNumber($cat['id']) ?></td>
                             <td class="px-6 py-4 font-semibold text-gray-700 text-sm"><?= htmlspecialchars(getLocalizedCategoryName($cat)) ?></td>
                             <td class="px-6 py-4 text-sm text-gray-500">
                                 <?= htmlspecialchars(substr($cat['description'] ?? '', 0, 80)) ?></td>

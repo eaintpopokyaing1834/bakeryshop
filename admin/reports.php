@@ -318,9 +318,9 @@ function fetchReport() {
 
 // ── Update Summary Cards ─────────────────────────────
 function updateSummaryCards(data) {
-    document.getElementById('statOrders').textContent = data.total_orders.toLocaleString();
+    document.getElementById('statOrders').textContent = window.localizeJsNumber(data.total_orders.toLocaleString());
     document.getElementById('statRevenue').textContent = formatMMK(data.total_revenue);
-    document.getElementById('statProductsSold').textContent = data.total_products_sold.toLocaleString();
+    document.getElementById('statProductsSold').textContent = window.localizeJsNumber(data.total_products_sold.toLocaleString());
     document.getElementById('statTotalSales').textContent = formatMMK(data.total_revenue);
 }
 
@@ -393,9 +393,9 @@ function updateBestSellingTable(products) {
     }
     tbody.innerHTML = products.map((p, i) => `
         <tr class="hover:bg-gray-50 transition-colors">
-            <td class="px-6 py-4 text-sm text-gray-500">${i + 1}</td>
+            <td class="px-6 py-4 text-sm text-gray-500">${window.localizeJsNumber(i + 1)}</td>
             <td class="px-6 py-4 text-sm font-semibold text-gray-700">${escapeHtml(p.name)}</td>
-            <td class="px-6 py-4 text-sm text-gray-700">${parseInt(p.total_sold).toLocaleString()}</td>
+            <td class="px-6 py-4 text-sm text-gray-700">${window.localizeJsNumber(parseInt(p.total_sold).toLocaleString())}</td>
             <td class="px-6 py-4 text-sm font-semibold text-gray-700">${formatMMK(p.revenue)}</td>
         </tr>
     `).join('');
@@ -433,8 +433,8 @@ function updateStatusTable(statuses) {
                         ${status.charAt(0).toUpperCase() + status.slice(1)}
                     </span>
                 </td>
-                <td class="px-6 py-4 text-sm font-semibold text-gray-700">${count.toLocaleString()}</td>
-                <td class="px-6 py-4 text-sm text-gray-500">${pct}%</td>
+                <td class="px-6 py-4 text-sm font-semibold text-gray-700">${window.localizeJsNumber(count.toLocaleString())}</td>
+                <td class="px-6 py-4 text-sm text-gray-500">${window.localizeJsNumber(pct)}%</td>
             </tr>
         `;
     }).join('');
@@ -458,7 +458,7 @@ function updateOrdersTable(orders) {
 
     tbody.innerHTML = orders.map(o => `
         <tr class="hover:bg-gray-50 transition-colors">
-            <td class="px-6 py-4 font-mono text-sm text-gray-600">#${String(o.id).padStart(4, '0')}</td>
+            <td class="px-6 py-4 font-mono text-sm text-gray-600">#${window.localizeJsNumber(String(o.id).padStart(4, '0'))}</td>
             <td class="px-6 py-4">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 font-semibold text-sm">
@@ -473,7 +473,7 @@ function updateOrdersTable(orders) {
                     ${o.status.charAt(0).toUpperCase() + o.status.slice(1)}
                 </span>
             </td>
-            <td class="px-6 py-4 text-sm text-gray-400">${new Date(o.order_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+            <td class="px-6 py-4 text-sm text-gray-400">${window.localizeJsDate(o.order_date)}</td>
             <td class="px-6 py-4">
                 <a href="/sweetheaven/admin/order.php?highlight=${o.id}"
                    class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">

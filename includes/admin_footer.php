@@ -83,8 +83,8 @@
         }
     });
 
-    window.formatPriceJS = function(amount) {
-        let formatted = Number(amount).toLocaleString();
+    window.localizeJsNumber = function(amount) {
+        let formatted = String(amount);
         const currentLang = '<?= currentLang() ?>';
         if (currentLang === 'my') {
             const en = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -92,7 +92,30 @@
             for (let i = 0; i < 10; i++) {
                 formatted = formatted.split(en[i]).join(my[i]);
             }
-            return formatted + ' ကျပ်';
+        }
+        return formatted;
+    };
+
+    window.localizeJsDate = function(dateString) {
+        let d = new Date(dateString);
+        let formatted = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const currentLang = '<?= currentLang() ?>';
+        if (currentLang === 'my') {
+            const en_months_short = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const my_months_short = ['ဇန်', 'ဖေ', 'မတ်', 'ဧ', 'မေ', 'ဇွန်', 'ဇူ', 'ဩ', 'စက်', 'အောက်', 'နို', 'ဒီ'];
+            for (let i = 0; i < 12; i++) {
+                formatted = formatted.replace(en_months_short[i], my_months_short[i]);
+            }
+            return window.localizeJsNumber(formatted);
+        }
+        return formatted;
+    };
+
+    window.formatPriceJS = function(amount) {
+        let formatted = Number(amount).toLocaleString();
+        const currentLang = '<?= currentLang() ?>';
+        if (currentLang === 'my') {
+            return window.localizeJsNumber(formatted) + ' ကျပ်';
         }
         return formatted + ' MMK';
     };

@@ -87,7 +87,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     ?>
                         <tr>
                             <td>
-                                <span class="text-xs font-mono text-gray-400"><?= $serialNo++ ?></span>
+                                <span class="text-xs font-mono text-gray-400"><?= localizeNumber($serialNo++) ?></span>
                             </td>
                             <td>
                                 <div class="flex items-center gap-2.5">
@@ -105,7 +105,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                 <p class="text-sm text-gray-600 line-clamp-2 leading-relaxed"><?= htmlspecialchars($m['message']) ?></p>
                             </td>
                             <td>
-                                <span class="text-sm text-gray-400 whitespace-nowrap"><?= date('M j, Y', strtotime($m['created_at'])) ?></span>
+                                <span class="text-sm text-gray-400 whitespace-nowrap"><?= localizeDate($m['created_at'], 'M j, Y') ?></span>
                             </td>
                             <?php if ($role === 'admin'): ?>
                                 <td>
@@ -127,7 +127,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <!-- Pagination -->
     <?php if ($totalPages > 1): ?>
     <div class="pagination-wrap">
-        <p class="pagination-info"><?= sprintf(__('admin_page_of'), $page, $totalPages) ?></p>
+        <p class="pagination-info"><?= sprintf(__('admin_page_of'), localizeNumber($page), localizeNumber($totalPages)) ?></p>
         <div class="pagination-pills">
             <?php if ($page > 1): ?>
                 <a href="?page=<?= $page - 1 ?>" class="pg-btn pg-btn-nav">
@@ -136,7 +136,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 </a>
             <?php endif; ?>
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <a href="?page=<?= $i ?>" class="pg-btn <?= $i === $page ? 'pg-btn-active' : 'pg-btn-default' ?>"><?= $i ?></a>
+                <a href="?page=<?= $i ?>" class="pg-btn <?= $i === $page ? 'pg-btn-active' : 'pg-btn-default' ?>"><?= localizeNumber($i) ?></a>
             <?php endfor; ?>
             <?php if ($page < $totalPages): ?>
                 <a href="?page=<?= $page + 1 ?>" class="pg-btn pg-btn-nav">

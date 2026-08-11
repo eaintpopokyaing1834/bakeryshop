@@ -177,7 +177,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 <div class="flex items-center justify-between mb-6 px-4">
     <div>
         <h2 class="text-xl font-bold text-gray-800"><?= __('payment_heading') ?></h2>
-        <p class="text-sm text-gray-400 mt-0.5"><?= sprintf(__('payment_methods_count'), count($paymentMethods)) ?></p>
+        <p class="text-sm text-gray-400 mt-0.5"><?= sprintf(__('payment_methods_count'), localizeNumber(count($paymentMethods))) ?></p>
     </div>
     <?php if ($isAdmin): ?>
     <button onclick="openAddModal()"

@@ -53,7 +53,7 @@ $activeClass = "bg-white/60 text-rose-400 font-semibold sidebar-link-active";
             <?php if ($newOrdersCount > 0): ?>
                 <span
                     class="ml-auto bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30">
-                    <?= $newOrdersCount > 99 ? '99+' : $newOrdersCount ?>
+                    <?= $newOrdersCount > 99 ? localizeNumber('99+') : localizeNumber($newOrdersCount) ?>
                 </span>
             <?php endif; ?>
         </a>
@@ -81,7 +81,7 @@ $activeClass = "bg-white/60 text-rose-400 font-semibold sidebar-link-active";
             if ($pendingCustomizeCount > 0): ?>
                 <span
                     class="ml-auto bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30">
-                    <?= $pendingCustomizeCount > 99 ? '99+' : $pendingCustomizeCount ?>
+                    <?= $pendingCustomizeCount > 99 ? localizeNumber('99+') : localizeNumber($pendingCustomizeCount) ?>
                 </span>
             <?php endif; ?>
         </a>

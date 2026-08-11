@@ -190,10 +190,6 @@ $reqStatusColors = [
                                     <option value="Lemon"><?= __('customize_flavor_lemon') ?></option>
                                     <option value="Strawberry"><?= __('customize_flavor_strawberry') ?></option>
                                     <option value="Coffee"><?= __('customize_flavor_coffee') ?></option>
-                                    <option value="Matcha"><?= __('customize_flavor_matcha') ?></option>
-                                    <option value="Pandan"><?= __('customize_flavor_pandan') ?></option>
-                                    <option value="Mango"><?= __('customize_flavor_mango') ?></option>
-                                    <option value="Black Forest"><?= __('customize_flavor_black_forest') ?></option>
                                     <option value="Custom"><?= __('customize_flavor_custom') ?></option>
                                 </select>
                             </div>

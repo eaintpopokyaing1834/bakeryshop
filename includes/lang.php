@@ -117,9 +117,20 @@ function localizeNumber($number): string {
  */
 function localizeDate($dateString, $format = 'M j, Y g:i A'): string {
     if (!$dateString) return '';
-    $timestamp = strtotime($dateString);
+    $timestamp = is_numeric($dateString) ? (int)$dateString : strtotime($dateString);
     $formatted = date($format, $timestamp);
     if (currentLang() === 'my') {
+        $en_months_short = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $my_months_short = ['ဇန်', 'ဖေ', 'မတ်', 'ဧ', 'မေ', 'ဇွန်', 'ဇူ', 'ဩ', 'စက်', 'အောက်', 'နို', 'ဒီ'];
+        $en_months_long = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        $my_months_long = ['ဇန်နဝါရီ', 'ဖေဖော်ဝါရီ', 'မတ်', 'ဧပြီ', 'မေ', 'ဇွန်', 'ဇူလိုင်', 'ဩဂုတ်', 'စက်တင်ဘာ', 'အောက်တိုဘာ', 'နိုဝင်ဘာ', 'ဒီဇင်ဘာ'];
+        $en_ampm = ['AM', 'PM', 'am', 'pm'];
+        $my_ampm = ['နံနက်', 'ညနေ', 'နံနက်', 'ညနေ'];
+        
+        $formatted = str_replace($en_months_long, $my_months_long, $formatted);
+        $formatted = str_replace($en_months_short, $my_months_short, $formatted);
+        $formatted = str_replace($en_ampm, $my_ampm, $formatted);
+        
         return convertToMyanmarDigits($formatted);
     }
     return $formatted;
