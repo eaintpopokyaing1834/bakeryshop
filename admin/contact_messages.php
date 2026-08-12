@@ -23,7 +23,14 @@ $totalPages = max(1, (int) ceil($totalRows / $perPage));
 $page = min($page, $totalPages);
 $offset = ($page - 1) * $perPage;
 
-$messages = $db->prepare("SELECT * FROM feedback ORDER BY created_at DESC LIMIT $perPage OFFSET $offset");
+$messages = $db->prepare("
+    SELECT feedback.id AS id, feedback.message, feedback.created_at, 
+           users.name, users.email 
+    FROM feedback 
+    JOIN users ON feedback.user_id = users.id 
+    ORDER BY feedback.created_at DESC 
+    LIMIT $perPage OFFSET $offset
+");
 $messages->execute();
 $messages = $messages->fetchAll();
 
@@ -62,7 +69,6 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     <th><?= __('admin_table_no') ?? 'No.' ?></th>
                     <th><?= __('admin_customer') ?></th>
                     <th><?= __('review_col_email') ?></th>
-                    <th>Phone</th>
                     <th>Message</th>
                     <th><?= __('admin_date') ?></th>
                     <?php if ($role === 'admin'): ?>
@@ -73,7 +79,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <tbody>
                 <?php if (empty($messages)): ?>
                     <tr>
-                        <td colspan="<?= $role === 'admin' ? 7 : 6 ?>">
+                        <td colspan="<?= $role === 'admin' ? 6 : 5 ?>">
                             <div class="empty-state">
                                 <span class="empty-state-icon">📭</span>
                                 <p class="empty-state-text">No messages yet.</p>
@@ -97,9 +103,6 @@ require_once __DIR__ . '/../includes/admin_header.php';
                             </td>
                             <td>
                                 <a href="mailto:<?= htmlspecialchars($m['email']) ?>" class="text-sm text-blue-500 hover:text-blue-600 hover:underline"><?= htmlspecialchars($m['email']) ?></a>
-                            </td>
-                            <td>
-                                <span class="text-sm text-gray-500"><?= htmlspecialchars($m['phone'] ?: '—') ?></span>
                             </td>
                             <td class="max-w-xs">
                                 <p class="text-sm text-gray-600 line-clamp-2 leading-relaxed"><?= htmlspecialchars($m['message']) ?></p>

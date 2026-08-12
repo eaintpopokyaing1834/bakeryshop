@@ -100,6 +100,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         <table class="admin-table">
             <thead>
                 <tr>
+                    <th><?= __('admin_table_no') ?? 'No.' ?></th>
                     <th><?= __('admin_customer') ?></th>
                     <th><?= __('review_col_email') ?></th>
                     <th>Product</th>
@@ -112,7 +113,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <tbody>
                 <?php if (empty($reviews)): ?>
                     <tr>
-                        <td colspan="7">
+                        <td colspan="8">
                             <div class="empty-state">
                                 <span class="empty-state-icon">💬</span>
                                 <p class="empty-state-text"><?= __('review_no_reviews') ?></p>
@@ -120,8 +121,14 @@ require_once __DIR__ . '/../includes/admin_header.php';
                         </td>
                     </tr>
                 <?php else: ?>
-                    <?php foreach ($reviews as $r): ?>
+                    <?php 
+                    $serialNo = $offset + 1;
+                    foreach ($reviews as $r): 
+                    ?>
                         <tr>
+                            <td>
+                                <span class="text-xs font-mono text-gray-400"><?= localizeNumber($serialNo++) ?></span>
+                            </td>
                             <td>
                                 <div class="flex items-center gap-2.5">
                                     <div class="user-avatar"><?= strtoupper(substr($r['customer_name'], 0, 1)) ?></div>

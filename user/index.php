@@ -48,11 +48,12 @@ $latestProducts = $db->query("
 ")->fetchAll();
 
 $customerReviews = $db->query("
-    SELECT u.name, r.comment AS message, r.rating, MAX(r.created_at) as created_at
+    SELECT u.name, p.name AS product_name, r.comment AS message, r.rating, MAX(r.created_at) as created_at
     FROM reviews r
     JOIN users u ON r.user_id = u.id
+    LEFT JOIN products p ON r.product_id = p.id
     WHERE r.status='approved'
-    GROUP BY u.name, r.comment, r.rating
+    GROUP BY u.name, p.name, r.comment, r.rating
     ORDER BY created_at DESC
 ")->fetchAll();
 
@@ -1150,6 +1151,11 @@ if ($isLoggedIn) {
                                         <?php endfor; ?>
                                     </div>
                                 <?php endif; ?>
+                                <?php if (!empty($r['product_name'])): ?>
+                                    <p class="text-xs font-semibold text-rose-500 mb-2 truncate">
+                                        <?= htmlspecialchars($r['product_name']) ?>
+                                    </p>
+                                <?php endif; ?>
                                 <p class="text-gray-500 text-sm leading-7">"<?= htmlspecialchars($r['message']) ?>"</p>
                             </div>
                         </div>
@@ -1190,6 +1196,11 @@ if ($isLoggedIn) {
                                                     </svg>
                                                 <?php endfor; ?>
                                             </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($r['product_name'])): ?>
+                                            <p class="text-xs font-semibold text-rose-500 mb-2 truncate">
+                                                <?= htmlspecialchars($r['product_name']) ?>
+                                            </p>
                                         <?php endif; ?>
                                         <p class="text-gray-500 text-sm leading-7">"<?= htmlspecialchars($r['message']) ?>"</p>
                                     </div>
@@ -1241,39 +1252,40 @@ if ($isLoggedIn) {
                                             d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                                     </svg>
                                 </div>
-                                <p class="text-gray-700 font-bold text-base mb-1">Access Restricted</p>
+                                <p class="text-gray-700 font-bold text-base mb-1"><?= __('contact_us_restricted_title') ?></p>
                                 <p class="text-gray-500 text-sm leading-relaxed">
-                                    Admin and Cashier accounts are not allowed to send messages from this form.
+                                    <?= __('contact_us_restricted_desc') ?>
                                 </p>
                             </div>
+                        <?php elseif (!$isLoggedIn): ?>
+                            <!-- Guest: not logged in notice -->
+                            <div class="flex flex-col items-center justify-center text-center py-10 px-4">
+                                <div class="w-16 h-16 rounded-full bg-rose-100 flex items-center justify-center mb-4">
+                                    <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                </div>
+                                <p class="text-gray-700 font-bold text-lg mb-2"><?= __('contact_us_signin_title') ?></p>
+                                <p class="text-gray-500 text-sm leading-relaxed mb-6">
+                                    <?= __('contact_us_signin_desc') ?>
+                                </p>
+                                <a href="#" onclick="if(typeof openAuthModal==='function'){event.preventDefault(); openAuthModal('login');}" class="bg-[#e8746a] hover:bg-[#d4635a] text-white font-bold px-8 py-3 rounded-xl transition-all shadow-md hover:shadow-lg">
+                                    <?= __('contact_us_signin_btn') ?>
+                                </a>
+                            </div>
                         <?php else: ?>
-                            <!-- Form — visible to guests & customers -->
+                            <!-- Form — visible to logged-in customers -->
                             <form id="contactForm" class="space-y-5">
                                 <div class="grid sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2"><?= __('contact_us_name_label') ?> <span class="text-rose-400">*</span></label>
-                                        <input type="text" id="contactName" required
-                                            class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all <?= $isLoggedIn ? 'bg-gray-50 cursor-not-allowed' : '' ?>"
-                                            placeholder="<?= htmlspecialchars(__('contact_us_name_ph')) ?>"
-                                            value="<?= $isLoggedIn ? htmlspecialchars($currentUser['name'] ?? '') : '' ?>"
-                                            <?= $isLoggedIn ? 'readonly' : '' ?>>
+                                    <div class="bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+                                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1"><?= __('contact_us_name_label') ?></label>
+                                        <p class="text-sm font-semibold text-gray-700 truncate"><?= htmlspecialchars($currentUser['name'] ?? '') ?></p>
                                     </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2"><?= __('contact_us_email_label') ?> <span class="text-rose-400">*</span></label>
-                                        <input type="email" id="contactEmail" required
-                                            class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all <?= $isLoggedIn ? 'bg-gray-50 cursor-not-allowed' : '' ?>"
-                                            placeholder="<?= htmlspecialchars(__('contact_us_email_ph')) ?>"
-                                            value="<?= $isLoggedIn ? htmlspecialchars($currentUser['email'] ?? '') : '' ?>"
-                                            <?= $isLoggedIn ? 'readonly' : '' ?>>
+                                    <div class="bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+                                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1"><?= __('contact_us_email_label') ?></label>
+                                        <p class="text-sm font-semibold text-gray-700 truncate"><?= htmlspecialchars($currentUser['email'] ?? '') ?></p>
                                     </div>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2"><?= __('contact_us_phone_label') ?> <span class="text-gray-400 font-normal normal-case tracking-normal"><?= __('contact_us_phone_optional') ?></span></label>
-                                    <input type="tel" id="contactPhone" maxlength="11"
-                                        pattern="09[0-9]{9}"
-                                        title="<?= htmlspecialchars(__('checkout_err_phone')) ?>"
-                                        class="w-full px-4 py-3.5 rounded-xl bg-white border border-pink-200 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm transition-all"
-                                        placeholder="<?= htmlspecialchars(__('contact_us_phone_ph')) ?>">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2"><?= __('contact_us_message_label') ?> <span class="text-rose-400">*</span></label>
@@ -1345,20 +1357,10 @@ if ($isLoggedIn) {
             const submittingText = btn.dataset.submittingText || 'Sending...';
             const errTimeout    = <?= json_encode(__('contact_us_err_timeout')) ?>;
             const errGeneral    = <?= json_encode(__('contact_us_err_general')) ?>;
-            const errPhone      = <?= json_encode(__('checkout_err_phone')) ?>;
+            
             btn.disabled = true;
             btn.textContent = submittingText;
             msgBox.classList.add('hidden');
-
-            const phoneVal = document.getElementById('contactPhone').value.trim();
-            if (phoneVal !== '' && !/^09\d{9}$/.test(phoneVal)) {
-                msgBox.classList.remove('hidden');
-                msgBox.className = 'mt-5 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium';
-                msgBox.textContent = errPhone;
-                btn.disabled = false;
-                btn.textContent = submitText;
-                return;
-            }
 
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 30000);
@@ -1367,10 +1369,8 @@ if ($isLoggedIn) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
-                    name:    document.getElementById('contactName').value,
-                    email:   document.getElementById('contactEmail').value,
-                    phone:   document.getElementById('contactPhone').value,
                     message: document.getElementById('contactMessage').value
+
                 }),
                 signal: controller.signal
             })

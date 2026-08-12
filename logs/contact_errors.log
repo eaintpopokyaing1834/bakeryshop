@@ -6,3 +6,8 @@
 2026-08-05 17:12:05 | MAIL | PHP mail() also failed
 2026-08-05 18:54:39 | SMTP | smtpSend returned false
 2026-08-05 18:54:41 | MAIL | PHP mail() also failed
+2026-08-12 15:49:39 | DB | SQLSTATE[42S22]: Column not found: 1054 Unknown column 'phone' in 'field list'
+2026-08-12 15:49:45 | SMTP | smtpSend returned false
+2026-08-12 15:49:47 | MAIL | PHP mail() also failed
+2026-08-12 15:54:53 | SMTP | smtpSend returned false
+2026-08-12 15:54:55 | MAIL | PHP mail() also failed

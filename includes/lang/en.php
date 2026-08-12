@@ -456,6 +456,11 @@ return [
     'contact_us_error'        => 'Please fill in all required fields.',
     'contact_us_err_timeout'  => 'Request timed out. Please try again.',
     'contact_us_err_general'  => 'Something went wrong. Please try again.',
+    'contact_us_restricted_title' => 'Access Restricted',
+    'contact_us_restricted_desc'  => 'Admin and Cashier accounts are not allowed to send messages from this form.',
+    'contact_us_signin_title'     => 'Sign In to Send Feedback',
+    'contact_us_signin_desc'      => 'We\'d love to hear your thoughts! Please log in to your account to share your feedback with us.',
+    'contact_us_signin_btn'       => 'Log In Now',
 
     // ── Toast / JS Messages ──────────────────────────────
     'toast_added_to_cart' => '%s added to cart!',

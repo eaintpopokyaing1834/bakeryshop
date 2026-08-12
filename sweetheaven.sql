@@ -1,23 +1,23 @@
 -- ============================================================
---  Sweetheaven Bakery — Database Schema
+--  Sweetheaven Bakery â€” Database Schema
 --  Normal Form  : 3NF (Third Normal Form)
 --  Engine       : InnoDB
 --  Charset      : utf8mb4 / utf8mb4_unicode_ci
 --
 --  3NF VERIFICATION SUMMARY
---  ─────────────────────────────────────────────────────────
+--  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 --  All 14 tables satisfy 1NF, 2NF, and 3NF.
 --
---  KEY DECISION — shipping_method stays as ENUM:
+--  KEY DECISION â€” shipping_method stays as ENUM:
 --    A 3NF transitive dependency on shipping_method would only
 --    exist if orders stored a separate shipping_fee column:
---      order_id → shipping_method → shipping_fee  (violation)
+--      order_id â†’ shipping_method â†’ shipping_fee  (violation)
 --    There is NO shipping_fee column in orders. The fee is
 --    computed in PHP at checkout and folded into total_amount.
---    The ENUM stores only a label — not a dependent fact.
---    Therefore NO transitive dependency exists.  ENUM ✅ 3NF.
+--    The ENUM stores only a label â€” not a dependent fact.
+--    Therefore NO transitive dependency exists.  ENUM âœ… 3NF.
 --
---  JUSTIFIED EXCEPTION — orders.total_amount:
+--  JUSTIFIED EXCEPTION â€” orders.total_amount:
 --    Derivable from order_items, but kept as a historical
 --    snapshot (prices change over time). This is the standard
 --    accepted practice in financial/order systems.
@@ -29,7 +29,7 @@ CREATE DATABASE IF NOT EXISTS sweetheaven_db
 
 USE sweetheaven_db;
 
--- ────────────────────────────────────────────────────────────
+-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 --  TABLE CREATION ORDER (respects all FK dependencies)
 --
 --   1. users
@@ -46,15 +46,15 @@ USE sweetheaven_db;
 --  12. reviews
 --  13. notifications
 --  14. contact_messages
--- ────────────────────────────────────────────────────────────
+-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 -- ============================================================
 --  1. USERS
 --  Functional Dependencies:
---    id → name, email, password, role, status,
+--    id â†’ name, email, password, role, status,
 --          profile_image, created_at, updated_at
---  1NF ✅  2NF ✅  3NF ✅
+--  1NF âœ…  2NF âœ…  3NF âœ…
 -- ============================================================
 CREATE TABLE IF NOT EXISTS users (
     id            INT          AUTO_INCREMENT PRIMARY KEY,
@@ -74,8 +74,8 @@ CREATE TABLE IF NOT EXISTS users (
 -- ============================================================
 --  2. CATEGORIES
 --  Functional Dependencies:
---    id → name, description, image
---  1NF ✅  2NF ✅  3NF ✅
+--    id â†’ name, description, image
+--  1NF âœ…  2NF âœ…  3NF âœ…
 -- ============================================================
 CREATE TABLE IF NOT EXISTS categories (
     id          INT          AUTO_INCREMENT PRIMARY KEY,
@@ -88,8 +88,8 @@ CREATE TABLE IF NOT EXISTS categories (
 -- ============================================================
 --  3. DISCOUNTS
 --  Functional Dependencies:
---    id → name, type, value, status, created_at
---  1NF ✅  2NF ✅  3NF ✅
+--    id â†’ name, type, value, status, created_at
+--  1NF âœ…  2NF âœ…  3NF âœ…
 -- ============================================================
 CREATE TABLE IF NOT EXISTS discounts (
     id         INT           AUTO_INCREMENT PRIMARY KEY,
@@ -104,12 +104,12 @@ CREATE TABLE IF NOT EXISTS discounts (
 -- ============================================================
 --  4. PRODUCTS
 --  Functional Dependencies:
---    id → category_id (FK), name, price, discount_id (FK),
+--    id â†’ category_id (FK), name, price, discount_id (FK),
 --          stock, description, created_at, updated_at
---  category_id and discount_id are FK references — not
---  transitive dependencies — their details live in their own
+--  category_id and discount_id are FK references â€” not
+--  transitive dependencies â€” their details live in their own
 --  normalized tables.
---  1NF ✅  2NF ✅  3NF ✅
+--  1NF âœ…  2NF âœ…  3NF âœ…
 -- ============================================================
 CREATE TABLE IF NOT EXISTS products (
     id          INT           AUTO_INCREMENT PRIMARY KEY,
@@ -131,8 +131,8 @@ CREATE TABLE IF NOT EXISTS products (
 -- ============================================================
 --  5. PRODUCT IMAGES
 --  Functional Dependencies:
---    id → product_id (FK), image_url, is_primary, created_at
---  1NF ✅  2NF ✅  3NF ✅
+--    id â†’ product_id (FK), image_url, is_primary, created_at
+--  1NF âœ…  2NF âœ…  3NF âœ…
 -- ============================================================
 CREATE TABLE IF NOT EXISTS product_images (
     id         INT          AUTO_INCREMENT PRIMARY KEY,
@@ -148,8 +148,8 @@ CREATE TABLE IF NOT EXISTS product_images (
 -- ============================================================
 --  6. PAYMENT METHODS
 --  Functional Dependencies:
---    id → payment_name, acc_name, acc_no, qr_image, is_active
---  1NF ✅  2NF ✅  3NF ✅
+--    id â†’ payment_name, acc_name, acc_no, qr_image, is_active
+--  1NF âœ…  2NF âœ…  3NF âœ…
 -- ============================================================
 CREATE TABLE IF NOT EXISTS payment_methods (
     id           INT          AUTO_INCREMENT PRIMARY KEY,
@@ -164,11 +164,11 @@ CREATE TABLE IF NOT EXISTS payment_methods (
 -- ============================================================
 --  7. CUSTOMIZE REQUESTS
 --  Functional Dependencies:
---    id → user_id (FK), size, flavor, color, cake_message,
+--    id â†’ user_id (FK), size, flavor, color, cake_message,
 --          reference_image, delivery_date, additional_notes,
 --          status, admin_price, admin_note, created_at, updated_at
 --  All attributes describe this specific custom cake request.
---  1NF ✅  2NF ✅  3NF ✅
+--  1NF âœ…  2NF âœ…  3NF âœ…
 -- ============================================================
 CREATE TABLE IF NOT EXISTS customize_requests (
     id               INT           AUTO_INCREMENT PRIMARY KEY,
@@ -194,22 +194,22 @@ CREATE TABLE IF NOT EXISTS customize_requests (
 -- ============================================================
 --  8. ORDERS
 --  Functional Dependencies:
---    id → user_id (FK), customize_request_id (FK), phone,
+--    id â†’ user_id (FK), customize_request_id (FK), phone,
 --          order_date, request_note, shipping_method,
 --          shipping_address, total_amount*, status
 --
 --  WHY shipping_method stays as ENUM (not a 3NF violation):
 --    A transitive dependency would require a shipping_fee column
---    inside orders.  There is none — the fee is computed in PHP
+--    inside orders.  There is none â€” the fee is computed in PHP
 --    and absorbed into total_amount.  shipping_method is simply
---    an atomic label attribute of the order. ✅ 3NF
+--    an atomic label attribute of the order. âœ… 3NF
 --
 --  WHY total_amount is kept (justified exception):
---    total_amount = SUM(items × price) - discounts + fee.
+--    total_amount = SUM(items Ã— price) - discounts + fee.
 --    Product prices change over time, so this is a historical
 --    snapshot, not a purely derived value.  Keeping it is the
 --    accepted standard for financial order records.
---  1NF ✅  2NF ✅  3NF ✅
+--  1NF âœ…  2NF âœ…  3NF âœ…
 -- ============================================================
 CREATE TABLE IF NOT EXISTS orders (
     id                   INT           AUTO_INCREMENT PRIMARY KEY,
@@ -233,18 +233,18 @@ CREATE TABLE IF NOT EXISTS orders (
 -- ============================================================
 --  9. ORDER ITEMS
 --  Functional Dependencies:
---    id → order_id (FK), product_id (FK, nullable), quantity, price
+--    id â†’ order_id (FK), product_id (FK, nullable), quantity, price
 --
---  NOTE — price:
+--  NOTE â€” price:
 --    Stores the unit price AT TIME OF PURCHASE (snapshot).
 --    Not derived from products.price (which changes over time).
---    Directly dependent on this row's id. ✅ 3NF
+--    Directly dependent on this row's id. âœ… 3NF
 --
---  NOTE — product_id NULL:
+--  NOTE â€” product_id NULL:
 --    Custom cake orders have no linked product row.
 --    NULL is intentional (checkout.php inserts NULL product_id
 --    for custom cake line items).
---  1NF ✅  2NF ✅  3NF ✅
+--  1NF âœ…  2NF âœ…  3NF âœ…
 -- ============================================================
 CREATE TABLE IF NOT EXISTS order_items (
     id         INT           AUTO_INCREMENT PRIMARY KEY,
@@ -262,9 +262,9 @@ CREATE TABLE IF NOT EXISTS order_items (
 -- ============================================================
 --  10. PAYMENT
 --  Functional Dependencies:
---    id → order_id (FK), payment_method_id (FK), screenshot,
+--    id â†’ order_id (FK), payment_method_id (FK), screenshot,
 --          payment_date, status, paid_at
---  1NF ✅  2NF ✅  3NF ✅
+--  1NF âœ…  2NF âœ…  3NF âœ…
 -- ============================================================
 CREATE TABLE IF NOT EXISTS payment (
     id                INT          AUTO_INCREMENT PRIMARY KEY,
@@ -284,9 +284,9 @@ CREATE TABLE IF NOT EXISTS payment (
 -- ============================================================
 --  11. WISHLIST
 --  Functional Dependencies:
---    id → user_id (FK), product_id (FK), created_at
+--    id â†’ user_id (FK), product_id (FK), created_at
 --  Natural uniqueness enforced via UNIQUE KEY on (user_id, product_id).
---  1NF ✅  2NF ✅  3NF ✅
+--  1NF âœ…  2NF âœ…  3NF âœ…
 -- ============================================================
 CREATE TABLE IF NOT EXISTS wishlist (
     id         INT       AUTO_INCREMENT PRIMARY KEY,
@@ -302,11 +302,11 @@ CREATE TABLE IF NOT EXISTS wishlist (
 -- ============================================================
 --  12. REVIEWS
 --  Functional Dependencies:
---    id → user_id (FK), product_id (FK), rating,
+--    id â†’ user_id (FK), product_id (FK), rating,
 --          comment, status, created_at
 --  rating is an opinion about a specific product by a specific
---  user — not derivable from any other non-key attribute.
---  1NF ✅  2NF ✅  3NF ✅
+--  user â€” not derivable from any other non-key attribute.
+--  1NF âœ…  2NF âœ…  3NF âœ…
 -- ============================================================
 CREATE TABLE IF NOT EXISTS reviews (
     id         INT       AUTO_INCREMENT PRIMARY KEY,
@@ -326,9 +326,9 @@ CREATE TABLE IF NOT EXISTS reviews (
 -- ============================================================
 --  13. NOTIFICATIONS
 --  Functional Dependencies:
---    id → user_id (FK, nullable), order_id (FK, nullable),
+--    id â†’ user_id (FK, nullable), order_id (FK, nullable),
 --          type, title, message, is_seen, created_at
---  1NF ✅  2NF ✅  3NF ✅
+--  1NF âœ…  2NF âœ…  3NF âœ…
 -- ============================================================
 CREATE TABLE IF NOT EXISTS notifications (
     id         INT          AUTO_INCREMENT PRIMARY KEY,
@@ -347,20 +347,22 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 
 -- ============================================================
---  14. CONTACT MESSAGES
+--  14. FEEDBACK
 --  Functional Dependencies:
---    id → name, email, phone, message, is_read, created_at
+--    id →  user_id(FK,message, created_at
 --  1NF ✅  2NF ✅  3NF ✅
 -- ============================================================
-CREATE TABLE IF NOT EXISTS contact_messages (
-    id         INT          AUTO_INCREMENT PRIMARY KEY,
-    name       VARCHAR(120) NOT NULL,
-    email      VARCHAR(150) NOT NULL,
-    phone      VARCHAR(50)  DEFAULT NULL,
-    message    TEXT         NOT NULL,
-    is_read    TINYINT(1)   NOT NULL DEFAULT 0,
-    created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_contact_read (is_read)
+
+
+CREATE TABLE IF NOT EXISTS feedback (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  user_id int(11) NOT NULL,
+  message text NOT NULL,
+  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY fk_feedback_user (user_id),
+  CONSTRAINT fk_feedback_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -424,4 +426,3 @@ INSERT IGNORE INTO discounts (id, name, type, value, status) VALUES
 -- Payment methods
 INSERT IGNORE INTO payment_methods (id, payment_name, acc_name, acc_no, is_active) VALUES
     (1, 'KBZ Pay',  'Sweet Heaven Bakery', '09 4500 12345', 1),
-    (2, 'Wave Pay', 'Sweet Heaven Bakery', '09 7800 67890', 1);

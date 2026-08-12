@@ -37,46 +37,55 @@ $userRole = $_SESSION['role'] ?? '';
 if (in_array($userRole, ['admin', 'cashier'], true)) {
     jsonOut(false, 'Admins and Cashiers are not allowed to send messages from here.');
 }
+if (empty($_SESSION['user_id'])) {
+    jsonOut(false, 'You must be logged in to submit feedback.');
+}
 
 /* ── input ────────────────────────────────────────────────────────────── */
-$name    = trim($_POST['name']    ?? '');
-$email   = trim($_POST['email']   ?? '');
-$phone   = trim($_POST['phone']   ?? '');
 $message = trim($_POST['message'] ?? '');
+$userId  = (int) $_SESSION['user_id'];
 
 /* ── validation ───────────────────────────────────────────────────────── */
-if (empty($name) || empty($email) || empty($message)) {
-    jsonOut(false, 'Name, email, and message are required.');
-}
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    jsonOut(false, 'Please enter a valid email address.');
+if (empty($message)) {
+    jsonOut(false, 'Message is required.');
 }
 if (strlen($message) < 5) {
     jsonOut(false, 'Your message is too short.');
 }
-if ($phone !== '' && !preg_match('/^09\d{9}$/', $phone)) {
-    jsonOut(false, 'Please enter a valid Myanmar phone number (09XXXXXXXXX, 11 digits).');
-}
 
 /* ── DB: save message ─────────────────────────────────────────────────── */
 $dbSaved = false;
+$name = 'Customer';
+$email = '';
+$phone = '';
+
 try {
     require_once __DIR__ . '/../config/db.php';
     $db = getDB();
 
-    $db->exec("CREATE TABLE IF NOT EXISTS feedback (
-        id         INT AUTO_INCREMENT PRIMARY KEY,
-        name       VARCHAR(120)  NOT NULL,
-        email      VARCHAR(150)  NOT NULL,
-        phone      VARCHAR(50)   DEFAULT NULL,
-        message    TEXT          NOT NULL,
-        created_at TIMESTAMP     DEFAULT CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    // Fetch user details for email notification
+    $stmtUser = $db->prepare("SELECT name, email FROM users WHERE id = ?");
+    $stmtUser->execute([$userId]);
+    if ($u = $stmtUser->fetch()) {
+        $name = $u['name'];
+        $email = $u['email'];
+    }
+
+    $db->exec("CREATE TABLE IF NOT EXISTS `feedback` (
+      `id` int(11) NOT NULL AUTO_INCREMENT,
+      `user_id` int(11) NOT NULL,
+      `message` text NOT NULL,
+      `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+      `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (`id`),
+      KEY `fk_feedback_user` (`user_id`),
+      CONSTRAINT `fk_feedback_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
     $stmt = $db->prepare(
-        "INSERT INTO feedback (name, email, phone, message) VALUES (?, ?, ?, ?)"
+        "INSERT INTO feedback (user_id, message) VALUES (?, ?)"
     );
-    $stmt->execute([$name, $email, $phone, $message]);
+    $stmt->execute([$userId, $message]);
     $dbSaved = true;
 } catch (Throwable $e) {
     logError('DB', $e->getMessage());
