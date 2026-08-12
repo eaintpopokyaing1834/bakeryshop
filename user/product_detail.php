@@ -279,18 +279,8 @@ $relatedProducts = $relatedProducts->fetchAll();
                             <?= nl2br(htmlspecialchars(getLocalizedProductDescription($product))) ?>
                         </p>
 
-                        <!-- Qty + Actions -->
+                        <!-- Actions -->
                         <?php if ($product['stock'] > 0): ?>
-                            <div class="flex items-center gap-4 mb-4">
-                                <div class="flex items-center border border-gray-200 rounded-xl overflow-hidden">
-                                    <button onclick="changeQty(-1)"
-                                        class="px-4 py-3 text-gray-600 hover:bg-gray-100 transition-colors font-bold text-lg">−</button>
-                                    <input type="number" id="qty" value="1" min="1" max="<?= $product['stock'] ?>"
-                                        class="w-16 text-center border-none focus:outline-none text-gray-800 font-semibold py-3">
-                                    <button onclick="changeQty(1)"
-                                        class="px-4 py-3 text-gray-600 hover:bg-gray-100 transition-colors font-bold text-lg">+</button>
-                                </div>
-                            </div>
                             <?php if ($isCustomer): ?>
                                 <div class="flex gap-3 flex-wrap">
                                     <button onclick="addToCart(<?= $product['id'] ?>)"

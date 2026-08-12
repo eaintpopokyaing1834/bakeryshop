@@ -303,7 +303,7 @@ function updateQty(productId, newQty, maxStock) {
                 qtyEl.dataset.qty = newQty;
                 qtyEl.textContent = window.localizeNumberJS ? window.localizeNumberJS(newQty) : newQty;
             }
-            if (subEl) subEl.textContent = formatPriceJS(data.cart_item.price * newQty);
+            if (subEl) subEl.textContent = formatPriceJS(data.subtotal);
 
             // Update right-side order summary item
             const summaryItem = document.getElementById(`summary-item-${productId}`);

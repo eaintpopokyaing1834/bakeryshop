@@ -570,6 +570,12 @@ if ($isLoggedIn) {
                             </button>
                             <?php endif; ?>
 
+                            <?php if ($product['stock'] === 0): ?>
+                            <div class="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm">
+                                <span class="bg-red-600 text-white text-sm font-bold px-5 py-2 rounded-full shadow-lg"><?= __('products_out_of_stock') ?></span>
+                            </div>
+                            <?php endif; ?>
+
                             <!-- Badge -->
                             <?php if ($hasDiscount): ?>
                                 <div class="absolute top-0 left-0 bg-rose-500 text-white text-xs font-bold px-3 py-1 rounded-br-lg shadow-md">
@@ -610,7 +616,7 @@ if ($isLoggedIn) {
                                         border-[#e8746a] text-[#e8746a]">
                                         <?= __('common_view') ?>
                                     </a>
-                                    <?php if (!$isAdmin): ?>
+                                    <?php if (!$isAdmin && $product['stock'] > 0): ?>
                                         <button
                                             onclick="addToCart(<?= $product['id'] ?>, '<?= addslashes(getLocalizedProductName($product)) ?>')"
                                             class="bg-rose-400 flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-bold text-white transition-all duration-200 hover:opacity-90 shadow">

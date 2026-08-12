@@ -290,7 +290,7 @@ $statusColors = [
                                 <?php elseif ($order['pay_status'] === 'rejected'): ?>
                                     <span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-100 text-red-700"><?= __('order_payment_rejected') ?></span>
                                 <?php elseif ($order['pay_status'] === 'pending'): ?>
-                                    <span class="text-xs text-gray-400 italic"><?= __('order_awaiting_receipt') ?></span>
+                                    <span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-600">View Only</span>
                                 <?php endif; ?>
                             <?php else: ?>
                                 <?php if ($order['pay_status'] === 'pending' && !empty($order['screenshot'])): ?>
