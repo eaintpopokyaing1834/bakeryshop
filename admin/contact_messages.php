@@ -46,11 +46,11 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <div class="section-card-header">
         <div>
             <h3><?= __('admin_nav_contact_messages') ?></h3>
-            <p class="sub"><?= $totalRows ?> <?= __('admin_total') ?? 'total messages' ?></p>
+            <p class="sub"><?= localizeNumber($totalRows) ?> <?= __('admin_total') ?? 'total messages' ?></p>
         </div>
         <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-            <?= $totalRows ?> messages
+            <?= localizeNumber($totalRows) ?> <?= __('admin_total') ?? 'messages' ?>
         </span>
     </div>
 
@@ -59,7 +59,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th><?= __('admin_table_no') ?? 'No.' ?></th>
                     <th><?= __('admin_customer') ?></th>
                     <th><?= __('review_col_email') ?></th>
                     <th>Phone</th>

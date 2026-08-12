@@ -61,7 +61,7 @@
                         icon = '<div class="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center shrink-0"><svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></div>';
                     }
                     const unread = n.is_seen == 0 ? 'bg-rose-50' : '';
-                    return `<div class="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer ${unread}">${icon}<div class="flex-1 min-w-0"><p class="text-sm font-semibold text-gray-800">${n.title}</p><p class="text-xs text-gray-500 mt-0.5 line-clamp-2">${n.message}</p><p class="text-[10px] text-gray-400 mt-1">${n.created_at}</p></div></div>`;
+                    return `<div class="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer ${unread}">${icon}<div class="flex-1 min-w-0"><p class="text-sm font-semibold text-gray-800">${n.title}</p><p class="text-xs text-gray-500 mt-0.5 line-clamp-2">${n.message}</p><p class="text-[10px] text-gray-400 mt-1">${window.localizeJsDate(n.created_at)}</p></div></div>`;
                 }).join('');
             });
     }
@@ -98,14 +98,15 @@
 
     window.localizeJsDate = function(dateString) {
         let d = new Date(dateString);
-        let formatted = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        let formatted = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
         const currentLang = '<?= currentLang() ?>';
         if (currentLang === 'my') {
-            const en_months_short = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            const my_months_short = ['ဇန်', 'ဖေ', 'မတ်', 'ဧ', 'မေ', 'ဇွန်', 'ဇူ', 'ဩ', 'စက်', 'အောက်', 'နို', 'ဒီ'];
+            const en_months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const my_months = ['ဇန်နဝါရီ', 'ဖေဖော်ဝါရီ', 'မတ်', 'ဧပြီ', 'မေ', 'ဇွန်', 'ဇူလိုင်', 'ဩဂုတ်', 'စက်တင်ဘာ', 'အောက်တိုဘာ', 'နိုဝင်ဘာ', 'ဒီဇင်ဘာ'];
             for (let i = 0; i < 12; i++) {
-                formatted = formatted.replace(en_months_short[i], my_months_short[i]);
+                formatted = formatted.replace(en_months[i], my_months[i]);
             }
+            formatted = formatted.replace(/,/g, '၊');
             return window.localizeJsNumber(formatted);
         }
         return formatted;

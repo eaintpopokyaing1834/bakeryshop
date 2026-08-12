@@ -487,7 +487,7 @@ $totalNotifications = (int) $db->query("SELECT COUNT(*) FROM notifications WHERE
                         <?= $pageTitle ?? 'Dashboard' ?>
                     </h1>
                     <p class="text-xs text-gray-400 font-medium">
-                        <?= date('l, F j, Y') ?>
+                        <?= localizeDate(time(), 'l, F j, Y') ?>
                     </p>
                 </div>
             </div>

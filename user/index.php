@@ -1747,8 +1747,8 @@ if ($isLoggedIn) {
                     <img src="../images/cake.png" class="w-5 h-5">
                 </div>
                 <div>
-                    <h2 id="authModalTitle" class="text-xl font-bold text-[#3d2020] leading-[1.3] m-0">Welcome back</h2>
-                    <p id="authModalSubtitle" class="text-[.78rem] text-[#b08080] mt-[3px] mb-0 mx-0">Sign in to your Sweet Heaven account</p>
+                    <h2 id="authModalTitle" class="text-xl font-bold text-[#3d2020] leading-[1.3] m-0"><?= __('login_welcome') ?? 'Welcome back' ?></h2>
+                    <p id="authModalSubtitle" class="text-[.78rem] text-[#b08080] mt-[3px] mb-0 mx-0"><?= __('login_subtitle') ?></p>
                 </div>
             </div>
 
@@ -1774,7 +1774,7 @@ if ($isLoggedIn) {
                                 </svg>
                             </span>
                             <input type="email" id="modalEmail" name="email" required autocomplete="email"
-                                placeholder="Email address" class="w-full py-3 pl-10 pr-3.5 rounded-[14px] border-[1.5px] border-[#f0d8d8] bg-white text-[.855rem] text-[#3d2020] outline-none font-inherit transition-all duration-200 placeholder:text-[#d4adad] focus:border-[#e8a0a0] focus:shadow-[0_0_0_3.5px_rgba(220,130,130,.14)] focus:bg-[#fffbfb] peer">
+                                placeholder="<?= __('login_email_ph') ?>" class="w-full py-3 pl-10 pr-3.5 rounded-[14px] border-[1.5px] border-[#f0d8d8] bg-white text-[.855rem] text-[#3d2020] outline-none font-inherit transition-all duration-200 placeholder:text-[#d4adad] focus:border-[#e8a0a0] focus:shadow-[0_0_0_3.5px_rgba(220,130,130,.14)] focus:bg-[#fffbfb] peer">
                         </div>
                         <div class="relative flex items-center">
                             <span class="absolute left-[13px] text-[#d4a0a0] pointer-events-none flex transition-colors duration-200 peer-focus:text-[#c97878]">
@@ -1784,7 +1784,7 @@ if ($isLoggedIn) {
                                 </svg>
                             </span>
                             <input type="password" id="modalPassword" name="password" required
-                                autocomplete="current-password" placeholder="Password" class="w-full py-3 pl-10 pr-[42px] rounded-[14px] border-[1.5px] border-[#f0d8d8] bg-white text-[.855rem] text-[#3d2020] outline-none font-inherit transition-all duration-200 placeholder:text-[#d4adad] focus:border-[#e8a0a0] focus:shadow-[0_0_0_3.5px_rgba(220,130,130,.14)] focus:bg-[#fffbfb] peer">
+                                autocomplete="current-password" placeholder="<?= __('login_password_ph') ?>" class="w-full py-3 pl-10 pr-[42px] rounded-[14px] border-[1.5px] border-[#f0d8d8] bg-white text-[.855rem] text-[#3d2020] outline-none font-inherit transition-all duration-200 placeholder:text-[#d4adad] focus:border-[#e8a0a0] focus:shadow-[0_0_0_3.5px_rgba(220,130,130,.14)] focus:bg-[#fffbfb] peer">
                             <button type="button" onclick="toggleModalPassword('modalPassword',this)"
                                 class="absolute right-[13px] bg-transparent border-none cursor-pointer text-[#d4a0a0] p-0.5 flex transition-colors duration-200 hover:text-[#c97878]" tabindex="-1">
                                 <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1796,7 +1796,7 @@ if ($isLoggedIn) {
                             </button>
                         </div>
                         <button type="submit" id="loginSubmitBtn" class="w-full py-3 px-5 rounded-[14px] bg-gradient-to-br from-[#e8918a] to-[#d97070] text-white text-[.9rem] font-semibold border-none cursor-pointer flex items-center justify-center gap-2 mt-1 font-inherit tracking-[.01em] transition-all duration-200 shadow-[0_4px_16px_rgba(210,100,100,.25)] hover:opacity-[.92] hover:-translate-y-px hover:shadow-[0_8px_22px_rgba(210,100,100,.3)] active:scale-[.98] disabled:opacity-[.65] disabled:cursor-not-allowed disabled:transform-none">
-                            <span id="loginBtnText">Sign In</span>
+                            <span id="loginBtnText"><?= __('login_btn') ?></span>
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -1811,8 +1811,8 @@ if ($isLoggedIn) {
                     </div> -->
 
                     <p class="text-center text-[.8rem] text-[#b08080] mt-[18px]">
-                        Don't have an account?
-                        <button onclick="switchTab('register')" class="bg-transparent border-none cursor-pointer font-bold text-[#d97070] text-inherit font-inherit p-0 ml-[3px] transition-colors duration-200 hover:text-[#b85555] hover:underline">Sign up</button>
+                        <?= __('login_no_account') ?>
+                        <button type="button" onclick="switchTab('register')" class="bg-transparent border-none cursor-pointer font-bold text-[#d97070] text-inherit font-inherit p-0 ml-[3px] transition-colors duration-200 hover:text-[#b85555] hover:underline"><?= __('login_signup_link') ?></button>
                     </p>
                 </div>
 
@@ -1844,7 +1844,7 @@ if ($isLoggedIn) {
                                 </svg>
                             </span>
                             <input type="text" id="regName" name="name" required autocomplete="name"
-                                placeholder="Full name" class="w-full py-3 pl-10 pr-3.5 rounded-[14px] border-[1.5px] border-[#f0d8d8] bg-white text-[.855rem] text-[#3d2020] outline-none font-inherit transition-all duration-200 placeholder:text-[#d4adad] focus:border-[#e8a0a0] focus:shadow-[0_0_0_3.5px_rgba(220,130,130,.14)] focus:bg-[#fffbfb] peer">
+                                placeholder="<?= __('register_name_ph') ?>" class="w-full py-3 pl-10 pr-3.5 rounded-[14px] border-[1.5px] border-[#f0d8d8] bg-white text-[.855rem] text-[#3d2020] outline-none font-inherit transition-all duration-200 placeholder:text-[#d4adad] focus:border-[#e8a0a0] focus:shadow-[0_0_0_3.5px_rgba(220,130,130,.14)] focus:bg-[#fffbfb] peer">
                         </div>
                         <div class="relative flex items-center">
                             <span class="absolute left-[13px] text-[#d4a0a0] pointer-events-none flex transition-colors duration-200 peer-focus:text-[#c97878]">
@@ -1854,7 +1854,7 @@ if ($isLoggedIn) {
                                 </svg>
                             </span>
                             <input type="email" id="regEmail" name="email" required autocomplete="email"
-                                placeholder="Email address" class="w-full py-3 pl-10 pr-3.5 rounded-[14px] border-[1.5px] border-[#f0d8d8] bg-white text-[.855rem] text-[#3d2020] outline-none font-inherit transition-all duration-200 placeholder:text-[#d4adad] focus:border-[#e8a0a0] focus:shadow-[0_0_0_3.5px_rgba(220,130,130,.14)] focus:bg-[#fffbfb] peer">
+                                placeholder="<?= __('register_email_ph') ?>" class="w-full py-3 pl-10 pr-3.5 rounded-[14px] border-[1.5px] border-[#f0d8d8] bg-white text-[.855rem] text-[#3d2020] outline-none font-inherit transition-all duration-200 placeholder:text-[#d4adad] focus:border-[#e8a0a0] focus:shadow-[0_0_0_3.5px_rgba(220,130,130,.14)] focus:bg-[#fffbfb] peer">
                         </div>
                         <div class="relative flex items-center">
                             <span class="absolute left-[13px] text-[#d4a0a0] pointer-events-none flex transition-colors duration-200 peer-focus:text-[#c97878]">
@@ -1864,7 +1864,7 @@ if ($isLoggedIn) {
                                 </svg>
                             </span>
                             <input type="password" id="regPassword" name="password" required autocomplete="new-password"
-                                placeholder="Password (min 6 chars)" class="w-full py-3 pl-10 pr-[42px] rounded-[14px] border-[1.5px] border-[#f0d8d8] bg-white text-[.855rem] text-[#3d2020] outline-none font-inherit transition-all duration-200 placeholder:text-[#d4adad] focus:border-[#e8a0a0] focus:shadow-[0_0_0_3.5px_rgba(220,130,130,.14)] focus:bg-[#fffbfb] peer">
+                                placeholder="<?= __('register_pass_ph') ?>" class="w-full py-3 pl-10 pr-[42px] rounded-[14px] border-[1.5px] border-[#f0d8d8] bg-white text-[.855rem] text-[#3d2020] outline-none font-inherit transition-all duration-200 placeholder:text-[#d4adad] focus:border-[#e8a0a0] focus:shadow-[0_0_0_3.5px_rgba(220,130,130,.14)] focus:bg-[#fffbfb] peer">
                             <button type="button" onclick="toggleModalPassword('regPassword',this)" class="absolute right-[13px] bg-transparent border-none cursor-pointer text-[#d4a0a0] p-0.5 flex transition-colors duration-200 hover:text-[#c97878]" tabindex="-1">
                                 <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
@@ -1882,10 +1882,10 @@ if ($isLoggedIn) {
                                 </svg>
                             </span>
                             <input type="password" id="regConfirm" name="confirm_password" required
-                                autocomplete="new-password" placeholder="Confirm password" class="w-full py-3 pl-10 pr-3.5 rounded-[14px] border-[1.5px] border-[#f0d8d8] bg-white text-[.855rem] text-[#3d2020] outline-none font-inherit transition-all duration-200 placeholder:text-[#d4adad] focus:border-[#e8a0a0] focus:shadow-[0_0_0_3.5px_rgba(220,130,130,.14)] focus:bg-[#fffbfb] peer">
+                                autocomplete="new-password" placeholder="<?= __('register_confirm_ph') ?>" class="w-full py-3 pl-10 pr-3.5 rounded-[14px] border-[1.5px] border-[#f0d8d8] bg-white text-[.855rem] text-[#3d2020] outline-none font-inherit transition-all duration-200 placeholder:text-[#d4adad] focus:border-[#e8a0a0] focus:shadow-[0_0_0_3.5px_rgba(220,130,130,.14)] focus:bg-[#fffbfb] peer">
                         </div>
                         <button type="submit" id="registerSubmitBtn" class="w-full py-3 px-5 rounded-[14px] bg-gradient-to-br from-[#e8918a] to-[#d97070] text-white text-[.9rem] font-semibold border-none cursor-pointer flex items-center justify-center gap-2 mt-1 font-inherit tracking-[.01em] transition-all duration-200 shadow-[0_4px_16px_rgba(210,100,100,.25)] hover:opacity-[.92] hover:-translate-y-px hover:shadow-[0_8px_22px_rgba(210,100,100,.3)] active:scale-[.98] disabled:opacity-[.65] disabled:cursor-not-allowed disabled:transform-none">
-                            <span id="registerBtnText">Create Account</span>
+                            <span id="registerBtnText"><?= __('register_btn') ?></span>
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M5 13l4 4L19 7" />
@@ -1894,8 +1894,8 @@ if ($isLoggedIn) {
                     </form>
 
                     <p class="text-center text-[.8rem] text-[#b08080] mt-[18px]">
-                        Already have an account?
-                        <button onclick="switchTab('login')" class="bg-transparent border-none cursor-pointer font-bold text-[#d97070] text-inherit font-inherit p-0 ml-[3px] transition-colors duration-200 hover:text-[#b85555] hover:underline">Sign in</button>
+                        <?= __('register_have_account') ?>
+                        <button type="button" onclick="switchTab('login')" class="bg-transparent border-none cursor-pointer font-bold text-[#d97070] text-inherit font-inherit p-0 ml-[3px] transition-colors duration-200 hover:text-[#b85555] hover:underline"><?= __('register_signin_link') ?></button>
                     </p>
                 </div>
 
@@ -1942,10 +1942,10 @@ if ($isLoggedIn) {
             // Update title and subtitle
             const title    = document.getElementById('authModalTitle');
             const subtitle = document.getElementById('authModalSubtitle');
-            if (title)    title.textContent    = isLogin ? 'Welcome back'     : 'Create an account';
+            if (title)    title.textContent    = isLogin ? '<?= __('login_welcome') ?? 'Welcome back' ?>' : '<?= __('register_title_short') ?? 'Create an account' ?>';
             if (subtitle) subtitle.textContent = isLogin
-                ? 'Sign in to your Sweet Heaven account'
-                : 'Join us and enjoy exclusive treats';
+                ? '<?= __('login_subtitle') ?>'
+                : '<?= __('register_subtitle2') ?? 'Join us and enjoy exclusive treats' ?>';
 
             // Clear ALL alerts whenever the panel changes
             setLoginError('');
@@ -1984,7 +1984,7 @@ if ($isLoggedIn) {
         function submitLogin(e) {
             e.preventDefault();
             setLoginError('');
-            setBtnLoading('loginSubmitBtn', 'loginBtnText', true, 'Sign In');
+            setBtnLoading('loginSubmitBtn', 'loginBtnText', true, '<?= __('login_btn') ?>');
 
             const body = new URLSearchParams({
                 action: 'login',
@@ -1998,7 +1998,7 @@ if ($isLoggedIn) {
                     if (data.success) {
                         if (_pendingAction) {
                             // Reset button FIRST so it's not frozen if modal is reopened
-                            setBtnLoading('loginSubmitBtn', 'loginBtnText', false, 'Sign In');
+                            setBtnLoading('loginSubmitBtn', 'loginBtnText', false, '<?= __('login_btn') ?>');
                             // Execute the pending action BEFORE closeAuthModal() — because
                             // closeAuthModal() calls clearPendingAction(), which would null it out.
                             // Wait for the API call to finish, then reload so PHP re-renders
@@ -2018,12 +2018,12 @@ if ($isLoggedIn) {
                         }
                     } else {
                         setLoginError(data.error);
-                        setBtnLoading('loginSubmitBtn', 'loginBtnText', false, 'Sign In');
+                        setBtnLoading('loginSubmitBtn', 'loginBtnText', false, '<?= __('login_btn') ?>');
                     }
                 })
                 .catch(() => {
-                    setLoginError('Network error. Please try again.');
-                    setBtnLoading('loginSubmitBtn', 'loginBtnText', false, 'Sign In');
+                    setLoginError('<?= __('login_err_network') ?? "Network error. Please try again." ?>');
+                    setBtnLoading('loginSubmitBtn', 'loginBtnText', false, '<?= __('login_btn') ?>');
                 });
         }
        
@@ -2031,7 +2031,7 @@ if ($isLoggedIn) {
             e.preventDefault();
             setRegisterError('');
             document.getElementById('registerSuccess').classList.add('hidden');
-            setBtnLoading('registerSubmitBtn', 'registerBtnText', true, 'Create Account');
+            setBtnLoading('registerSubmitBtn', 'registerBtnText', true, '<?= __('register_btn') ?>');
 
             const body = new URLSearchParams({
                 action: 'register',
@@ -2044,11 +2044,11 @@ if ($isLoggedIn) {
             fetch('/sweetheaven/api/auth_modal.php', { method: 'POST', body })
                 .then(r => r.json())
                 .then(data => {
-                    setBtnLoading('registerSubmitBtn', 'registerBtnText', false, 'Create Account');
+                    setBtnLoading('registerSubmitBtn', 'registerBtnText', false, '<?= __('register_btn') ?>');
                     if (data.success) {
                         document.getElementById('modalRegisterForm').reset();
                         const successEl = document.getElementById('registerSuccess');
-                        document.getElementById('registerSuccessMsg').textContent = data.message + ' You can now sign in.';
+                        document.getElementById('registerSuccessMsg').textContent = data.message;
                         successEl.classList.remove('hidden');
                         // Auto-switch to login after 2 seconds
                         setTimeout(() => switchTab('login'), 2000);
@@ -2057,8 +2057,8 @@ if ($isLoggedIn) {
                     }
                 })
                 .catch(() => {
-                    setRegisterError('Network error. Please try again.');
-                    setBtnLoading('registerSubmitBtn', 'registerBtnText', false, 'Create Account');
+                    setRegisterError('<?= __('login_err_network') ?? "Network error. Please try again." ?>');
+                    setBtnLoading('registerSubmitBtn', 'registerBtnText', false, '<?= __('register_btn') ?>');
                 });
         }
 

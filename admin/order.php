@@ -157,7 +157,7 @@ $statusColors = [
     <div class="section-card-header">
         <div>
             <h3><?= __('admin_nav_orders') ?></h3>
-            <p class="sub"><?= $totalOrders ?> <?= __('admin_total') ?></p>
+            <p class="sub"><?= localizeNumber($totalOrders) ?> <?= __('admin_total') ?></p>
         </div>
     </div>
 
@@ -206,7 +206,7 @@ $statusColors = [
                         'standard' => __('order_ship_standard'),
                         'express'  => __('order_ship_express'),
                         'pickup'   => __('order_ship_pickup'),
-                        'free'     => __('order_ship_free'),
+                        'free_delivery', 'free' => __('order_ship_free'),
                         default    => ucfirst($order['shipping_method']),
                     } ?></span>
                 </td>
