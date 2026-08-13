@@ -443,49 +443,51 @@ const statusData    = <?= json_encode($statusData ?: [1]) ?>;
 const bestLabels    = <?= json_encode($bestSellingLabels) ?>;
 const bestData      = <?= json_encode($bestSellingData) ?>;
 
-// Revenue Chart
-new ApexCharts(document.querySelector('#revenueChart'), {
-    series: [{ name: '<?= __('admin_revenue') ?> (<?= __('admin_mmk') ?>)', data: revenueData }],
-    chart: { type: 'area', height: 260, toolbar: { show: false }, fontFamily: 'Poppins, sans-serif', animations: { enabled: true, easing: 'easeinout', speed: 700 } },
-    xaxis: { categories: monthLabels, labels: { style: { fontSize: '11px', colors: '#94a3b8' } }, axisBorder: { show: false }, axisTicks: { show: false } },
-    yaxis: { labels: { formatter: v => window.localizeJsNumber((v/1000).toFixed(0)) + 'K', style: { fontSize: '11px', colors: '#94a3b8' } } },
-    colors: ['#f43f5e'],
-    fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.02, stops: [0, 100] } },
-    stroke: { curve: 'smooth', width: 2.5 },
-    dataLabels: { enabled: false },
-    grid: { borderColor: '#f1f5f9', strokeDashArray: 4, padding: { left: 10, right: 10 } },
-    tooltip: { y: { formatter: v => window.localizeJsNumber(v.toLocaleString()) + ' <?= __('admin_mmk') ?>' }, theme: 'light' },
-    markers: { size: 0, hover: { size: 5 } }
-}).render();
-
-// Status Donut Chart
-if (document.querySelector('#statusChart')) {
-    new ApexCharts(document.querySelector('#statusChart'), {
-        series: statusData,
-        chart: { type: 'donut', height: 260, fontFamily: 'Poppins, sans-serif', animations: { enabled: true, easing: 'easeinout', speed: 700 } },
-        labels: statusLabels,
-        colors: ['#f59e0b','#3b82f6','#6366f1','#22c55e','#ef4444'],
-        legend: { position: 'bottom', fontSize: '11px', fontWeight: 500, markers: { radius: 99 } },
-        dataLabels: { enabled: false },
-        plotOptions: { pie: { donut: { size: '68%', labels: { show: true, total: { show: true, fontSize: '14px', fontWeight: 700, color: '#111827', label: 'Total' } } } } },
-        stroke: { width: 0 }
-    }).render();
-}
-
-// Best-Selling Chart
-if (document.querySelector('#bestSellingChart') && bestLabels.length > 0) {
-    new ApexCharts(document.querySelector('#bestSellingChart'), {
-        series: [{ name: '<?= __('reports_units_sold') ?>', data: bestData }],
-        chart: { type: 'bar', height: 260, toolbar: { show: false }, fontFamily: 'Poppins, sans-serif', animations: { enabled: true, easing: 'easeinout', speed: 700 } },
-        plotOptions: { bar: { horizontal: true, borderRadius: 6, dataLabels: { position: 'top' }, barHeight: '55%' } },
-        xaxis: { categories: bestLabels, labels: { style: { fontSize: '11px', colors: '#94a3b8' } }, axisBorder: { show: false }, axisTicks: { show: false } },
-        yaxis: { labels: { style: { fontSize: '11px', colors: '#475569', fontWeight: 500 } } },
+document.addEventListener("DOMContentLoaded", function() {
+    // Revenue Chart
+    new ApexCharts(document.querySelector('#revenueChart'), {
+        series: [{ name: '<?= __('admin_revenue') ?> (<?= __('admin_mmk') ?>)', data: revenueData }],
+        chart: { type: 'area', height: 260, toolbar: { show: false }, fontFamily: 'Poppins, sans-serif', animations: { enabled: true, easing: 'easeinout', speed: 700 } },
+        xaxis: { categories: monthLabels, labels: { style: { fontSize: '11px', colors: '#94a3b8' } }, axisBorder: { show: false }, axisTicks: { show: false } },
+        yaxis: { labels: { formatter: v => window.localizeJsNumber((v/1000).toFixed(0)) + 'K', style: { fontSize: '11px', colors: '#94a3b8' } } },
         colors: ['#f43f5e'],
-        dataLabels: { enabled: true, offsetX: 22, style: { fontSize: '11px', colors: ['#64748b'], fontWeight: 600 } },
-        grid: { borderColor: '#f1f5f9', strokeDashArray: 4, xaxis: { lines: { show: true } }, yaxis: { lines: { show: false } } },
-        tooltip: { y: { formatter: v => window.localizeJsNumber(v) + ' <?= __('reports_units') ?>' }, theme: 'light' }
+        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.02, stops: [0, 100] } },
+        stroke: { curve: 'smooth', width: 2.5 },
+        dataLabels: { enabled: false },
+        grid: { borderColor: '#f1f5f9', strokeDashArray: 4, padding: { left: 10, right: 10 } },
+        tooltip: { y: { formatter: v => window.localizeJsNumber(v.toLocaleString()) + ' <?= __('admin_mmk') ?>' }, theme: 'light' },
+        markers: { size: 0, hover: { size: 5 } }
     }).render();
-}
+
+    // Status Donut Chart
+    if (document.querySelector('#statusChart')) {
+        new ApexCharts(document.querySelector('#statusChart'), {
+            series: statusData,
+            chart: { type: 'donut', height: 260, fontFamily: 'Poppins, sans-serif', animations: { enabled: true, easing: 'easeinout', speed: 700 } },
+            labels: statusLabels,
+            colors: ['#f59e0b','#3b82f6','#6366f1','#22c55e','#ef4444'],
+            legend: { position: 'bottom', fontSize: '11px', fontWeight: 500, markers: { radius: 99 } },
+            dataLabels: { enabled: false },
+            plotOptions: { pie: { donut: { size: '68%', labels: { show: true, total: { show: true, fontSize: '14px', fontWeight: 700, color: '#111827', label: 'Total' } } } } },
+            stroke: { width: 0 }
+        }).render();
+    }
+
+    // Best-Selling Chart
+    if (document.querySelector('#bestSellingChart') && bestLabels.length > 0) {
+        new ApexCharts(document.querySelector('#bestSellingChart'), {
+            series: [{ name: '<?= __('reports_units_sold') ?>', data: bestData }],
+            chart: { type: 'bar', height: 260, toolbar: { show: false }, fontFamily: 'Poppins, sans-serif', animations: { enabled: true, easing: 'easeinout', speed: 700 } },
+            plotOptions: { bar: { horizontal: true, borderRadius: 6, dataLabels: { position: 'top' }, barHeight: '55%' } },
+            xaxis: { categories: bestLabels, labels: { style: { fontSize: '11px', colors: '#94a3b8' } }, axisBorder: { show: false }, axisTicks: { show: false } },
+            yaxis: { labels: { style: { fontSize: '11px', colors: '#475569', fontWeight: 500 } } },
+            colors: ['#f43f5e'],
+            dataLabels: { enabled: true, offsetX: 22, style: { fontSize: '11px', colors: ['#64748b'], fontWeight: 600 } },
+            grid: { borderColor: '#f1f5f9', strokeDashArray: 4, xaxis: { lines: { show: true } }, yaxis: { lines: { show: false } } },
+            tooltip: { y: { formatter: v => window.localizeJsNumber(v) + ' <?= __('reports_units') ?>' }, theme: 'light' }
+        }).render();
+    }
+});
 </script>
 
 <?php require_once __DIR__ . '/../includes/admin_footer.php'; ?>

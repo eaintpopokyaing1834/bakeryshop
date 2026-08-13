@@ -123,8 +123,8 @@ return [
     'story_fruit' => 'Real fruit fillings, no artificial flavors',
 
     'promo_special' => 'Special Promotion',
-    'promo_first_order' => '5% Off Your First Order!',
-    'promo_first_desc' => 'Sign up and get an instant discount on your very first purchase. No code needed!',
+    'promo_first_order' => '%s Off Your First Order!',
+    'promo_first_desc' => 'Sign up and get %s off your very first purchase. No code needed!',
     'promo_claim' => 'Claim Discount →',
     'promo_customize_title' => 'Dream Cake, Made to Order',
     'promo_customize_desc' => 'Design your perfect custom cake. We handle the rest.',
@@ -420,8 +420,8 @@ return [
     'discount_view_all_offers' => 'View All Offers',
 
     // ── Promo Section (Index) ────────────────────────────
-    'promo_free_gift_title' => 'Free Gift Over 50,000 MMK',
-    'promo_free_gift_desc' => 'Spend 50,000 MMK or more and we\'ll add a delicious free treat to your order!',
+    'promo_free_gift_title' => '%s',
+    'promo_free_gift_desc' => 'Spend %s or more and we\'ll add a delicious free treat to your order!',
     'promo_shop_now' => 'Shop Now →',
     'promo_latest_products' => 'Latest Products',
 
@@ -568,7 +568,7 @@ return [
     'checkout_order_summary' => 'Order Summary',
     'checkout_subtotal' => 'Subtotal',
     'checkout_product_discounts' => '🤑 Product Discounts',
-    'checkout_first_order_discount' => '🎉 First Order Discount (5%)',
+    'checkout_first_order_discount' => '🎉 First Order Discount (%s)',
     'checkout_shipping' => 'Shipping',
     'checkout_total' => 'Total',
     'checkout_place_order' => 'Place Order',

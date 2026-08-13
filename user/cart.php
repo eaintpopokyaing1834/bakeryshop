@@ -54,13 +54,31 @@ $totalSavings = array_sum(array_map(
 ));
 // $subtotal already equals $originalSubtotal - $totalSavings
 
-// First-order 5 % discount applies on the original subtotal
+// Fetch active order-level rules
 $firstOrderDiscount = 0;
-if (!empty($cartProducts) && isset($_SESSION['user_id'])) {
+$firstOrderRuleValue = 0;
+$firstOrderRuleType = 'percentage';
+
+$activeOrderRules = $db->query("SELECT * FROM discounts WHERE scope = 'order' AND status = 1")->fetchAll();
+$firstOrderRule = null;
+foreach ($activeOrderRules as $rule) {
+    if ($rule['is_first_order'] == 1) {
+        $firstOrderRule = $rule;
+        $firstOrderRuleValue = $rule['value'];
+        $firstOrderRuleType = $rule['type'];
+    }
+}
+
+// First-order discount applies on the original subtotal
+if (!empty($cartProducts) && isset($_SESSION['user_id']) && $firstOrderRule) {
     $ocStmt = $db->prepare("SELECT COUNT(*) FROM orders WHERE user_id=?");
     $ocStmt->execute([$_SESSION['user_id']]);
     if ($ocStmt->fetchColumn() == 0) {
-        $firstOrderDiscount = $originalSubtotal * 0.05;
+        if ($firstOrderRule['type'] === 'percentage') {
+            $firstOrderDiscount = $originalSubtotal * ($firstOrderRule['value'] / 100);
+        } elseif ($firstOrderRule['type'] === 'fixed') {
+            $firstOrderDiscount = $firstOrderRule['value'];
+        }
     }
 }
 $grandTotal = $originalSubtotal - $totalSavings - $firstOrderDiscount;
@@ -190,14 +208,18 @@ $grandTotal = $originalSubtotal - $totalSavings - $firstOrderDiscount;
                     </div>
                     <?php endif; ?>
 
+                    <?php 
+                    $foLabelValue = $firstOrderRuleType === 'percentage' ? localizeNumber((int)$firstOrderRuleValue) . '%' : formatPrice($firstOrderRuleValue);
+                    $foLabel = sprintf(__('checkout_first_order_discount'), $foLabelValue);
+                    ?>
                     <?php if ($firstOrderDiscount > 0): ?>
                     <div class="flex justify-between text-blue-600 font-medium" id="firstOrderDiscountRow">
-                        <span><?= __('checkout_first_order_discount') ?></span>
+                        <span><?= $foLabel ?></span>
                         <span id="firstOrderDiscountDisplay">-<?= formatPrice($firstOrderDiscount) ?></span>
                     </div>
                     <?php else: ?>
                     <div class="flex justify-between text-blue-600 font-medium hidden" id="firstOrderDiscountRow">
-                        <span><?= __('checkout_first_order_discount') ?></span>
+                        <span><?= $foLabel ?></span>
                         <span id="firstOrderDiscountDisplay"></span>
                     </div>
                     <?php endif; ?>
@@ -242,6 +264,8 @@ $grandTotal = $originalSubtotal - $totalSavings - $firstOrderDiscount;
 
 <script>
 const _isFirstOrder = <?= $firstOrderDiscount > 0 ? 'true' : 'false' ?>;
+const _firstOrderRuleValue = <?= json_encode($firstOrderRuleValue) ?>;
+const _firstOrderRuleType = <?= json_encode($firstOrderRuleType) ?>;
 
 // Recalculate total product-level savings from DOM data attributes
 function recalcSavings() {
@@ -257,7 +281,14 @@ function recalcSavings() {
 function updateSummary(originalTotal) {
     const savings           = recalcSavings();
     const discounted        = originalTotal - savings;
-    const firstOrderDiscount = _isFirstOrder ? originalTotal * 0.05 : 0;
+    let firstOrderDiscount = 0;
+    if (_isFirstOrder) {
+        if (_firstOrderRuleType === 'percentage') {
+            firstOrderDiscount = originalTotal * (_firstOrderRuleValue / 100);
+        } else if (_firstOrderRuleType === 'fixed') {
+            firstOrderDiscount = parseFloat(_firstOrderRuleValue);
+        }
+    }
     const grand             = discounted - firstOrderDiscount;
 
     const subtotalEl  = document.getElementById('subtotalDisplay');

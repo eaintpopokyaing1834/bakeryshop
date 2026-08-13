@@ -88,6 +88,21 @@ if ($isLoggedIn) {
     $currentUser = $stmtUser->fetch();
 }
 
+$maxDiscountRow = $db->query("SELECT MAX(value) as max_val FROM discounts WHERE type = 'percentage' AND status = 1")->fetch();
+$maxDiscountPercent = $maxDiscountRow['max_val'] ? (int)$maxDiscountRow['max_val'] : 15;
+
+$activeOrderRules = $db->query("SELECT * FROM discounts WHERE scope = 'order' AND status = 1")->fetchAll();
+$firstOrderRule = null;
+$freeGiftRule = null;
+foreach ($activeOrderRules as $rule) {
+    if ($rule['is_first_order'] == 1) $firstOrderRule = $rule;
+    if ($rule['type'] === 'free_gift') $freeGiftRule = $rule;
+}
+
+$firstOrderValue = $firstOrderRule ? ($firstOrderRule['type'] === 'percentage' ? (int)$firstOrderRule['value'] . '%' : formatPrice($firstOrderRule['value'])) : '5%';
+$freeGiftAmount = $freeGiftRule ? formatPrice($freeGiftRule['min_order_amount']) : '50,000 MMK';
+$freeGiftName = $freeGiftRule ? htmlspecialchars($freeGiftRule['name']) : __('promo_free_gift_title', '50,000 MMK');
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -714,16 +729,15 @@ if ($isLoggedIn) {
         <div class="max-w-7xl mx-auto px-6">
 
             <div class="grid lg:grid-cols-2  gap-6">
-
-                <!-- Promo 1 -->
+                        <!-- Promo 1 -->
 
                 <div class="flex flex-col gap-6">
                     <div class="text-3xl font-semibold text-center"><?= __('promo_special') ?></div>
                     <div class="rounded-2xl transition-all duration-200 ease-in-out hover:-translate-y-[3px] hover:shadow-[0_12px_36px_rgba(0,0,0,.07)] overflow-hidden flex flex-col md:flex-row border border-rose-100 bg-[#fdf0ee]">
                         <div class="p-12 flex-1">
                             <span class="text-3xl mb-3 block">🎉</span>
-                            <h3 class="font-bold text-gray-800 text-xl mb-2"><?= __('promo_first_order') ?></h3>
-                            <p class="text-gray-500 text-sm leading-relaxed mb-5"><?= __('promo_first_desc') ?></p>
+                            <h3 class="font-bold text-gray-800 text-xl mb-2"><?= __('promo_first_order', localizeNumber($firstOrderValue)) ?></h3>
+                            <p class="text-gray-500 text-sm leading-relaxed mb-5"><?= __('promo_first_desc', localizeNumber($firstOrderValue)) ?></p>
                             <?php if ($isLoggedIn): ?>
                                 <a href="/sweetheaven/user/products.php"
                                     class="inline-block text-white font-semibold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity bg-[#e8746a]">
@@ -749,8 +763,8 @@ if ($isLoggedIn) {
                         bg-[#fffbf0]">
                         <div class="p-12 flex-1">
                             <span class="text-3xl mb-3 block">🎁</span>
-                            <h3 class="font-bold text-gray-800 text-xl mb-2"><?= __('promo_free_gift_title') ?></h3>
-                            <p class="text-gray-500 text-sm leading-relaxed mb-5"><?= __('promo_free_gift_desc') ?></p>
+                            <h3 class="font-bold text-gray-800 text-xl mb-2"><?= __('promo_free_gift_title', $freeGiftName) ?></h3>
+                            <p class="text-gray-500 text-sm leading-relaxed mb-5"><?= __('promo_free_gift_desc', localizeNumber($freeGiftAmount)) ?></p>
                             <a href="/sweetheaven/user/products.php"
                                 class="inline-block text-white font-semibold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity
                                 bg-amber-500">
@@ -861,7 +875,7 @@ if ($isLoggedIn) {
                         <!-- Giant percentage -->
                         <div class="mb-3">
                             <span class="block text-gray-800 text-3xl font-black uppercase tracking-wide leading-tight mb-1"><?= __('discount_up_to') ?></span>
-                            <span class="block font-black text-[clamp(5rem,10vw,7rem)] text-[#e8746a] leading-none drop-shadow-md"><?= localizeNumber('15') ?>%</span>
+                            <span class="block font-black text-[clamp(5rem,10vw,7rem)] text-[#e8746a] leading-none drop-shadow-md"><?= localizeNumber($maxDiscountPercent) ?>%</span>
                             <span class="block text-gray-800 text-[clamp(2rem,4vw,3rem)] font-black uppercase tracking-tight leading-tight mt-1"><?= __('discount_off') ?></span>
                         </div>
 

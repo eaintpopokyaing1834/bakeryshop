@@ -92,12 +92,15 @@ CREATE TABLE IF NOT EXISTS categories (
 --  1NF âœ…  2NF âœ…  3NF âœ…
 -- ============================================================
 CREATE TABLE IF NOT EXISTS discounts (
-    id         INT           AUTO_INCREMENT PRIMARY KEY,
-    name       VARCHAR(100)  NOT NULL,
-    type       ENUM('percentage','fixed') NOT NULL DEFAULT 'percentage',
-    value      DECIMAL(10,2) NOT NULL,
-    status     TINYINT(1)    NOT NULL DEFAULT 1,
-    created_at TIMESTAMP     DEFAULT CURRENT_TIMESTAMP
+    id               INT           AUTO_INCREMENT PRIMARY KEY,
+    name             VARCHAR(100)  NOT NULL,
+    scope            ENUM('product','order') NOT NULL DEFAULT 'product',
+    type             ENUM('percentage','fixed','free_gift') NOT NULL DEFAULT 'percentage',
+    value            DECIMAL(10,2) NOT NULL,
+    min_order_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    is_first_order   TINYINT(1)    NOT NULL DEFAULT 0,
+    status           TINYINT(1)    NOT NULL DEFAULT 1,
+    created_at       TIMESTAMP     DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -417,11 +420,13 @@ INSERT IGNORE INTO product_images (product_id, image_url, is_primary) VALUES
     (10, '/sweetheaven/images/pudd.jpg',     1);
 
 -- Discount presets
-INSERT IGNORE INTO discounts (id, name, type, value, status) VALUES
-    (1, '10% OFF',       'percentage', 10.00,   1),
-    (2, '15% OFF',       'percentage', 15.00,   1),
-    (3, '20% OFF',       'percentage', 20.00,   1),
-    (4, '5,000 MMK OFF', 'fixed',      5000.00, 1);
+INSERT IGNORE INTO discounts (id, name, scope, type, value, min_order_amount, is_first_order, status) VALUES
+    (1, '10% OFF',               'product', 'percentage', 10.00,   0.00,     0, 1),
+    (2, '15% OFF',               'product', 'percentage', 15.00,   0.00,     0, 1),
+    (3, '20% OFF',               'product', 'percentage', 20.00,   0.00,     0, 1),
+    (4, '5,000 MMK OFF',         'product', 'fixed',      5000.00, 0.00,     0, 1),
+    (5, 'First Order Discount',  'order',   'percentage', 5.00,    0.00,     1, 1),
+    (6, 'Free Gift Over 50K',    'order',   'free_gift',  0.00,    50000.00, 0, 1);
 
 -- Payment methods
 INSERT IGNORE INTO payment_methods (id, payment_name, acc_name, acc_no, is_active) VALUES

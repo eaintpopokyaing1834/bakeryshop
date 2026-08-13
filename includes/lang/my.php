@@ -123,8 +123,8 @@ return [
     'story_fruit'          => 'စစ်မှန်သော သဘာ၀ သစ်သီးအစစ်များ၊ အတုအပ မပါ',
 
     'promo_special'        => 'အထူး ပရိုမိုးရှင်း',
-    'promo_first_order'    => 'ပထမဆုံး အော်ဒါတွင် ၅% လျှော့ဈေး!',
-    'promo_first_desc'     => 'အကောင့်ဖွင့်ပြီး ပထမဆုံး ဝယ်ယူမှုတွင် ချက်ချင်း လျှော့ဈေးရမည်။ ကုဒ် မလိုအပ်ပါ!',
+    'promo_first_order'    => 'ပထမဆုံး အော်ဒါတွင် %s လျှော့ဈေး!',
+    'promo_first_desc'     => 'အကောင့်ဖွင့်ပြီး ပထမဆုံး ဝယ်ယူမှုတွင် %s လျှော့ဈေးရမည်။ ကုဒ် မလိုအပ်ပါ!',
     'promo_claim'          => 'လျှော့ဈေး ယူမည် →',
     'promo_customize_title'=> 'အိပ်မက်ကိတ်မုန့် အော်ဒါမှာမည်',
     'promo_customize_desc' => 'သင်ကြိုက်သော ကိတ်မုန့် ဒီဇိုင်းပေးပါ၊ ကျွန်ုပ်တို့ ကိုင်တွယ်ပါမည်။',
@@ -376,7 +376,7 @@ return [
     'detail_only_left'     => '%d ခုသာ ကျန်သည်!',
 
     'detail_in_stock_qty'       => 'ဝယ်ယူနိုင်သည် (%s)',
-    'detail_reviews_count'      => '%s သုံးသပ်ချက်%s',
+    'detail_reviews_count'      => 'သုံးသပ်ချက် %s ခု',
     'detail_members_only'       => 'အသင်းဝင်များသာ ဝယ်ယူနိုင်သည်',
     'detail_members_only_desc'  => 'စာရင်းသွင်းထားသော ဝယ်ယူသူများသာ ထုတ်ကုန်များကို ဝယ်ယူနိုင်ပါသည်။',
     'detail_admin_no_purchase'  => 'စီမံခန့်ခွဲသူ အကောင့်များမှ ဝယ်ယူ၍မရပါ။',
@@ -585,7 +585,7 @@ return [
     'checkout_order_summary'        => 'အော်ဒါ အကျဉ်းချုပ်',
     'checkout_subtotal'             => 'ကုန်ကျငွေ',
     'checkout_product_discounts'    => 'ထုတ်ကုန် လျှော့စျေးများ',
-    'checkout_first_order_discount' => ' ပထမဆုံးအော်ဒါ လျှော့စျေး (၅%)',
+    'checkout_first_order_discount' => ' ပထမဆုံးအော်ဒါ လျှော့စျေး (%s)',
     'checkout_shipping'             => 'ပို့ဆောင်ခ',
     'checkout_total'                => 'စုစုပေါင်း',
     'checkout_place_order'          => 'အော်ဒါမှာမည်',

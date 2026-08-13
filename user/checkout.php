@@ -6,6 +6,18 @@ require_once __DIR__ . '/../middleware/customer_check.php';
 require_once __DIR__ . '/../config/db.php';
 $db = getDB();
 
+$activeOrderRules = $db->query("SELECT * FROM discounts WHERE scope = 'order' AND status = 1")->fetchAll();
+$firstOrderRule = null;
+$freeGiftRule = null;
+foreach ($activeOrderRules as $rule) {
+    if ($rule['is_first_order'] == 1) {
+        $firstOrderRule = $rule;
+    }
+    if ($rule['type'] === 'free_gift') {
+        $freeGiftRule = $rule;
+    }
+}
+
 $customizeId = (int)($_GET['customize_id'] ?? 0);
 $customizeRequest = null;
 
@@ -89,7 +101,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $orderCount = $db->prepare("SELECT COUNT(*) FROM orders WHERE user_id=?");
                 $orderCount->execute([$_SESSION['user_id']]);
                 $isFirstOrder = $orderCount->fetchColumn() == 0;
-                $firstOrderDiscount = $isFirstOrder ? $originalSubtotalCalc * 0.05 : 0;
+                $firstOrderDiscount = 0;
+                if ($isFirstOrder && $firstOrderRule) {
+                    if ($firstOrderRule['type'] === 'percentage') {
+                        $firstOrderDiscount = $originalSubtotalCalc * ($firstOrderRule['value'] / 100);
+                    } elseif ($firstOrderRule['type'] === 'fixed') {
+                        $firstOrderDiscount = $firstOrderRule['value'];
+                    }
+                }
                 $totalAmount = $originalSubtotalCalc - ($originalSubtotalCalc - $subtotal) - $firstOrderDiscount + $shippingFee;
             }
 
@@ -237,7 +256,14 @@ if ($customizeRequest) {
     $orderCount = $db->prepare("SELECT COUNT(*) FROM orders WHERE user_id=?");
     $orderCount->execute([$_SESSION['user_id']]);
     $isFirstOrder = $orderCount->fetchColumn() == 0;
-    $firstOrderDiscount = $isFirstOrder ? $originalSubtotal * 0.05 : 0;
+    $firstOrderDiscount = 0;
+    if ($isFirstOrder && $firstOrderRule) {
+        if ($firstOrderRule['type'] === 'percentage') {
+            $firstOrderDiscount = $originalSubtotal * ($firstOrderRule['value'] / 100);
+        } elseif ($firstOrderRule['type'] === 'fixed') {
+            $firstOrderDiscount = $firstOrderRule['value'];
+        }
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -502,9 +528,19 @@ if ($customizeRequest) {
                             </div>
                             <?php endif; ?>
                             <?php if ($firstOrderDiscount > 0): ?>
+                            <?php 
+                            $foLabelValue = $firstOrderRule['type'] === 'percentage' ? localizeNumber((int)$firstOrderRule['value']) . '%' : formatPrice($firstOrderRule['value']);
+                            $foLabel = sprintf(__('checkout_first_order_discount'), $foLabelValue);
+                            ?>
                             <div class="flex justify-between text-blue-600 font-medium">
-                                <span><?= __('checkout_first_order_discount') ?></span>
+                                <span><?= $foLabel ?></span>
                                 <span>-<?= formatPrice($firstOrderDiscount) ?></span>
+                            </div>
+                            <?php endif; ?>
+                            <?php if ($freeGiftRule && $originalSubtotal >= $freeGiftRule['min_order_amount']): ?>
+                            <div class="flex justify-between text-purple-600 font-medium bg-purple-50 p-2 rounded-xl mt-2 mb-2">
+                                <span class="flex items-center gap-2">🎁 <?= htmlspecialchars($freeGiftRule['name']) ?></span>
+                                <span class="text-xs uppercase font-bold tracking-wider mt-0.5">Unlocked</span>
                             </div>
                             <?php endif; ?>
                             <div class="flex justify-between text-gray-500">

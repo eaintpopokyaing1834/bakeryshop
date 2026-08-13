@@ -37,16 +37,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_discount'])) {
     $id = (int) ($_POST['discount_id'] ?? 0);
     $name = trim($_POST['name']);
+    $scope = $_POST['scope'] ?? 'product';
     $type = $_POST['type'];
     $value = (float) $_POST['value'];
+    $min_order_amount = (float) ($_POST['min_order_amount'] ?? 0);
+    $is_first_order = isset($_POST['is_first_order']) ? 1 : 0;
     $status = (int) ($_POST['status'] ?? 1);
 
     if ($id > 0) {
-        $db->prepare("UPDATE discounts SET name=?, type=?, value=?, status=? WHERE id=?")
-            ->execute([$name, $type, $value, $status, $id]);
+        $db->prepare("UPDATE discounts SET name=?, scope=?, type=?, value=?, min_order_amount=?, is_first_order=?, status=? WHERE id=?")
+            ->execute([$name, $scope, $type, $value, $min_order_amount, $is_first_order, $status, $id]);
     } else {
-        $db->prepare("INSERT INTO discounts (name,type,value,status) VALUES (?,?,?,?)")
-            ->execute([$name, $type, $value, $status]);
+        $db->prepare("INSERT INTO discounts (name,scope,type,value,min_order_amount,is_first_order,status) VALUES (?,?,?,?,?,?,?)")
+            ->execute([$name, $scope, $type, $value, $min_order_amount, $is_first_order, $status]);
     }
     $_SESSION['flash_message'] = 'Discount saved successfully!';
     header('Location: ?tab=discounts');
@@ -83,6 +86,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 <tr>
                     <th class="px-6 py-4 text-left"><?= __('admin_id') ?></th>
                     <th class="px-6 py-4 text-left"><?= __('admin_name') ?></th>
+                    <th class="px-6 py-4 text-left">Scope</th>
                     <th class="px-6 py-4 text-left"><?= __('discount_col_type') ?></th>
                     <th class="px-6 py-4 text-left"><?= __('discount_col_value') ?></th>
                     <th class="px-6 py-4 text-left"><?= __('admin_status') ?></th>
@@ -91,13 +95,14 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
-                <?php foreach ($discounts as $d): ?>
+                <?php $i = 1; foreach ($discounts as $d): ?>
                 <tr class="hover:bg-gray-50/50 transition-colors">
-                    <td class="px-6 py-4 font-mono text-gray-500 text-sm"><?= localizeNumber($d['id']) ?></td>
+                    <td class="px-6 py-4 font-mono text-gray-500 text-sm"><?= localizeNumber($i++) ?></td>
                     <td class="px-6 py-4 font-semibold text-gray-700 text-sm"><?= htmlspecialchars($d['name']) ?></td>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-600 capitalize"><?= htmlspecialchars($d['scope']) ?></td>
                     <td class="px-6 py-4 text-sm">
-                        <span class="px-2.5 py-1 rounded-full text-xs font-bold <?= $d['type'] === 'percentage' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700' ?>">
-                            <?= $d['type'] === 'percentage' ? __('discount_type_percent') : __('discount_type_fixed') ?>
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold <?= $d['type'] === 'percentage' ? 'bg-blue-100 text-blue-700' : ($d['type'] === 'fixed' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700') ?>">
+                            <?= $d['type'] === 'percentage' ? __('discount_type_percent') : ($d['type'] === 'fixed' ? __('discount_type_fixed') : 'Free Gift') ?>
                         </span>
                     </td>
                     <td class="px-6 py-4 font-bold text-gray-700 text-sm">
@@ -108,7 +113,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                             <?= $d['status'] ? __('admin_active') : __('admin_inactive') ?>
                         </span>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-500"><?= localizeNumber($d['product_count']) ?></td>
+                    <td class="px-6 py-4 text-sm text-gray-500"><?= $d['scope'] === 'product' ? localizeNumber($d['product_count']) : '-' ?></td>
                     <td class="px-6 py-4">
                         <?php if ($isAdmin): ?>
                         <div class="flex items-center gap-2">
@@ -146,12 +151,22 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
             </div>
             <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Scope *</label>
+                <select name="scope" id="discountScope" required
+                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm"
+                    onchange="toggleOrderFields()">
+                    <option value="product">Product Level</option>
+                    <option value="order">Order Level (Promotions)</option>
+                </select>
+            </div>
+            <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('discount_label_type') ?></label>
                 <select name="type" id="discountType" required
                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm"
-                    onchange="document.getElementById('valueUnit').textContent = this.value === 'percentage' ? '%' : '<?= __('admin_mmk') ?>'">
+                    onchange="document.getElementById('valueUnit').textContent = this.value === 'percentage' ? '%' : (this.value === 'fixed' ? '<?= __('admin_mmk') ?>' : '')">
                     <option value="percentage"><?= __('discount_type_percent') ?></option>
                     <option value="fixed"><?= __('discount_type_fixed') ?></option>
+                    <option value="free_gift" class="order-only-option hidden">Free Gift</option>
                 </select>
             </div>
             <div>
@@ -160,6 +175,17 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     <input type="number" name="value" id="discountValue" required min="0" step="0.01" placeholder="<?= __('discount_ph_value') ?>"
                         class="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                     <span id="valueUnit" class="text-sm font-bold text-gray-500 w-12">%</span>
+                </div>
+            </div>
+            <div id="orderFields" class="hidden space-y-4 pt-2">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Minimum Order Amount</label>
+                    <input type="number" name="min_order_amount" id="discountMinAmount" min="0" step="0.01" value="0"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" name="is_first_order" id="discountFirstOrder" value="1" class="w-4 h-4 text-rose-500 rounded focus:ring-rose-400">
+                    <label class="text-sm font-semibold text-gray-700">First Order Only</label>
                 </div>
             </div>
             <div>
@@ -185,12 +211,32 @@ require_once __DIR__ . '/../includes/admin_header.php';
 function openDiscountModal(data = null) {
     document.getElementById('discountId').value = data ? data.id : 0;
     document.getElementById('discountName').value = data ? data.name : '';
+    document.getElementById('discountScope').value = data ? data.scope : 'product';
     document.getElementById('discountType').value = data ? data.type : 'percentage';
     document.getElementById('discountValue').value = data ? data.value : '';
+    document.getElementById('discountMinAmount').value = data ? data.min_order_amount : '0';
+    document.getElementById('discountFirstOrder').checked = data && data.is_first_order == 1;
     document.getElementById('discountStatus').value = data ? data.status : '1';
     document.getElementById('discountModalTitle').textContent = data ? '<?= __('discount_edit_title') ?>' : '<?= __('discount_add_title') ?>';
-    document.getElementById('valueUnit').textContent = (data ? data.type : 'percentage') === 'percentage' ? '%' : '<?= __('admin_mmk') ?>';
+    document.getElementById('valueUnit').textContent = (data ? data.type : 'percentage') === 'percentage' ? '%' : ((data && data.type === 'free_gift') ? '' : '<?= __('admin_mmk') ?>');
+    toggleOrderFields();
     document.getElementById('discountModal').classList.remove('hidden');
+}
+function toggleOrderFields() {
+    const scope = document.getElementById('discountScope').value;
+    const orderFields = document.getElementById('orderFields');
+    const freeGiftOption = document.querySelector('.order-only-option');
+    if (scope === 'order') {
+        orderFields.classList.remove('hidden');
+        freeGiftOption.classList.remove('hidden');
+    } else {
+        orderFields.classList.add('hidden');
+        freeGiftOption.classList.add('hidden');
+        if (document.getElementById('discountType').value === 'free_gift') {
+            document.getElementById('discountType').value = 'percentage';
+            document.getElementById('valueUnit').textContent = '%';
+        }
+    }
 }
 function editDiscount(data) { openDiscountModal(data); }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
