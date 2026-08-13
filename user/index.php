@@ -48,12 +48,12 @@ $latestProducts = $db->query("
 ")->fetchAll();
 
 $customerReviews = $db->query("
-    SELECT u.name, p.name AS product_name, r.comment AS message, r.rating, MAX(r.created_at) as created_at
+    SELECT u.name, u.profile_image, p.name AS product_name, r.comment AS message, r.rating, MAX(r.created_at) as created_at
     FROM reviews r
     JOIN users u ON r.user_id = u.id
     LEFT JOIN products p ON r.product_id = p.id
     WHERE r.status='approved'
-    GROUP BY u.name, p.name, r.comment, r.rating
+    GROUP BY u.name, u.profile_image, p.name, r.comment, r.rating
     ORDER BY created_at DESC
 ")->fetchAll();
 
@@ -1140,8 +1140,12 @@ if ($isLoggedIn) {
                         <div class="w-full sm:w-[300px]">
                             <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm text-left h-full">
                                 <div class="flex items-center gap-3 mb-4">
-                                    <div class="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-500 font-bold text-sm flex-shrink-0">
-                                        <?= strtoupper(substr($r['name'], 0, 1)) ?>
+                                    <div class="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-500 font-bold text-sm flex-shrink-0 overflow-hidden">
+                                        <?php if (!empty($r['profile_image'])): ?>
+                                            <img src="/sweetheaven/<?= htmlspecialchars($r['profile_image']) ?>" class="w-full h-full object-cover">
+                                        <?php else: ?>
+                                            <?= strtoupper(substr($r['name'], 0, 1)) ?>
+                                        <?php endif; ?>
                                     </div>
                                     <div class="min-w-0">
                                         <p class="font-semibold text-gray-700 text-sm truncate"><?= htmlspecialchars($r['name']) ?></p>
@@ -1182,8 +1186,12 @@ if ($isLoggedIn) {
                                     <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm h-full text-left">
                                         <div class="flex items-center gap-3 mb-4">
                                             <div
-                                                class="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-500 font-bold text-sm flex-shrink-0">
-                                                <?= strtoupper(substr($r['name'], 0, 1)) ?>
+                                                class="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-500 font-bold text-sm flex-shrink-0 overflow-hidden">
+                                                <?php if (!empty($r['profile_image'])): ?>
+                                                    <img src="/sweetheaven/<?= htmlspecialchars($r['profile_image']) ?>" class="w-full h-full object-cover">
+                                                <?php else: ?>
+                                                    <?= strtoupper(substr($r['name'], 0, 1)) ?>
+                                                <?php endif; ?>
                                             </div>
                                             <div class="min-w-0">
                                                 <p class="font-semibold text-gray-700 text-sm truncate">

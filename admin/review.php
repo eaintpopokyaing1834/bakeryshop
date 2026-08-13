@@ -46,7 +46,7 @@ $page = min($page, $totalPages);
 $offset      = ($page - 1) * $perPage;
 
 $stmt = $db->prepare("
-    SELECT r.*, u.name AS customer_name, u.email AS customer_email, r.comment AS review_text,
+    SELECT r.*, u.name AS customer_name, u.email AS customer_email, u.profile_image, r.comment AS review_text,
            p.name AS product_name
     FROM reviews r
     JOIN users u ON r.user_id = u.id
@@ -131,7 +131,11 @@ require_once __DIR__ . '/../includes/admin_header.php';
                             </td>
                             <td>
                                 <div class="flex items-center gap-2.5">
-                                    <div class="user-avatar"><?= strtoupper(substr($r['customer_name'], 0, 1)) ?></div>
+                                    <?php if (!empty($r['profile_image'])): ?>
+                                        <img src="/sweetheaven/<?= htmlspecialchars($r['profile_image']) ?>" class="user-avatar object-cover">
+                                    <?php else: ?>
+                                        <div class="user-avatar"><?= strtoupper(substr($r['customer_name'], 0, 1)) ?></div>
+                                    <?php endif; ?>
                                     <span class="text-sm font-semibold text-gray-700"><?= htmlspecialchars($r['customer_name']) ?></span>
                                 </div>
                             </td>

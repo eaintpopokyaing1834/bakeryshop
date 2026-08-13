@@ -53,14 +53,14 @@ foreach ($statusCounts as $s) {
 
 // ── Recent Orders ────────────────────────────────────
 $recentOrders = $db->query("
-    SELECT o.id, u.name, o.total_amount, o.status, o.order_date
+    SELECT o.id, u.name, u.profile_image, o.total_amount, o.status, o.order_date
     FROM orders o JOIN users u ON o.user_id = u.id
     ORDER BY o.order_date DESC LIMIT 8
 ")->fetchAll();
 
 // ── Customer Reviews (max 2) ──────────────────────────
 $customerReviews = $db->query("
-    SELECT u.name, r.comment AS message, r.rating, r.created_at
+    SELECT u.name, u.profile_image, r.comment AS message, r.rating, r.created_at
     FROM reviews r
     JOIN users u ON r.user_id = u.id
     WHERE r.status='approved'
@@ -321,7 +321,11 @@ $statusColors = [
                         </td>
                         <td>
                             <div class="flex items-center gap-2.5">
-                                <div class="user-avatar"><?= strtoupper(substr($order['name'], 0, 1)) ?></div>
+                                <?php if (!empty($order['profile_image'])): ?>
+                                    <img src="/sweetheaven/<?= htmlspecialchars($order['profile_image']) ?>" class="user-avatar object-cover">
+                                <?php else: ?>
+                                    <div class="user-avatar"><?= strtoupper(substr($order['name'], 0, 1)) ?></div>
+                                <?php endif; ?>
                                 <span class="text-sm font-medium text-gray-700"><?= htmlspecialchars($order['name']) ?></span>
                             </div>
                         </td>
@@ -400,7 +404,11 @@ $statusColors = [
                 <?php foreach ($customerReviews as $r): ?>
                 <div class="p-4 rounded-2xl border border-gray-100 bg-gradient-to-br from-gray-50 to-white">
                     <div class="flex items-center gap-3 mb-2.5">
-                        <div class="user-avatar"><?= strtoupper(substr($r['name'], 0, 1)) ?></div>
+                        <?php if (!empty($r['profile_image'])): ?>
+                            <img src="/sweetheaven/<?= htmlspecialchars($r['profile_image']) ?>" class="user-avatar object-cover">
+                        <?php else: ?>
+                            <div class="user-avatar"><?= strtoupper(substr($r['name'], 0, 1)) ?></div>
+                        <?php endif; ?>
                         <div>
                             <p class="text-sm font-semibold text-gray-700"><?= htmlspecialchars($r['name']) ?></p>
                             <p class="text-xs text-gray-400"><?= localizeDate($r['created_at'], 'M j, Y') ?></p>

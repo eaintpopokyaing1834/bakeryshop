@@ -66,6 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['user_id']   = $user['id'];
                 $_SESSION['role']      = $user['role'];
                 $_SESSION['name']      = $user['name'];
+                $_SESSION['profile_image'] = $user['profile_image'] ?? null;
                 $_SESSION['logged_in'] = true;
 
                 // Remember Me — 30-day token

@@ -42,19 +42,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
         } elseif ($passNew && $passNew !== $passConf) {
             $profileError = 'New password and confirmation do not match.';
         } else {
+            $profileImage = $user['profile_image'];
+            if (!empty($_FILES['profile_image']['tmp_name'])) {
+                $uploadDir = __DIR__ . '/../uploads/profiles/';
+                if (!is_dir($uploadDir))
+                    mkdir($uploadDir, 0775, true);
+                $ext = strtolower(pathinfo($_FILES['profile_image']['name'], PATHINFO_EXTENSION));
+                $file = 'profile_' . $userId . '_' . time() . '.' . $ext;
+                if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $uploadDir . $file)) {
+                    $profileImage = 'uploads/profiles/' . $file;
+                }
+            }
+
             if ($passNew) {
                 $hashed = password_hash($passNew, PASSWORD_BCRYPT);
-                $db->prepare("UPDATE users SET name=?, email=?, password=? WHERE id=?")
-                   ->execute([$name, $email, $hashed, $userId]);
+                $db->prepare("UPDATE users SET name=?, email=?, password=?, profile_image=? WHERE id=?")
+                   ->execute([$name, $email, $hashed, $profileImage, $userId]);
             } else {
-                $db->prepare("UPDATE users SET name=?, email=? WHERE id=?")
-                   ->execute([$name, $email, $userId]);
+                $db->prepare("UPDATE users SET name=?, email=?, profile_image=? WHERE id=?")
+                   ->execute([$name, $email, $profileImage, $userId]);
             }
             $_SESSION['name'] = $name;
+            $_SESSION['profile_image'] = $profileImage;
             $profileMsg = 'Profile updated successfully!';
             // Refresh user data
             $user['name'] = $name;
             $user['email'] = $email;
+            $user['profile_image'] = $profileImage;
         }
     }
 }
@@ -84,17 +98,26 @@ require_once __DIR__ . '/../includes/admin_header.php';
             </div>
         <?php endif; ?>
 
-        <form method="POST" class="px-6 py-5 space-y-4">
+        <form method="POST" enctype="multipart/form-data" class="px-6 py-5 space-y-4">
             <input type="hidden" name="update_profile" value="1">
 
             <!-- Avatar -->
-            <div class="flex items-center gap-4 mb-2">
-                <div class="w-16 h-16 rounded-full bg-pink-500 flex items-center justify-center text-white text-2xl font-bold shrink-0">
-                    <?= strtoupper(substr($user['name'], 0, 1)) ?>
+            <div class="flex items-center gap-6 mb-2">
+                <div class="w-16 h-16 rounded-full bg-pink-500 flex items-center justify-center text-white text-2xl font-bold shrink-0 overflow-hidden">
+                    <?php if (!empty($user['profile_image'])): ?>
+                        <img src="/sweetheaven/<?= htmlspecialchars($user['profile_image']) ?>" class="w-full h-full object-cover" id="profilePreview">
+                    <?php else: ?>
+                        <div class="w-full h-full flex items-center justify-center" id="profilePreview">
+                            <?= strtoupper(substr($user['name'], 0, 1)) ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <div>
-                    <p class="font-semibold text-gray-800"><?= htmlspecialchars($user['name']) ?></p>
-                    <p class="text-sm text-gray-400"><?= ucfirst($_SESSION['role']) ?></p>
+                    <label class="cursor-pointer bg-rose-50 hover:bg-rose-100 text-rose-600 px-4 py-2 rounded-xl text-sm font-semibold transition-colors">
+                        <?= __('profile_change_photo') ?? 'Change Photo' ?>
+                        <input type="file" name="profile_image" accept="image/*" class="hidden" onchange="previewImage(this)">
+                    </label>
+                    <p class="text-sm text-gray-400 mt-2"><?= ucfirst($_SESSION['role']) ?></p>
                 </div>
             </div>
 
@@ -158,6 +181,25 @@ function togglePasswordVisibility(id) {
         input.type = 'text';
     } else {
         input.type = 'password';
+    }
+}
+
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const preview = document.getElementById('profilePreview');
+            if (preview.tagName === 'IMG') {
+                preview.src = e.target.result;
+            } else {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'w-full h-full object-cover';
+                img.id = 'profilePreview';
+                preview.replaceWith(img);
+            }
+        };
+        reader.readAsDataURL(input.files[0]);
     }
 }
 </script>

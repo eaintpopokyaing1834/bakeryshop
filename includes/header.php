@@ -312,10 +312,14 @@ $sort = trim($_GET['sort'] ?? '');
                     <div class="relative" id="profileDropdown">
                         <button onclick="toggleProfile()"
                             class="flex items-center gap-2 bg-stone-50 hover:bg-stone-100 text-stone-600 px-3 py-2 rounded-lg transition-colors text-sm font-medium border border-stone-200/60">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
+                            <?php if (!empty($_SESSION['profile_image'])): ?>
+                                <img src="/sweetheaven/<?= htmlspecialchars($_SESSION['profile_image']) ?>" class="w-5 h-5 rounded-full object-cover">
+                            <?php else: ?>
+                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            <?php endif; ?>
                             <span class="max-w-[100px] truncate"><?= htmlspecialchars($_SESSION['name']) ?></span>
                             <svg class="w-3 h-3 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />

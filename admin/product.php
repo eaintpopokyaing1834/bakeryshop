@@ -72,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_product'])) {
     $id = (int) ($_POST['product_id'] ?? 0);
     $name = trim($_POST['name']);
     $name_my = trim($_POST['name_my'] ?? '');
+    $category_my = trim($_POST['category_my'] ?? ''); // This will update the categories table
     $category_id = (int) $_POST['category_id'];
     $price = (float) $_POST['price'];
     $stock = (int) $_POST['stock'];
@@ -88,6 +89,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_product'])) {
         $db->prepare("INSERT INTO products (name,name_my,category_id,price,discount_id,stock,description,description_my) VALUES (?,?,?,?,?,?,?,?)")
             ->execute([$name, $name_my, $category_id, $price, $discount_id, $stock, $description, $description_my]);
         $productId = $db->lastInsertId();
+    }
+
+    // Update the categories table with the provided Myanmar category name
+    if ($category_id > 0 && $category_my !== '') {
+        $db->prepare("UPDATE categories SET name_my=? WHERE id=?")->execute([$category_my, $category_id]);
     }
 
     // ── Handle image uploads (appends; never deletes existing images) ──
@@ -163,9 +169,9 @@ $perPage       = 10;
 $page          = max(1, (int)($_GET['page'] ?? 1));
 // Count using LEFT JOIN so products with deleted categories are still counted
 $totalProducts = (int)$db->query("SELECT COUNT(*) FROM products p LEFT JOIN categories c ON p.category_id = c.id")->fetchColumn();
-$totalPages    = max(1, (int)ceil($totalProducts / $perPage));
-$page          = min($page, $totalPages);
-$offset        = ($page - 1) * $perPage;
+$totalProductPages = max(1, (int)ceil($totalProducts / $perPage));
+$productPage   = min($page, $totalProductPages);
+$productOffset = ($productPage - 1) * $perPage;
 
 $stmt = $db->prepare("
     SELECT p.*, c.name AS category_name, c.name_my AS category_name_my, d.name AS discount_name, d.type AS discount_type, d.value AS discount_value,
@@ -174,12 +180,20 @@ $stmt = $db->prepare("
     LEFT JOIN categories c ON p.category_id = c.id
     LEFT JOIN discounts d ON p.discount_id = d.id
     ORDER BY p.created_at DESC
-    LIMIT $perPage OFFSET $offset
+    LIMIT $perPage OFFSET $productOffset
 ");
 $stmt->execute();
 $products = $stmt->fetchAll();
 
-$categories = $db->query("SELECT * FROM categories ORDER BY name")->fetchAll();
+// Categories Pagination
+$totalCategories = (int)$db->query("SELECT COUNT(*) FROM categories")->fetchColumn();
+$totalCategoryPages = max(1, (int)ceil($totalCategories / $perPage));
+$categoryPage = min($page, $totalCategoryPages);
+$categoryOffset = ($categoryPage - 1) * $perPage;
+
+$categories = $db->query("SELECT * FROM categories ORDER BY name")->fetchAll(); // For dropdowns
+$pagedCategories = $db->query("SELECT * FROM categories ORDER BY name LIMIT $perPage OFFSET $categoryOffset")->fetchAll(); // For table
+
 $discounts  = $db->query("SELECT * FROM discounts WHERE status=1 ORDER BY name")->fetchAll();
 
 $pageTitle = __('product_page_title');
@@ -240,7 +254,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 <tbody id="productTableBody" class="divide-y divide-gray-50">
                     <?php foreach ($products as $loopIdx => $p): ?>
                         <tr class="hover:bg-gray-50/50 transition-colors" data-product-id="<?= $p['id'] ?>">
-                            <td class="px-6 py-4 font-semibold text-gray-500 text-sm row-no"><?= localizeNumber($offset + $loopIdx + 1) ?></td>
+                            <td class="px-6 py-4 font-semibold text-gray-500 text-sm row-no"><?= localizeNumber($productOffset + $loopIdx + 1) ?></td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-12 h-12 rounded-xl overflow-hidden bg-rose-50 shrink-0">
@@ -297,18 +311,18 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 </tbody>
             </table>
         </div>
-        <?php if ($totalPages > 1): ?>
+        <?php if ($totalProductPages > 1): ?>
         <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-            <p class="text-sm text-gray-400"><?= sprintf(__('admin_page_of'), $page, $totalPages) ?></p>
+            <p class="text-sm text-gray-400"><?= sprintf(__('admin_page_of'), $productPage, $totalProductPages) ?></p>
             <div class="flex items-center gap-1">
-                <?php if ($page > 1): ?>
-                <a href="?tab=products&page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← <?= __('admin_prev') ?></a>
+                <?php if ($productPage > 1): ?>
+                <a href="?tab=products&page=<?= $productPage - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← <?= __('admin_prev') ?></a>
                 <?php endif; ?>
-                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <a href="?tab=products&page=<?= $i ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors <?= $i === $page ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>"><?= $i ?></a>
+                <?php for ($i = 1; $i <= $totalProductPages; $i++): ?>
+                <a href="?tab=products&page=<?= $i ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors <?= $i === $productPage ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>"><?= $i ?></a>
                 <?php endfor; ?>
-                <?php if ($page < $totalPages): ?>
-                <a href="?tab=products&page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"><?= __('admin_next') ?> →</a>
+                <?php if ($productPage < $totalProductPages): ?>
+                <a href="?tab=products&page=<?= $productPage + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"><?= __('admin_next') ?> →</a>
                 <?php endif; ?>
             </div>
         </div>
@@ -319,7 +333,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <h3 class="font-bold text-gray-800"><?= __('product_all_categories') ?> <span
-                    class="text-gray-400 font-normal text-sm ml-2">(<?= localizeNumber(count($categories)) ?> <?= __('admin_total') ?>)</span></h3>
+                    class="text-gray-400 font-normal text-sm ml-2">(<?= localizeNumber($totalCategories) ?> <?= __('admin_total') ?>)</span></h3>
             <?php if ($isAdmin): ?>
             <button onclick="openCategoryModal()"
                 class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2">
@@ -334,16 +348,16 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <table class="w-full">
                 <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider whitespace-nowrap">
                     <tr>
-                        <th class="px-6 py-4 text-left"><?= __('product_col_id') ?></th>
+                        <th class="px-6 py-4 text-left">No.</th>
                         <th class="px-6 py-4 text-left"><?= __('product_col_name') ?></th>
                         <th class="px-6 py-4 text-left"><?= __('product_label_desc') ?></th>
                         <th class="px-6 py-4 text-left"><?= __('admin_actions') ?></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
-                    <?php foreach ($categories as $cat): ?>
+                    <?php foreach ($pagedCategories as $loopIdx => $cat): ?>
                         <tr class="hover:bg-gray-50/50 transition-colors">
-                            <td class="px-6 py-4 font-mono text-gray-500 text-sm"><?= localizeNumber($cat['id']) ?></td>
+                            <td class="px-6 py-4 font-semibold text-gray-500 text-sm"><?= localizeNumber($categoryOffset + $loopIdx + 1) ?></td>
                             <td class="px-6 py-4 font-semibold text-gray-700 text-sm"><?= htmlspecialchars(getLocalizedCategoryName($cat)) ?></td>
                             <td class="px-6 py-4 text-sm text-gray-500">
                                 <?= htmlspecialchars(substr($cat['description'] ?? '', 0, 80)) ?></td>
@@ -365,6 +379,23 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 </tbody>
             </table>
         </div>
+        
+        <?php if ($totalCategoryPages > 1): ?>
+        <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+            <p class="text-sm text-gray-400"><?= sprintf(__('admin_page_of'), $categoryPage, $totalCategoryPages) ?></p>
+            <div class="flex items-center gap-1">
+                <?php if ($categoryPage > 1): ?>
+                <a href="?tab=categories&page=<?= $categoryPage - 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">← <?= __('admin_prev') ?></a>
+                <?php endif; ?>
+                <?php for ($i = 1; $i <= $totalCategoryPages; $i++): ?>
+                <a href="?tab=categories&page=<?= $i ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors <?= $i === $categoryPage ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' ?>"><?= $i ?></a>
+                <?php endfor; ?>
+                <?php if ($categoryPage < $totalCategoryPages): ?>
+                <a href="?tab=categories&page=<?= $categoryPage + 1 ?>" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"><?= __('admin_next') ?> →</a>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 <?php endif; ?>
 </div>
@@ -399,9 +430,14 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     <select name="category_id" id="productCategory" required
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                         <?php foreach ($categories as $cat): ?>
-                            <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                            <option value="<?= $cat['id'] ?>"><?= htmlspecialchars(getLocalizedCategoryName($cat)) ?></option>
                         <?php endforeach; ?>
                     </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_category') ?> (Myanmar)</label>
+                    <input type="text" name="category_my" id="productCategoryMy" placeholder="အမျိုးအစား (မြန်မာ)"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_price') ?> *</label>
@@ -665,6 +701,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
         document.getElementById('productName').value = data ? data.name : '';
         document.getElementById('productNameMy').value = data ? (data.name_my || '') : '';
         document.getElementById('productCategory').value = data ? data.category_id : '';
+        document.getElementById('productCategoryMy').value = data ? (data.category_name_my || '') : '';
         document.getElementById('productPrice').value = data ? data.price : '';
         document.getElementById('productStock').value = data ? data.stock : '';
         document.getElementById('productDiscount').value = data ? (data.discount_id || '') : '';

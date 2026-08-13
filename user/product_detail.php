@@ -41,7 +41,7 @@ $images->execute([$productId]);
 $images = $images->fetchAll();
 
 $reviews = $db->prepare("
-    SELECT r.*, u.name AS reviewer_name
+    SELECT r.*, u.name AS reviewer_name, u.profile_image AS reviewer_image
     FROM reviews r JOIN users u ON r.user_id = u.id
     WHERE r.product_id = ?
     ORDER BY r.created_at DESC
@@ -373,8 +373,12 @@ $relatedProducts = $relatedProducts->fetchAll();
                         <div class="border-b border-gray-50 pb-6">
                             <div class="flex items-center gap-3 mb-2">
                                 <div
-                                    class="w-9 h-9 rounded-full bg-gradient-to-br from-stone-300 to-stone-600 flex items-center justify-center text-white font-bold text-sm">
-                                    <?= strtoupper(substr($review['reviewer_name'], 0, 1)) ?>
+                                    class="w-9 h-9 rounded-full bg-gradient-to-br from-stone-300 to-stone-600 flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden">
+                                    <?php if (!empty($review['reviewer_image'])): ?>
+                                        <img src="/sweetheaven/<?= htmlspecialchars($review['reviewer_image']) ?>" class="w-full h-full object-cover" alt="Reviewer">
+                                    <?php else: ?>
+                                        <?= strtoupper(substr($review['reviewer_name'], 0, 1)) ?>
+                                    <?php endif; ?>
                                 </div>
                                 <div>
                                     <p class="font-semibold text-gray-700 text-sm">

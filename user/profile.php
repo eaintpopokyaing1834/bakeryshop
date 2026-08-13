@@ -45,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                 ->execute([$name, $email, $profileImage, $userId]);
         }
         $_SESSION['name'] = $name;
+        $_SESSION['profile_image'] = $profileImage;
         $profileMsg = __('profile_success');
     }
 }

@@ -16,7 +16,7 @@ $discounted = (int)($_GET['discounted'] ?? 0);
 $where  = ["1=1"]; // Show all products including out-of-stock (card UI shows "Out of Stock" overlay)
 $params = [];
 if ($categoryId > 0) { $where[] = "p.category_id = ?"; $params[] = $categoryId; }
-if ($search !== '') { $where[] = "(p.name LIKE ? OR p.description LIKE ? OR p.name_my LIKE ? OR p.description_my LIKE ?)"; $params[] = "%$search%"; $params[] = "%$search%"; $params[] = "%$search%"; $params[] = "%$search%"; }
+if ($search !== '') { $where[] = "(p.name LIKE ? OR p.description LIKE ? OR p.name_my LIKE ? OR p.description_my LIKE ? OR c.name LIKE ? OR c.name_my LIKE ?)"; $params[] = "%$search%"; $params[] = "%$search%"; $params[] = "%$search%"; $params[] = "%$search%"; $params[] = "%$search%"; $params[] = "%$search%"; }
 if ($minPrice > 0) { $where[] = "p.price >= ?"; $params[] = $minPrice; }
 if ($maxPrice < 999999) { $where[] = "p.price <= ?"; $params[] = $maxPrice; }
 if ($discounted) { $where[] = "p.discount_id IS NOT NULL"; }

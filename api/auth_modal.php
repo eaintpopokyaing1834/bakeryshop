@@ -27,6 +27,7 @@ if ($action === 'login') {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['role']    = $user['role'];
         $_SESSION['name']    = $user['name'];
+        $_SESSION['profile_image'] = $user['profile_image'] ?? null;
         $_SESSION['cart']    = $_SESSION['cart'] ?? [];
 
         $redirect = in_array($user['role'], ['admin', 'cashier'])

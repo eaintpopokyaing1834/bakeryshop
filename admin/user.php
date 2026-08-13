@@ -321,8 +321,12 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 <td class="px-6 py-4 text-sm text-gray-400">#<?= localizeNumber($u['id']) ?></td>
                 <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold">
-                            <?= strtoupper(substr($u['name'],0,1)) ?>
+                        <div class="w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold shrink-0 overflow-hidden">
+                            <?php if (!empty($u['profile_image'])): ?>
+                                <img src="/sweetheaven/<?= htmlspecialchars($u['profile_image']) ?>" class="w-full h-full object-cover">
+                            <?php else: ?>
+                                <?= strtoupper(substr($u['name'],0,1)) ?>
+                            <?php endif; ?>
                         </div>
                         <p class="font-semibold text-gray-700 text-sm"><?= htmlspecialchars($u['name']) ?></p>
                     </div>
