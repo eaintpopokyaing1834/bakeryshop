@@ -28,7 +28,7 @@ $bestSellers = $db->query("
            ) AS extra_images
     FROM products p
     LEFT JOIN categories c ON p.category_id = c.id
-    LEFT JOIN discounts d ON p.discount_id = d.id
+    LEFT JOIN discounts d ON p.discount_id = d.id AND d.status = 1
     LEFT JOIN product_images pi ON pi.product_id = p.id
     LEFT JOIN reviews r ON r.product_id = p.id
     LEFT JOIN order_items oi ON oi.product_id = p.id
@@ -596,9 +596,9 @@ $freeGiftName = $freeGiftRule ? htmlspecialchars($freeGiftRule['name']) : __('pr
                                 <div class="absolute top-0 left-0 bg-rose-500 text-white text-xs font-bold px-3 py-1 rounded-br-lg shadow-md">
                                     <?= htmlspecialchars(getLocalizedDiscountLabel($product)) ?>
                                 </div>
-                            <?php elseif ($product['stock'] < 5): ?>
+                            <?php elseif ($product['stock'] > 0 && $product['stock'] < 5): ?>
                                 <div class="absolute top-0 left-0 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-br-lg shadow-md">
-                                    <?= __('bestsellers_low_stock') ?>
+                                    <?= __('bestsellers_low_stock', localizeNumber($product['stock'])) ?>
                                 </div>
                             <?php endif; ?>
                         </div>

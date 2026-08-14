@@ -37,7 +37,7 @@ $products = $db->prepare("
            COUNT(DISTINCT oi.id) AS total_sold
     FROM products p
     LEFT JOIN categories c ON p.category_id = c.id
-    LEFT JOIN discounts d ON p.discount_id = d.id
+    LEFT JOIN discounts d ON p.discount_id = d.id AND d.status = 1
     LEFT JOIN reviews r ON r.product_id = p.id
     LEFT JOIN order_items oi ON oi.product_id = p.id
     WHERE " . implode(' AND ', $where) . "
@@ -231,7 +231,7 @@ if ($isLoggedIn && !$isAdmin) {
                             <span class="bg-red-600 text-white text-sm font-bold px-5 py-2 rounded-full shadow-lg"><?= __('products_out_of_stock') ?></span>
                         </div>
                         <?php elseif ($product['stock'] < 10 && !$hasDiscount): ?>
-                        <div class="absolute top-3 left-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">Only <?= $product['stock'] ?> left</div>
+                        <div class="absolute top-3 left-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md"><?= __('products_only_left', localizeNumber($product['stock'])) ?></div>
                         <?php endif; ?>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                     </div>

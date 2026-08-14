@@ -100,7 +100,7 @@ return [
     'bestsellers_subtitle' => 'အရောင်းရဆုံးထုတ်ကုန်များ',
     'bestsellers_title'    => 'ဝယ်သူများကြိုက်နှစ်သက်သည်',
     'bestsellers_see_all'  => 'ထုတ်ကုန်အားလုံး ကြည့်မည်',
-    'bestsellers_low_stock'=> 'အနည်းငယ်သာ ကျန်သည်',
+    'bestsellers_low_stock'=> '%s ခုသာကျန်သည်',
 
     'customize_label'      => 'သင့်ကိုယ်ပိုင်ပြုလုပ်ပါ',
     'customize_title'      => 'သင့်စိတ်ကြိုက်ကိတ်ပြုလုပ်ပါ',
@@ -175,7 +175,7 @@ return [
     'products_not_found'   => 'ထုတ်ကုန် မတွေ့ပါ',
     'products_adjust'      => 'စစ်ထုတ်မှု သို့မဟုတ် ရှာဖွေမှု ပြောင်းကြည့်ပါ။',
     'products_out_of_stock'=> 'မရှိတော့ပါ',
-    'products_only_left'   => '%d ခုသာ ကျန်သည်',
+    'products_only_left'   => '%sခုသာကျန်ပါတော့တယ်',
     'products_view'        => 'ကြည့်မည်',
     'products_add_cart'    => 'တောင်းထဲထည့်မည်',
     'products_search_label'=> 'ရှာဖွေမှု: "%s"',

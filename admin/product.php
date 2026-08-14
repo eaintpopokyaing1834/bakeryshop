@@ -76,6 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_product'])) {
     $category_id = (int) $_POST['category_id'];
     $price = (float) $_POST['price'];
     $stock = (int) $_POST['stock'];
+    if ($stock > 100) $stock = 100;
     $description = trim($_POST['description']);
     $description_my = trim($_POST['description_my'] ?? '');
 
@@ -456,7 +457,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_stock') ?> *</label>
-                    <input type="number" name="stock" id="productStock" required min="0" placeholder="<?= __('product_ph_stock') ?>"
+                    <input type="number" name="stock" id="productStock" required min="0" max="100" oninput="if(this.value > 100) this.value = 100;" placeholder="<?= __('product_ph_stock') ?>"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                 </div>
                 <div class="col-span-2">

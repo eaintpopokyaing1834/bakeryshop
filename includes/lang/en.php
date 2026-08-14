@@ -100,7 +100,7 @@ return [
     'bestsellers_subtitle' => 'Customers Love',
     'bestsellers_title' => 'Best Sellers',
     'bestsellers_see_all' => 'See All Products',
-    'bestsellers_low_stock' => 'Low Stock',
+    'bestsellers_low_stock' => 'Only %s left',
 
     'customize_label' => 'Make It Yours',
     'customize_title' => 'Customize Your Cake',
@@ -175,7 +175,7 @@ return [
     'products_not_found' => 'No products found',
     'products_adjust' => 'Try adjusting your filters or search terms.',
     'products_out_of_stock' => 'Out of Stock',
-    'products_only_left' => 'Only %d left',
+    'products_only_left' => 'Only %s left',
     'products_view' => 'View',
     'products_add_cart' => '+ Cart',
     'products_search_label' => 'Search: "%s"',
