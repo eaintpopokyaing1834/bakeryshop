@@ -39,8 +39,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_discount'])) {
     $name = trim($_POST['name']);
     $scope = $_POST['scope'] ?? 'product';
     $type = $_POST['type'];
-    $value = (float) $_POST['value'];
-    $min_order_amount = (float) ($_POST['min_order_amount'] ?? 0);
+    $value = (int) $_POST['value'];
+    if ($value > 100) $value = 100;
+    $min_order_amount = (int) ($_POST['min_order_amount'] ?? 0);
     $is_first_order = isset($_POST['is_first_order']) ? 1 : 0;
     $status = (int) ($_POST['status'] ?? 1);
 
@@ -135,14 +136,14 @@ require_once __DIR__ . '/../includes/admin_header.php';
 
 <!-- Discount Modal -->
 <div id="discountModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-sm w-full max-w-md">
+    <div class="bg-white rounded-2xl shadow-sm w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div class="p-6 border-b border-gray-100 flex items-center justify-between">
             <h3 class="text-lg font-bold text-gray-800" id="discountModalTitle"><?= __('discount_add_title') ?></h3>
             <button onclick="closeModal('discountModal')" class="text-gray-400 hover:text-gray-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
-        <form method="POST" class="p-6 space-y-4">
+        <form method="POST" class="px-6 pb-6 pt-4 space-y-4">
             <input type="hidden" name="save_discount" value="1">
             <input type="hidden" name="discount_id" id="discountId" value="0">
             <div>
@@ -166,13 +167,13 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     onchange="document.getElementById('valueUnit').textContent = this.value === 'percentage' ? '%' : (this.value === 'fixed' ? '<?= __('admin_mmk') ?>' : '')">
                     <option value="percentage"><?= __('discount_type_percent') ?></option>
                     <option value="fixed"><?= __('discount_type_fixed') ?></option>
-                    <option value="free_gift" class="order-only-option hidden">Free Gift</option>
+                    <option value="free_gift">Free Gift</option>
                 </select>
             </div>
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('discount_label_value') ?></label>
                 <div class="flex items-center gap-2">
-                    <input type="number" name="value" id="discountValue" required min="0" step="0.01" placeholder="<?= __('discount_ph_value') ?>"
+                    <input type="number" name="value" id="discountValue" required min="0" max="100" step="1" oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(this.value > 100) this.value = 100;" placeholder="<?= __('discount_ph_value') ?>"
                         class="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                     <span id="valueUnit" class="text-sm font-bold text-gray-500 w-12">%</span>
                 </div>
@@ -180,12 +181,12 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <div id="orderFields" class="hidden space-y-4 pt-2">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Minimum Order Amount</label>
-                    <input type="number" name="min_order_amount" id="discountMinAmount" min="0" step="0.01" value="0"
+                    <input type="number" name="min_order_amount" id="discountMinAmount" min="0" step="1" value="0" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                 </div>
                 <div class="flex items-center gap-2">
-                    <input type="checkbox" name="is_first_order" id="discountFirstOrder" value="1" class="w-4 h-4 text-rose-500 rounded focus:ring-rose-400">
-                    <label class="text-sm font-semibold text-gray-700">First Order Only</label>
+                    <input type="checkbox" name="is_first_order" id="discountIsFirstOrder" value="1" class="w-4 h-4 text-rose-500 border-gray-300 rounded focus:ring-rose-500">
+                    <label for="discountIsFirstOrder" class="text-sm font-semibold text-gray-700">Is First Order Discount</label>
                 </div>
             </div>
             <div>
@@ -213,9 +214,9 @@ function openDiscountModal(data = null) {
     document.getElementById('discountName').value = data ? data.name : '';
     document.getElementById('discountScope').value = data ? data.scope : 'product';
     document.getElementById('discountType').value = data ? data.type : 'percentage';
-    document.getElementById('discountValue').value = data ? data.value : '';
-    document.getElementById('discountMinAmount').value = data ? data.min_order_amount : '0';
-    document.getElementById('discountFirstOrder').checked = data && data.is_first_order == 1;
+    document.getElementById('discountValue').value = data ? parseInt(data.value) : '';
+    document.getElementById('discountMinAmount').value = data ? parseInt(data.min_order_amount) : '0';
+    document.getElementById('discountIsFirstOrder').checked = data ? (data.is_first_order == 1) : false;
     document.getElementById('discountStatus').value = data ? data.status : '1';
     document.getElementById('discountModalTitle').textContent = data ? '<?= __('discount_edit_title') ?>' : '<?= __('discount_add_title') ?>';
     document.getElementById('valueUnit').textContent = (data ? data.type : 'percentage') === 'percentage' ? '%' : ((data && data.type === 'free_gift') ? '' : '<?= __('admin_mmk') ?>');
@@ -225,17 +226,10 @@ function openDiscountModal(data = null) {
 function toggleOrderFields() {
     const scope = document.getElementById('discountScope').value;
     const orderFields = document.getElementById('orderFields');
-    const freeGiftOption = document.querySelector('.order-only-option');
     if (scope === 'order') {
         orderFields.classList.remove('hidden');
-        freeGiftOption.classList.remove('hidden');
     } else {
         orderFields.classList.add('hidden');
-        freeGiftOption.classList.add('hidden');
-        if (document.getElementById('discountType').value === 'free_gift') {
-            document.getElementById('discountType').value = 'percentage';
-            document.getElementById('valueUnit').textContent = '%';
-        }
     }
 }
 function editDiscount(data) { openDiscountModal(data); }

@@ -19,7 +19,7 @@ if ($categoryId > 0) { $where[] = "p.category_id = ?"; $params[] = $categoryId; 
 if ($search !== '') { $where[] = "(p.name LIKE ? OR p.description LIKE ? OR p.name_my LIKE ? OR p.description_my LIKE ? OR c.name LIKE ? OR c.name_my LIKE ?)"; $params[] = "%$search%"; $params[] = "%$search%"; $params[] = "%$search%"; $params[] = "%$search%"; $params[] = "%$search%"; $params[] = "%$search%"; }
 if ($minPrice > 0) { $where[] = "p.price >= ?"; $params[] = $minPrice; }
 if ($maxPrice < 999999) { $where[] = "p.price <= ?"; $params[] = $maxPrice; }
-if ($discounted) { $where[] = "p.discount_id IS NOT NULL"; }
+if ($discounted) { $where[] = "d.id IS NOT NULL"; }
 
 $sortSQL = match($sort) {
     'price_asc'  => 'p.price ASC',
@@ -196,9 +196,13 @@ if ($isLoggedIn && !$isAdmin) {
             <?php if (empty($products)): ?>
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-16 text-center">
                 <p class="text-5xl mb-4">🔍</p>
-                <h3 class="text-xl font-bold text-gray-700 mb-2"><?= __('products_not_found') ?></h3>
-                <p class="text-gray-400 text-sm mb-6"><?= __('products_adjust') ?></p>
-                <a href="/sweetheaven/user/products.php" class="bg-rose-500 text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-rose-600 transition-colors"><?= __('products_clear') ?></a>
+                <?php if ($discounted): ?>
+                    <h3 class="text-xl font-bold text-gray-700 mb-2"><?= __('products_no_discount') ?></h3>
+                <?php else: ?>
+                    <h3 class="text-xl font-bold text-gray-700 mb-2"><?= __('products_not_found') ?></h3>
+                    <p class="text-gray-400 text-sm mb-6"><?= __('products_adjust') ?></p>
+                <?php endif; ?>
+                <a href="/sweetheaven/user/products.php" class="inline-block px-8 py-3 bg-rose-500 text-white font-semibold rounded-xl hover:bg-rose-600 transition-colors shadow-sm shadow-rose-200"><?= __('products_clear') ?></a>
             </div>
             <?php else: ?>
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 items-stretch">

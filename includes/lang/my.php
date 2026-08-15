@@ -173,6 +173,7 @@ return [
     'products_sort_asc'    => 'ဈေးနှုန်း: အနည်းဆုံးမှ',
     'products_sort_desc'   => 'ဈေးနှုန်း: အများဆုံးမှ',
     'products_not_found'   => 'ထုတ်ကုန် မတွေ့ပါ',
+    'products_no_discount' => 'ယခုလောလောဆယ် လျှော့စျေးထုတ်ကုန်များ မရှိပါ',
     'products_adjust'      => 'စစ်ထုတ်မှု သို့မဟုတ် ရှာဖွေမှု ပြောင်းကြည့်ပါ။',
     'products_out_of_stock'=> 'မရှိတော့ပါ',
     'products_only_left'   => '%sခုသာကျန်ပါတော့တယ်',

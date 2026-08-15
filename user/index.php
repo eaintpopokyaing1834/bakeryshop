@@ -725,14 +725,17 @@ $freeGiftName = $freeGiftRule ? htmlspecialchars($freeGiftRule['name']) : __('pr
     </section>
 
     <!-- ═════════════════════════ PROMOTIONS ═════════════════════════ -->
+    <?php $hasAnyPromo = $firstOrderRule || $freeGiftRule; ?>
     <section class="py-16 bg-[#fdf8f3]">
         <div class="max-w-7xl mx-auto px-6">
 
-            <div class="grid lg:grid-cols-2  gap-6">
-                        <!-- Promo 1 -->
-
+            <div class="grid <?= $hasAnyPromo ? 'lg:grid-cols-2' : 'grid-cols-1' ?>  gap-6">
+                <?php if ($hasAnyPromo): ?>
                 <div class="flex flex-col gap-6">
                     <div class="text-3xl font-semibold text-center"><?= __('promo_special') ?></div>
+                    
+                    <?php if ($firstOrderRule): ?>
+                    <!-- Promo 1 -->
                     <div class="rounded-2xl transition-all duration-200 ease-in-out hover:-translate-y-[3px] hover:shadow-[0_12px_36px_rgba(0,0,0,.07)] overflow-hidden flex flex-col md:flex-row border border-rose-100 bg-[#fdf0ee]">
                         <div class="p-12 flex-1">
                             <span class="text-3xl mb-3 block">🎉</span>
@@ -757,7 +760,9 @@ $freeGiftName = $freeGiftRule ? htmlspecialchars($freeGiftRule['name']) : __('pr
                                 alt="Cake slice" class="w-full h-full object-cover">
                         </div>
                     </div>
+                    <?php endif; ?>
 
+                    <?php if ($freeGiftRule): ?>
                     <!-- Promo 2 -->
                     <div class="rounded-2xl transition-all duration-200 ease-in-out hover:-translate-y-[3px] hover:shadow-[0_12px_36px_rgba(0,0,0,.07)] overflow-hidden flex flex-col md:flex-row border border-amber-100
                         bg-[#fffbf0]">
@@ -776,10 +781,13 @@ $freeGiftName = $freeGiftRule ? htmlspecialchars($freeGiftRule['name']) : __('pr
                                 alt="Donuts" class="w-full h-full object-cover">
                         </div>
                     </div>
+                    <?php endif; ?>
                 </div>
+                <?php endif; ?>
+                
                 <article class="flex flex-col gap-6">
                     <div class="text-center text-3xl font-semibold"><?= __('promo_latest_products') ?></div>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4" bg-[#fffbf0]">
+                    <div class="grid <?= $hasAnyPromo ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-5' ?> gap-4" bg-[#fffbf0]">
                         <?php foreach ($latestProducts as $product): ?>
                             <?php
                             $imgSrc = $product['primary_image']

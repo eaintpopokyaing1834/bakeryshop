@@ -173,6 +173,7 @@ return [
     'products_sort_asc' => 'Price: Low to High',
     'products_sort_desc' => 'Price: High to Low',
     'products_not_found' => 'No products found',
+    'products_no_discount' => 'No discount products available at the moment',
     'products_adjust' => 'Try adjusting your filters or search terms.',
     'products_out_of_stock' => 'Out of Stock',
     'products_only_left' => 'Only %s left',
