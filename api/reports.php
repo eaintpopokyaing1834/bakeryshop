@@ -47,7 +47,7 @@ if ($startDate) {
     $where .= " AND o.order_date >= ?";
     $params[] = $startDate;
 }
-if ($endDate && $period !== 'custom') {
+if ($endDate) {
     $where .= " AND o.order_date <= ?";
     $params[] = $endDate;
 }
@@ -55,13 +55,13 @@ if ($endDate && $period !== 'custom') {
 $categoryJoin = "";
 $categoryWhere = "";
 if ($categoryId > 0) {
-    $categoryJoin = " JOIN order_items oi_filter ON o.id = oi_filter.order_id JOIN products p_filter ON oi_filter.product_id = p_filter.id";
-    $categoryWhere = " AND p_filter.category_id = ?";
+    $categoryWhere = " AND EXISTS (SELECT 1 FROM order_items oi_filter JOIN products p_filter ON oi_filter.product_id = p_filter.id WHERE oi_filter.order_id = o.id AND p_filter.category_id = ?)";
     $params[] = $categoryId;
 }
 
 // ── Total Orders ────────────────────────────────────
-$stmt = $db->prepare("SELECT COUNT(DISTINCT o.id) FROM orders o{$categoryJoin} WHERE {$where}{$categoryWhere}");
+$totalOrdersWhere = str_replace("o.status != 'cancelled'", "1=1", $where);
+$stmt = $db->prepare("SELECT COUNT(DISTINCT o.id) FROM orders o{$categoryJoin} WHERE {$totalOrdersWhere}{$categoryWhere}");
 $stmt->execute($params);
 $totalOrders = (int)$stmt->fetchColumn();
 
@@ -103,8 +103,7 @@ $allTimeParams = [];
 $allTimeCategoryJoin = "";
 $allTimeCategoryWhere = "";
 if ($categoryId > 0) {
-    $allTimeCategoryJoin = " JOIN order_items oi_at ON o.id = oi_at.order_id JOIN products p_at ON oi_at.product_id = p_at.id";
-    $allTimeCategoryWhere = " AND p_at.category_id = ?";
+    $allTimeCategoryWhere = " AND EXISTS (SELECT 1 FROM order_items oi_at JOIN products p_at ON oi_at.product_id = p_at.id WHERE oi_at.order_id = o.id AND p_at.category_id = ?)";
     $allTimeParams[] = $categoryId;
 }
 $stmt = $db->prepare("
@@ -137,7 +136,7 @@ if ($startDate) {
     $statusWhereSimple .= " AND o.order_date >= ?";
     $statusParamsSimple[] = $startDate;
 }
-if ($endDate && $period !== 'custom') {
+if ($endDate) {
     $statusWhereSimple .= " AND o.order_date <= ?";
     $statusParamsSimple[] = $endDate;
 }

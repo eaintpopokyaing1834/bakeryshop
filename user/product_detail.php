@@ -502,7 +502,7 @@ $relatedProducts = $relatedProducts->fetchAll();
             const rating = selectedRating;
             const comment = document.getElementById('reviewComment').value.trim();
             const msgEl = document.getElementById('reviewMsg');
-            if (!rating) { msgEl.textContent = 'Please select a rating.'; msgEl.className = 'text-sm mt-2 text-red-500'; return; }
+            if (!rating) { msgEl.textContent = '<?= __('detail_please_select_rating') ?>'; msgEl.className = 'text-sm mt-2 text-red-500'; return; }
             fetch('/sweetheaven/api/review.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

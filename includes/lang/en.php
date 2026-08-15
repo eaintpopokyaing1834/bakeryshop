@@ -1018,4 +1018,10 @@ return [
     'profile_edit_save'         => 'Save Changes',
     'profile_edit_cancel'       => 'Cancel',
     'profile_edit_success'      => 'Profile updated successfully!',
+    'review_only_purchased'     => 'You can only review products you have purchased and received.',
+    'detail_please_select_rating' => 'Please select a rating.',
+    'review_login_required'     => 'Please login to submit a review.',
+    'review_invalid_rating'     => 'Invalid rating.',
+    'review_updated'            => 'Review updated!',
+    'review_submitted'          => 'Review submitted!',
 ];
