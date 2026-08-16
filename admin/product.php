@@ -278,7 +278,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                             <td class="px-6 py-4 font-bold text-gray-700 text-sm"><?= formatPrice($p['price']) ?></td>
                             <td class="px-6 py-4">
                                 <?php if ($p['discount_type'] && $p['discount_value']): ?>
-                                    <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-700">
+                                    <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-700 whitespace-nowrap">
                                         <?= htmlspecialchars(getLocalizedDiscountLabel($p)) ?>
                                     </span>
                                 <?php else: ?>

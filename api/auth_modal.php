@@ -24,6 +24,12 @@ if ($action === 'login') {
     $user = $stmt->fetch();
 
     if ($user && password_verify($password, $user['password'])) {
+        // Block inactive accounts
+        if (($user['status'] ?? 'active') === 'inactive') {
+            echo json_encode(['success' => false, 'error' => 'Your account has been suspended. Please contact the administrator.']);
+            exit;
+        }
+
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['role']    = $user['role'];
         $_SESSION['name']    = $user['name'];

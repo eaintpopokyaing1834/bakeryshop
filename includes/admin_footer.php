@@ -76,6 +76,33 @@
             });
     }
 
+    // Real-time polling for notification count
+    function checkNotificationCount() {
+        fetch('/sweetheaven/api/notifications.php?action=count')
+            .then(r => r.json())
+            .then(data => {
+                const count = data.count;
+                const bellBtn = document.querySelector('.notif-bell');
+                let badge = document.getElementById('notifBadge');
+                
+                if (count > 0) {
+                    if (!badge) {
+                        badge = document.createElement('span');
+                        badge.id = 'notifBadge';
+                        badge.className = 'absolute -top-0.5 -right-0.5 bg-rose-500 text-white text-[10px] font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1';
+                        bellBtn.appendChild(badge);
+                    }
+                    badge.textContent = count > 99 ? '99+' : count;
+                } else if (badge) {
+                    badge.remove();
+                }
+            })
+            .catch(err => console.error('Error fetching notification count:', err));
+    }
+    
+    // Poll every 10 seconds
+    setInterval(checkNotificationCount, 10000);
+
     document.addEventListener('click', function (e) {
         const wrapper = document.getElementById('notifWrapper');
         if (wrapper && !wrapper.contains(e.target)) {

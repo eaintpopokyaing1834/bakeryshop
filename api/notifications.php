@@ -7,8 +7,8 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/../config/db.php';
 $db = getDB();
 
-$isAdmin = (isset($_SESSION['role']) && $_SESSION['role'] === 'admin');
-if (!$isAdmin) {
+$isStaff = (isset($_SESSION['role']) && in_array($_SESSION['role'], ['admin', 'cashier']));
+if (!$isStaff) {
     http_response_code(403);
     echo json_encode(['error' => 'Unauthorized']);
     exit;
