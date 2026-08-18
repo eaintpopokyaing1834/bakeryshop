@@ -198,18 +198,19 @@ $grandTotal = $originalSubtotal - $totalSavings - $firstOrderDiscount;
 
                     <?php if ($totalSavings > 0): ?>
                     <div class="flex justify-between text-green-600 font-medium" id="discountSavingsRow">
-                        <span><?= __('checkout_product_discounts') ?></span>
+                        <?php $pdPercent = ($originalSubtotal > 0) ? round(($totalSavings / $originalSubtotal) * 100) : 0; ?>
+                        <span id="discountLabelDisplay"><?= sprintf(__('checkout_product_discounts'), localizeNumber($pdPercent)) ?></span>
                         <span id="discountDisplay">-<?= formatPrice($totalSavings) ?></span>
                     </div>
                     <?php else: ?>
                     <div class="flex justify-between text-green-600 font-medium hidden" id="discountSavingsRow">
-                        <span><?= __('checkout_product_discounts') ?></span>
+                        <span id="discountLabelDisplay"><?= sprintf(__('checkout_product_discounts'), localizeNumber(0)) ?></span>
                         <span id="discountDisplay"></span>
                     </div>
                     <?php endif; ?>
 
                     <?php 
-                    $foLabelValue = $firstOrderRuleType === 'percentage' ? localizeNumber((int)$firstOrderRuleValue) . '%' : formatPrice($firstOrderRuleValue);
+                    $foLabelValue = localizeNumber((int)$firstOrderRuleValue);
                     $foLabel = sprintf(__('checkout_first_order_discount'), $foLabelValue);
                     ?>
                     <?php if ($firstOrderDiscount > 0): ?>
@@ -294,12 +295,21 @@ function updateSummary(originalTotal) {
     const subtotalEl  = document.getElementById('subtotalDisplay');
     const discountRow = document.getElementById('discountSavingsRow');
     const discountEl  = document.getElementById('discountDisplay');
+    const discountLabelDisplay = document.getElementById('discountLabelDisplay');
     const firstOrderRow = document.getElementById('firstOrderDiscountRow');
     const firstOrderEl  = document.getElementById('firstOrderDiscountDisplay');
     const grandEl     = document.getElementById('grandTotal');
 
     if (subtotalEl)     subtotalEl.textContent     = formatPriceJS(originalTotal);
-    if (discountEl)     discountEl.textContent     = '-' + formatPriceJS(Math.round(savings));
+    if (discountEl) {
+        discountEl.textContent = '-' + formatPriceJS(Math.round(savings));
+        if (discountLabelDisplay) {
+            const pdPercent = originalTotal > 0 ? Math.round((savings / originalTotal) * 100) : 0;
+            const localizedPdPercent = window.localizeNumberJS ? window.localizeNumberJS(pdPercent) : pdPercent;
+            const templateStr = '<?= addslashes(str_replace('%%', '%', __('checkout_product_discounts'))) ?>';
+            discountLabelDisplay.textContent = templateStr.replace('%s', localizedPdPercent);
+        }
+    }
     if (discountRow)    discountRow.classList.toggle('hidden', savings <= 0);
     if (firstOrderEl)   firstOrderEl.textContent   = '-' + formatPriceJS(Math.round(firstOrderDiscount));
     if (firstOrderRow)  firstOrderRow.classList.toggle('hidden', firstOrderDiscount <= 0);

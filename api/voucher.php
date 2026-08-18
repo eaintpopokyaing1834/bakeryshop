@@ -24,11 +24,7 @@ $order = $db->prepare("
 $order->execute([$orderId, $userId]);
 $order = $order->fetch();
 
-$allowedOrderStatuses = ['processing', 'shipped', 'delivered'];
-
-if (!$order
-    || $order['pay_status'] !== 'approved'
-    || !in_array($order['status'], $allowedOrderStatuses, true)) {
+if (!$order) {
     http_response_code(403);
     echo json_encode(['error' => 'Voucher not available']);
     exit;
@@ -36,12 +32,17 @@ if (!$order
 
 $items = $db->prepare("
     SELECT oi.quantity, oi.price AS discounted_price,
-           COALESCE(p.name, 'Custom Cake') AS product_name,
+           COALESCE(p.name, 'Customize Cake') AS product_name,
            p.price AS original_price,
            oi.product_id,
-           (SELECT image_url FROM product_images pi WHERE pi.product_id = p.id AND pi.is_primary = 1 LIMIT 1) as product_image
+           COALESCE(
+               (SELECT image_url FROM product_images pi WHERE pi.product_id = p.id AND pi.is_primary = 1 LIMIT 1),
+               cr.reference_image
+           ) as product_image
     FROM order_items oi
     LEFT JOIN products p ON oi.product_id = p.id
+    LEFT JOIN orders o ON oi.order_id = o.id
+    LEFT JOIN customize_requests cr ON o.customize_request_id = cr.id
     WHERE oi.order_id = ?
 ");
 $items->execute([$orderId]);

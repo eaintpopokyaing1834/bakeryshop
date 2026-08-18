@@ -518,18 +518,19 @@ if ($customizeRequest) {
                             </div>
                             <?php if ($totalSavings > 0): ?>
                             <div class="flex justify-between text-green-600 font-medium" id="discountSavingsRow">
-                                <span><?= __('checkout_product_discounts') ?></span>
+                                <?php $pdPercent = ($originalSubtotal > 0) ? round(($totalSavings / $originalSubtotal) * 100) : 0; ?>
+                                <span><?= sprintf(__('checkout_product_discounts'), localizeNumber($pdPercent)) ?></span>
                                 <span id="discountDisplay">-<?= formatPrice($totalSavings) ?></span>
                             </div>
                             <?php else: ?>
                             <div class="flex justify-between text-green-600 font-medium hidden" id="discountSavingsRow">
-                                <span><?= __('checkout_product_discounts') ?></span>
+                                <span><?= sprintf(__('checkout_product_discounts'), localizeNumber(0)) ?></span>
                                 <span id="discountDisplay"></span>
                             </div>
                             <?php endif; ?>
                             <?php if ($firstOrderDiscount > 0): ?>
                             <?php 
-                            $foLabelValue = $firstOrderRule['type'] === 'percentage' ? localizeNumber((int)$firstOrderRule['value']) . '%' : formatPrice($firstOrderRule['value']);
+                            $foLabelValue = localizeNumber((int)$firstOrderRule['value']);
                             $foLabel = sprintf(__('checkout_first_order_discount'), $foLabelValue);
                             ?>
                             <div class="flex justify-between text-blue-600 font-medium">

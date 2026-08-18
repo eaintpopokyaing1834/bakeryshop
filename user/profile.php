@@ -364,7 +364,7 @@ $statusColors = [
                 <?php else: ?>
                     <?php foreach ($orders as $order): ?>
                         <?php
-                        $orderItems = $db->prepare("SELECT oi.quantity, oi.price, p.name FROM order_items oi JOIN products p ON oi.product_id=p.id WHERE oi.order_id=?");
+                        $orderItems = $db->prepare("SELECT oi.quantity, oi.price, COALESCE(p.name, 'Customize Cake') AS name FROM order_items oi LEFT JOIN products p ON oi.product_id=p.id WHERE oi.order_id=?");
                         $orderItems->execute([$order['id']]);
                         $orderItems = $orderItems->fetchAll();
                         ?>
@@ -403,7 +403,7 @@ $statusColors = [
                                                 <?= ucfirst($order['pay_status']) ?>
                                             </span>
                                         <?php endif; ?>
-                                        <?php if ($order['pay_status'] === 'approved' && in_array($order['status'], ['processing', 'shipped', 'delivered'])): ?>
+                                        <?php if ($order['payment_name']): ?>
                                             &middot; <button onclick="openVoucher(<?= $order['id'] ?>)"
                                                 class="text-rose-500 hover:underline font-semibold"><?= __('profile_view_voucher') ?></button>
                                         <?php endif; ?>
@@ -581,10 +581,10 @@ $statusColors = [
                         <div class="mb-4 text-xs">
                             <h2 class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide border-b border-gray-100 pb-1 mb-2"><?= __('voucher_customer_info') ?></h2>
                             <div class="space-y-1">
-                                <p><span class="text-gray-500 inline-block w-20"><?= __('voucher_customer_name') ?>:</span> <span class="font-semibold text-gray-800" id="vCustName"></span></p>
-                                <p><span class="text-gray-500 inline-block w-20"><?= __('voucher_email') ?>:</span> <span class="text-gray-800 overflow-hidden text-ellipsis whitespace-nowrap align-bottom" id="vCustEmail"></span></p>
-                                <p><span class="text-gray-500 inline-block w-20"><?= __('voucher_phone') ?>:</span> <span class="text-gray-800" id="vCustPhone"></span></p>
-                                <p><span class="text-gray-500 inline-block w-20"><?= __('voucher_shipping_method') ?>:</span> <span class="text-gray-800" id="vShipping"></span></p>
+                                <p><span class="text-gray-500 inline-block w-28 whitespace-nowrap"><?= __('voucher_customer_name') ?>:</span> <span class="font-semibold text-gray-800" id="vCustName"></span></p>
+                                <p><span class="text-gray-500 inline-block w-28 whitespace-nowrap"><?= __('voucher_email') ?>:</span> <span class="text-gray-800 overflow-hidden text-ellipsis whitespace-nowrap align-bottom" id="vCustEmail"></span></p>
+                                <p><span class="text-gray-500 inline-block w-28 whitespace-nowrap"><?= __('voucher_phone') ?>:</span> <span class="text-gray-800" id="vCustPhone"></span></p>
+                                <p><span class="text-gray-500 inline-block w-28 whitespace-nowrap"><?= __('voucher_shipping_method') ?>:</span> <span class="text-gray-800" id="vShipping"></span></p>
                             </div>
                         </div>
 

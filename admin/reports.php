@@ -81,6 +81,7 @@ $statusColors = [
         <div>
             <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2"><?= __('reports_filter_period') ?></label>
             <div class="flex gap-1 bg-gray-100 rounded-lg p-1" id="periodGroup">
+                <button type="button" data-period="daily" class="period-btn px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-800"><?= __('reports_period_daily') ?></button>
                 <button type="button" data-period="monthly" class="period-btn px-4 py-2 text-sm font-medium rounded-md transition-all bg-white shadow text-rose-600"><?= __('reports_period_monthly') ?></button>
                 <button type="button" data-period="yearly" class="period-btn px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-800"><?= __('reports_period_yearly') ?></button>
                 <button type="button" data-period="custom" class="period-btn px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-800"><?= __('reports_period_custom') ?></button>
@@ -516,6 +517,7 @@ function escapeHtml(str) {
 
 // ── Print Report ─────────────────────────────────────
 function getPeriodLabel() {
+    if (currentPeriod === 'daily') return '<?= __('reports_daily_title') ?>';
     if (currentPeriod === 'yearly') return '<?= __('reports_yearly_title') ?>';
     if (currentPeriod === 'custom') return '<?= __('reports_custom_title') ?>';
     return '<?= __('reports_monthly_title') ?>';
@@ -523,6 +525,7 @@ function getPeriodLabel() {
 
 function getDateRangeText() {
     const today = new Date();
+    if (currentPeriod === 'daily') return today.toLocaleDateString();
     if (currentPeriod === 'yearly') return today.getFullYear().toString();
     if (currentPeriod === 'custom') {
         const s = document.getElementById('startDate').value;
