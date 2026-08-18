@@ -15,6 +15,13 @@ $startDate = null;
 $endDate = date('Y-m-d 23:59:59');
 
 switch ($period) {
+    case 'daily':
+        $startDate = date('Y-m-d 00:00:00');
+        $endDate   = date('Y-m-d 23:59:59');
+        break;
+    case 'weekly':
+        $startDate = date('Y-m-d 00:00:00', strtotime('monday this week'));
+        break;
     case 'monthly':
         $startDate = date('Y-m-01 00:00:00');
         break;
@@ -49,36 +56,27 @@ if ($period === 'custom' && !empty($_GET['end_date'])) {
 $categoryJoin = "";
 $categoryWhere = "";
 if ($categoryId > 0) {
-    $categoryJoin = " JOIN order_items oi ON o.id = oi.order_id JOIN products p ON oi.product_id = p.id";
-    $categoryWhere = " AND p.category_id = ?";
+    // Use EXISTS to filter by category WITHOUT multiplying rows
+    $categoryWhere = " AND EXISTS (SELECT 1 FROM order_items oi_f JOIN products p_f ON oi_f.product_id = p_f.id WHERE oi_f.order_id = o.id AND p_f.category_id = ?)";
     $params[] = $categoryId;
-} else {
-    $categoryJoin = " JOIN order_items oi ON o.id = oi.order_id JOIN products p ON oi.product_id = p.id";
 }
 
-// ── Fetch all order items ───────────────────────────
+// ── Fetch orders (one row per order, no duplication) ──
 try {
     $stmt = $db->prepare("
         SELECT
             o.id AS order_id,
             u.name AS customer_name,
-            p.name AS product_name,
-            c.name AS category,
-            oi.quantity,
-            oi.price,
-            (oi.quantity * oi.price) AS line_total,
             o.total_amount,
             COALESCE(pm.payment_name, 'N/A') AS payment_method,
             o.status AS order_status,
             o.order_date
         FROM orders o
         JOIN users u ON o.user_id = u.id
-        JOIN order_items oi ON o.id = oi.order_id
-        JOIN products p ON oi.product_id = p.id
-        JOIN categories c ON p.category_id = c.id
         LEFT JOIN payment pay ON o.id = pay.order_id
         LEFT JOIN payment_methods pm ON pay.payment_method_id = pm.id
         WHERE {$where}{$categoryWhere}
+        GROUP BY o.id, u.name, o.total_amount, pm.payment_name, o.status, o.order_date
         ORDER BY o.order_date DESC
     ");
     $stmt->execute($params);
@@ -89,6 +87,12 @@ try {
 
 // ── Generate filename ───────────────────────────────
 switch ($period) {
+    case 'daily':
+        $filename = "daily_report_" . date('Y-m-d') . ".xls";
+        break;
+    case 'weekly':
+        $filename = "weekly_report_" . date('Y-\WW') . ".xls";
+        break;
     case 'monthly':
         $filename = "monthly_report_" . date('F_Y') . ".xls";
         break;
@@ -135,26 +139,21 @@ echo '</Styles>' . "\n";
 // Worksheet
 echo '<Worksheet ss:Name="Report">' . "\n";
 echo '<Table ss:DefaultRowHeight="20">' . "\n";
-echo '<Column ss:Width="80"/><Column ss:Width="140"/><Column ss:Width="160"/><Column ss:Width="120"/><Column ss:Width="70"/><Column ss:Width="100"/><Column ss:Width="100"/><Column ss:Width="100"/><Column ss:Width="110"/><Column ss:Width="90"/><Column ss:Width="110"/>' . "\n";
+echo '<Column ss:Width="80"/><Column ss:Width="160"/><Column ss:Width="120"/><Column ss:Width="120"/><Column ss:Width="90"/><Column ss:Width="110"/>' . "\n";
 
 // Header row
-$headers = ['Order ID', 'Customer Name', 'Product Name', 'Category', 'Qty', 'Price', 'Line Total', 'Total', 'Payment', 'Status', 'Date'];
+$headers = ['Order ID', 'Customer Name', 'Total Amount', 'Payment', 'Status', 'Date'];
 echo '<Row ss:AutoFitHeight="0" ss:Height="24">';
 foreach ($headers as $h) {
     echo '<Cell ss:StyleID="hdr"><Data ss:Type="String">' . htmlspecialchars($h) . '</Data></Cell>';
 }
 echo '</Row>' . "\n";
 
-// Data rows
+// Data rows — one row per order
 foreach ($rows as $row) {
     echo '<Row>';
     echo '<Cell ss:StyleID="cell"><Data ss:Type="String">#' . str_pad($row['order_id'], 4, '0', STR_PAD_LEFT) . '</Data></Cell>';
     echo '<Cell ss:StyleID="cell"><Data ss:Type="String">' . htmlspecialchars($row['customer_name']) . '</Data></Cell>';
-    echo '<Cell ss:StyleID="cell"><Data ss:Type="String">' . htmlspecialchars($row['product_name']) . '</Data></Cell>';
-    echo '<Cell ss:StyleID="cell"><Data ss:Type="String">' . htmlspecialchars($row['category']) . '</Data></Cell>';
-    echo '<Cell ss:StyleID="num"><Data ss:Type="Number">' . $row['quantity'] . '</Data></Cell>';
-    echo '<Cell ss:StyleID="num"><Data ss:Type="Number">' . $row['price'] . '</Data></Cell>';
-    echo '<Cell ss:StyleID="num"><Data ss:Type="Number">' . $row['line_total'] . '</Data></Cell>';
     echo '<Cell ss:StyleID="num"><Data ss:Type="Number">' . $row['total_amount'] . '</Data></Cell>';
     echo '<Cell ss:StyleID="cell"><Data ss:Type="String">' . htmlspecialchars($row['payment_method']) . '</Data></Cell>';
     echo '<Cell ss:StyleID="cell"><Data ss:Type="String">' . ucfirst(htmlspecialchars($row['order_status'])) . '</Data></Cell>';

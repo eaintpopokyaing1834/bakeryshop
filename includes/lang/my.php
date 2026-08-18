@@ -586,7 +586,7 @@ return [
     'checkout_order_summary' => 'အော်ဒါ အကျဉ်းချုပ်',
     'checkout_subtotal' => 'စုစုပေါင်းတန်ဖိုး',
     'checkout_product_discounts' => 'ပုံမှန်လျှော့စျေး (%s ရာခိုင်နှုန်းလျော့)',
-    'checkout_first_order_discount' => 'ပထမဆုံးအကြိမ်မှာယူမှု လျှော့စျေး (%s ရာခိုင်နှုန်းလျော့)',
+    'checkout_first_order_discount' => 'ပထမဆုံးအော်ဒါလျှော့စျေး (%s ရာခိုင်နှုန်းလျော့)',
     'checkout_shipping' => 'ပို့ဆောင်ခ',
     'checkout_total' => 'အသားတင်စုစုပေါင်းတန်ဖိုး',
     'checkout_place_order' => 'အော်ဒါမှာမည်',

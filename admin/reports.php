@@ -558,7 +558,14 @@ function printReport() {
                 tbody.innerHTML = '<tr><td colspan="5" style="padding:10px; text-align:center; color:#999;"><?= __('reports_no_shipped') ?></td></tr>';
             } else {
                 tbody.innerHTML = data.orders.map(o => {
-                    const sc = { shipped:'#4f46e5', delivered:'#16a34a' }[o.status] || '#666';
+                    const statusColors = {
+                        pending:    '#d97706',
+                        processing: '#2563eb',
+                        shipped:    '#4f46e5',
+                        delivered:  '#16a34a',
+                        cancelled:  '#dc2626'
+                    };
+                    const sc = statusColors[o.status] || '#666';
                     return `<tr>
                         <td style="padding:6px 10px; border:1px solid #ccc;">#${String(o.id).padStart(4, '0')}</td>
                         <td style="padding:6px 10px; border:1px solid #ccc;">${escapeHtml(o.customer)}</td>

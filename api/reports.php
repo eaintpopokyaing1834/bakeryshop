@@ -154,14 +154,13 @@ $statusSummary = $stmt->fetchAll();
 $orderParams = array_merge($params);
 
 if ($printMode) {
-    // Print mode: only shipped and delivered orders
-    $printWhere = str_replace("o.status != 'cancelled'", "o.status IN ('shipped', 'delivered')", $where);
+    // Print mode: all non-cancelled orders (same as dashboard view)
     $orderSql = "
         SELECT o.id, u.name AS customer, o.total_amount, o.status, o.order_date
         FROM orders o
         JOIN users u ON o.user_id = u.id
         {$categoryJoin}
-        WHERE {$printWhere}{$categoryWhere}
+        WHERE {$where}{$categoryWhere}
         ORDER BY o.order_date DESC
     ";
 } else {
