@@ -275,9 +275,17 @@ $relatedProducts = $relatedProducts->fetchAll();
                             <?php endif; ?>
                         </div>
 
-                        <p class="text-gray-500 leading-relaxed mb-8">
-                            <?= nl2br(htmlspecialchars(getLocalizedProductDescription($product))) ?>
-                        </p>
+                        <?php $ingredientsText = getLocalizedProductDescription($product); ?>
+                        <?php if (!empty($ingredientsText)): ?>
+                        <div class="mb-8">
+                            <h3 class="text-sm font-semibold uppercase tracking-widest text-rose-400 mb-2">
+                                <?= __('detail_description') ?>
+                            </h3>
+                            <p class="text-gray-500 leading-relaxed">
+                                <?= nl2br(htmlspecialchars($ingredientsText)) ?>
+                            </p>
+                        </div>
+                        <?php endif; ?>
 
                         <!-- Actions -->
                         <?php if ($product['stock'] > 0): ?>

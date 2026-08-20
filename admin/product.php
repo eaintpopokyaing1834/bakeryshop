@@ -77,18 +77,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_product'])) {
     $price = (float) $_POST['price'];
     $stock = (int) $_POST['stock'];
     if ($stock > 100) $stock = 100;
-    $description = trim($_POST['description']);
-    $description_my = trim($_POST['description_my'] ?? '');
+    $ingredients = trim($_POST['ingredients'] ?? '');
+    $ingredients_my = trim($_POST['ingredients_my'] ?? '');
 
     $discount_id = !empty($_POST['discount_id']) ? (int)$_POST['discount_id'] : null;
 
     if ($id > 0) {
-        $db->prepare("UPDATE products SET name=?,name_my=?,category_id=?,price=?,discount_id=?,stock=?,description=?,description_my=?,updated_at=NOW() WHERE id=?")
-            ->execute([$name, $name_my, $category_id, $price, $discount_id, $stock, $description, $description_my, $id]);
+        $db->prepare("UPDATE products SET name=?,name_my=?,category_id=?,price=?,discount_id=?,stock=?,ingredients=?,ingredients_my=?,updated_at=NOW() WHERE id=?")
+            ->execute([$name, $name_my, $category_id, $price, $discount_id, $stock, $ingredients, $ingredients_my, $id]);
         $productId = $id;
     } else {
-        $db->prepare("INSERT INTO products (name,name_my,category_id,price,discount_id,stock,description,description_my) VALUES (?,?,?,?,?,?,?,?)")
-            ->execute([$name, $name_my, $category_id, $price, $discount_id, $stock, $description, $description_my]);
+        $db->prepare("INSERT INTO products (name,name_my,category_id,price,discount_id,stock,ingredients,ingredients_my) VALUES (?,?,?,?,?,?,?,?)")
+            ->execute([$name, $name_my, $category_id, $price, $discount_id, $stock, $ingredients, $ingredients_my]);
         $productId = $db->lastInsertId();
     }
 
@@ -270,7 +270,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                     <div>
                                         <p class="font-semibold text-gray-700 text-sm"><?= htmlspecialchars($p['name']) ?></p>
                                         <p class="text-xs text-gray-400 line-clamp-1">
-                                            <?= htmlspecialchars(substr($p['description'], 0, 60)) ?>...</p>
+                                            <?= htmlspecialchars(substr($p['ingredients'] ?? '', 0, 60)) ?>...</p>
                                     </div>
                                 </div>
                             </td>
@@ -462,12 +462,12 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 </div>
                 <div class="col-span-2">
                     <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_desc') ?></label>
-                    <textarea name="description" id="productDescription" rows="3" placeholder="<?= __('product_ph_desc') ?>"
+                    <textarea name="ingredients" id="productDescription" rows="3" placeholder="<?= __('product_ph_desc') ?>"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"></textarea>
                 </div>
                 <div class="col-span-2">
                     <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('product_label_desc') ?> (Myanmar)</label>
-                    <textarea name="description_my" id="productDescriptionMy" rows="3" placeholder="ဖော်ပြချက် (မြန်မာ)"
+                    <textarea name="ingredients_my" id="productDescriptionMy" rows="3" placeholder="ဖော်ပြချက် (မြန်မာ)"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"></textarea>
                 </div>
                 <div class="col-span-2" id="existingImagesSection" style="display:none;">
@@ -706,8 +706,8 @@ require_once __DIR__ . '/../includes/admin_header.php';
         document.getElementById('productPrice').value = data ? data.price : '';
         document.getElementById('productStock').value = data ? data.stock : '';
         document.getElementById('productDiscount').value = data ? (data.discount_id || '') : '';
-        document.getElementById('productDescription').value = data ? (data.description || '') : '';
-        document.getElementById('productDescriptionMy').value = data ? (data.description_my || '') : '';
+        document.getElementById('productDescription').value = data ? (data.ingredients || '') : '';
+        document.getElementById('productDescriptionMy').value = data ? (data.ingredients_my || '') : '';
         document.getElementById('productModalTitle').textContent = data ? T.editProduct : T.addProduct;
         resetUploadZone();
         // Hide existing images section for new products

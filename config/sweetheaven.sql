@@ -39,7 +39,8 @@ CREATE TABLE IF NOT EXISTS products (
     name VARCHAR(200) NOT NULL,
     price DECIMAL(10,2) NOT NULL,
     stock INT DEFAULT 0,
-    description TEXT,
+    ingredients TEXT,
+    ingredients_my TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
@@ -215,17 +216,17 @@ INSERT INTO categories (name, description, image) VALUES
 ('Desserts', 'Sweet desserts and puddings', '../images/pudd.jpg');
 
 -- Products
-INSERT INTO products (category_id, name, price, stock, description) VALUES
-(1, 'Classic Birthday Cake', 35000, 15, 'A stunning layered birthday cake with fresh cream and seasonal fruits. Perfect for any celebration.'),
-(1, 'Wedding Tier Cake', 150000, 5, 'Elegant 3-tier wedding cake with fondant decoration. Customizable to your theme.'),
-(2, 'Chocolate Fudge Slice', 4500, 50, 'Rich and indulgent chocolate fudge cake slice with ganache topping.'),
-(2, 'Lemon Chiffon Slice', 3500, 40, 'Light and zesty lemon chiffon cake with delicate lemon cream frosting.'),
-(3, 'Vanilla Cupcake (Box of 6)', 9000, 30, 'Fluffy vanilla cupcakes with swirled buttercream frosting. Great for gifting.'),
-(3, 'Red Velvet Cupcake (Box of 6)', 12000, 25, 'Classic red velvet cupcakes with cream cheese frosting.'),
-(4, 'Sourdough Loaf', 6000, 20, 'Naturally leavened sourdough with a crispy crust and chewy interior.'),
-(6, 'Glazed Donut (Pack of 6)', 13000, 35, 'Classic glazed donuts, light and fluffy. Available in original and strawberry glaze.'),
-(5, 'Butter Croissant', 2500, 60, 'Perfectly flaky and buttery French-style croissant baked fresh every morning.'),
-(8, 'Mango Pudding', 3000, 45, 'Silky smooth mango pudding made with real mango pulp and fresh cream.');
+INSERT INTO products (category_id, name, price, stock, ingredients) VALUES
+(1, 'Classic Birthday Cake', 35000, 15, 'Flour, Sugar, Eggs, Butter, Fresh Cream, Seasonal Fruits'),
+(1, 'Wedding Tier Cake', 150000, 5, 'Flour, Sugar, Eggs, Butter, Fondant, Edible Decoration'),
+(2, 'Chocolate Fudge Slice', 4500, 50, 'Dark Chocolate, Butter, Sugar, Eggs, Flour, Cocoa Powder, Ganache'),
+(2, 'Lemon Chiffon Slice', 3500, 40, 'Flour, Sugar, Eggs, Lemon Zest, Lemon Juice, Vegetable Oil, Cream'),
+(3, 'Vanilla Cupcake (Box of 6)', 9000, 30, 'Flour, Sugar, Butter, Eggs, Vanilla Extract, Buttercream Frosting'),
+(3, 'Red Velvet Cupcake (Box of 6)', 12000, 25, 'Flour, Sugar, Butter, Eggs, Red Food Coloring, Cocoa Powder, Cream Cheese Frosting'),
+(4, 'Sourdough Loaf', 6000, 20, 'Whole Wheat Flour, Water, Salt, Sourdough Starter'),
+(6, 'Glazed Donut (Pack of 6)', 13000, 35, 'Flour, Sugar, Yeast, Eggs, Butter, Milk, Glaze, Sprinkles'),
+(5, 'Butter Croissant', 2500, 60, 'All-Purpose Flour, Butter, Milk, Yeast, Sugar, Salt, Eggs'),
+(8, 'Mango Pudding', 3000, 45, 'Mango Pulp, Fresh Cream, Sugar, Gelatin, Milk');
 
 -- Product Images
 INSERT INTO product_images (product_id, image_url, is_primary) VALUES

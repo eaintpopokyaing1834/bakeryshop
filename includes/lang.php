@@ -72,9 +72,9 @@ function getLocalizedProductName($productData, $nameKey = 'name', $nameMyKey = '
 }
 
 /**
- * Return the localized product description with English fallback
+ * Return the localized product ingredients with English fallback
  */
-function getLocalizedProductDescription($productData, $descKey = 'description', $descMyKey = 'description_my'): string {
+function getLocalizedProductDescription($productData, $descKey = 'ingredients', $descMyKey = 'ingredients_my'): string {
     if (currentLang() === 'my' && !empty($productData[$descMyKey])) {
         return $productData[$descMyKey];
     }
