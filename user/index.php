@@ -262,7 +262,7 @@ $freeGiftName = $freeGiftRule ? htmlspecialchars($freeGiftRule['name']) : __('pr
                     <?= __('hero_pill') ?>
                 </span>
 
-                <h1 class="font-display text-5xl md:text-[3.8rem] leading-[1.1] text-gray-800 mt-5 mb-5">
+                <h1 class="font-display text-4xl md:text-[3.8rem] leading-[1.1] text-gray-800 mt-5 mb-5">
                     <?= __('hero_title') ?>
                 </h1>
 
@@ -342,9 +342,6 @@ $freeGiftName = $freeGiftRule ? htmlspecialchars($freeGiftRule['name']) : __('pr
         <div class="max-w-7xl mx-auto px-6">
             <div class="flex  items-center justify-center mb-10 animate-[fadeUp_0.7s_ease_both]">
                 <div class="text-center">
-                    <p class="text-md font-semibold uppercase tracking-widest mb-1 text-[#e8746a]">
-                        <?= __('cat_what_we_offer') ?>
-                    </p>
                     <h2 class="font-display text-4xl text-gray-800"><?= __('cat_our_categories') ?></h2>
                 </div>
 
@@ -568,10 +565,7 @@ $freeGiftName = $freeGiftRule ? htmlspecialchars($freeGiftRule['name']) : __('pr
         <div class="max-w-7xl mx-auto px-6">
             <div class="flex flex-col items-center justify-center mb-10 animate-[fadeUp_0.7s_ease_both] space-y-4">
                 <div>
-                    <p class="text-md text-center font-semibold uppercase tracking-widest mb-1" text-[#e8746a]">
-                        <?= __('bestsellers_subtitle') ?>
-                    </p>
-                    <h2 class="font-display text-4xl text-gray-800"><?= __('bestsellers_title') ?></h2>
+                    <h2 class="font-display text-4xl text-center text-gray-800"><?= __('bestsellers_title') ?></h2>
                 </div>
 
             </div>
@@ -733,9 +727,6 @@ $freeGiftName = $freeGiftRule ? htmlspecialchars($freeGiftRule['name']) : __('pr
                 </div>
                 <div class="space-y-6">
                     <div>
-                        <p class="text-md font-semibold uppercase tracking-widest mb-2" text-[#e8746a]">
-                            <?= __('customize_label') ?>
-                        </p>
                         <h2 class="font-display text-4xl text-gray-800"><?= __('customize_title') ?></h2>
                     </div>
                     <p class="text-gray-500 leading-relaxed text-lg">
@@ -876,17 +867,9 @@ $freeGiftName = $freeGiftRule ? htmlspecialchars($freeGiftRule['name']) : __('pr
 
             <!-- ── Section Header ── -->
             <div class="text-center mb-10">
-                <div class="flex items-center justify-center gap-3 mb-3">
-                    <span class="h-px w-10 bg-rose-300 inline-block"></span>
-                    <span class="text-xs font-bold uppercase tracking-[.2em]" text-[#e8746a]">
-                        <?= __('discount_section_label') ?>
-                    </span>
-                    <span class="h-px w-10 bg-rose-300 inline-block"></span>
-                </div>
-                <h2 class="font-display text-4xl md:text-5xl font-extrabold text-gray-800 mb-2">
+                <h2 class="font-display text-4xl  text-gray-800 mb-2">
                     <?= __('discount_section_title') ?>
                 </h2>
-                <p class="text-gray-400 text-sm"><?= __('discount_section_desc') ?></p>
             </div>
 
             <!-- ── Big Pink Banner ── -->
@@ -1028,12 +1011,11 @@ $freeGiftName = $freeGiftRule ? htmlspecialchars($freeGiftRule['name']) : __('pr
                     <svg class="w-4 h-4 text-rose-400" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
                     </svg>
-                    <h3 class="font-display text-3xl font-bold text-gray-800"><?= __('discount_shop_the_deals') ?></h3>
+                    <h3 class="font-display text-3xl  text-gray-800"><?= __('discount_shop_the_deals') ?></h3>
                     <svg class="w-4 h-4 text-rose-400" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
                     </svg>
                 </div>
-                <p class="text-gray-400 text-sm"><?= __('discount_grab_deals') ?></p>
             </div>
 
             <!-- ── Discounted Product Cards ── -->
@@ -1335,7 +1317,7 @@ $freeGiftName = $freeGiftRule ? htmlspecialchars($freeGiftRule['name']) : __('pr
                 <!-- <p class="text-xs font-semibold uppercase tracking-widest text-[#e8746a] mb-2">
                     <?= __('contact_us_label') ?></p> -->
                 <h2 class="font-display text-3xl text-gray-800"><?= __('contact_us_title') ?></h2>
-                <p class="text-gray-600 text-sm mt-2"><?= __('contact_us_desc') ?></p>
+                <!-- <p class="text-gray-600 text-sm mt-2"><?= __('contact_us_desc') ?></p> -->
             </div>
 
             <div class="grid lg:grid-cols-2 gap-8 items-center">
@@ -1344,9 +1326,9 @@ $freeGiftName = $freeGiftRule ? htmlspecialchars($freeGiftRule['name']) : __('pr
                 <div class="bg-pink-100 rounded-3xl p-8 sm:p-10 shadow-sm">
                     <!-- Header -->
                     <div class="mb-8">
-                        <p class="text-xs font-semibold uppercase tracking-widest text-[#e8746a] mb-2">
-                            <?= __('contact_us_form_label') ?></p>
-                        <h3 class="font-display text-3xl sm:text-4xl text-gray-800 mb-3">
+                        <!-- <p class="text-xs font-semibold uppercase tracking-widest text-[#e8746a] mb-2">
+                            <?= __('contact_us_form_label') ?></p> -->
+                        <h3 class="font-display text-3xl sm:text-2xl text-gray-800 mb-4">
                             <?= __('contact_us_form_title') ?></h3>
                         <p class="text-gray-500 text-sm"><?= __('contact_us_form_desc') ?></p>
                     </div>
@@ -1440,9 +1422,9 @@ $freeGiftName = $freeGiftRule ? htmlspecialchars($freeGiftRule['name']) : __('pr
                     <img src="../images/aboutus.jpg" alt="About Sweet Heaven Bakery" class="w-full h-96 object-cover">
                 </div>
                 <div class="animate-[fadeUp_0.7s_ease_both] [animation-delay:.2s]">
-                    <p class="text-xs font-semibold uppercase tracking-widest mb-2" text-[#e8746a]">
+                    <!-- <p class="text-xs font-semibold uppercase tracking-widest mb-2" text-[#e8746a]">
                         <?= __('about_label') ?>
-                    </p>
+                    </p> -->
                     <h2 class="font-display text-4xl text-gray-800 mb-6"><?= __('about_title') ?></h2>
                     <p class="text-gray-500 text-[15px] leading-7 mb-6">
                         <?= __('about_desc') ?>
