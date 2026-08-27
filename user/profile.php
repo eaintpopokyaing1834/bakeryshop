@@ -374,7 +374,7 @@ $statusColors = [
                                     <p class="font-bold text-gray-800">#<?= str_pad($order['id'], 4, '0', STR_PAD_LEFT) ?></p>
                                     <span
                                         class="text-xs font-bold px-2.5 py-1 rounded-full <?= $statusColors[$order['status']] ?? 'bg-gray-100 text-gray-600' ?>">
-                                        <?= ucfirst($order['status']) ?>
+                                        <?= __('customer_status_' . $order['status']) ?>
                                     </span>
                                 </div>
                                 <div class="text-right">
@@ -400,7 +400,7 @@ $statusColors = [
                         <?= $order['pay_status'] === 'approved' ? 'bg-green-100 text-green-700' : '' ?>
                         <?= $order['pay_status'] === 'pending' ? 'bg-amber-100 text-amber-700' : '' ?>
                         <?= $order['pay_status'] === 'rejected' ? 'bg-red-100 text-red-700' : '' ?>">
-                                                <?= ucfirst($order['pay_status']) ?>
+                                                <?= __('pay_status_' . $order['pay_status']) ?>
                                             </span>
                                         <?php endif; ?>
                                         <?php if ($order['payment_name']): ?>
@@ -443,7 +443,7 @@ $statusColors = [
                                     <p class="font-bold text-gray-800">#<?= str_pad($cr['id'], 4, '0', STR_PAD_LEFT) ?></p>
                                     <span
                                         class="text-xs font-bold px-2.5 py-1 rounded-full <?= $crStatusColors[$cr['status']] ?? 'bg-gray-100 text-gray-600' ?>">
-                                        <?= ucfirst($cr['status']) ?>
+                                        <?= __('status_' . $cr['status']) ?>
                                     </span>
                                 </div>
                                 <p class="text-xs text-gray-400"><?= date('M j, Y', strtotime($cr['created_at'])) ?></p>

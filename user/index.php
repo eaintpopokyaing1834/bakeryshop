@@ -1332,10 +1332,10 @@ $freeGiftName = $freeGiftRule ? htmlspecialchars($freeGiftRule['name']) : __('pr
 
             <!-- Section Title -->
             <div class="text-center mb-10">
-                <p class="text-xs font-semibold uppercase tracking-widest text-[#e8746a] mb-2">
-                    <?= __('contact_us_label') ?></p>
-                <h2 class="font-display text-4xl text-gray-800"><?= __('contact_us_title') ?></h2>
-                <p class="text-gray-400 text-sm mt-2"><?= __('contact_us_desc') ?></p>
+                <!-- <p class="text-xs font-semibold uppercase tracking-widest text-[#e8746a] mb-2">
+                    <?= __('contact_us_label') ?></p> -->
+                <h2 class="font-display text-3xl text-gray-800"><?= __('contact_us_title') ?></h2>
+                <p class="text-gray-600 text-sm mt-2"><?= __('contact_us_desc') ?></p>
             </div>
 
             <div class="grid lg:grid-cols-2 gap-8 items-center">

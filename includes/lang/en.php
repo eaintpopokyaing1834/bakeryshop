@@ -80,7 +80,7 @@ return [
 
     // ── Index / Home ────────────────────────────────────
     'hero_pill' => 'Freshly Baked Every Morning',
-    'hero_title' => "A Taste of Heaven<br>in Every Bite",
+    'hero_title' => "Sweetest Taste",
     'hero_desc' => "Handcrafted with love and the finest ingredients. From celebration cakes to everyday treats — our bakery brings joy to every table.",
     'hero_shop_now' => 'Shop Now',
     'hero_browse_cat' => 'Browse Categories',
@@ -94,10 +94,10 @@ return [
     'feature_love' => 'Made with Love',
     'feature_love_sub' => 'Passion in every bite',
 
-    'cat_what_we_offer' => 'What We Offer',
-    'cat_our_categories' => 'Our Categories',
+    'cat_what_we_offer' => 'Find what you want by category',
+    'cat_our_categories' => 'Categories',
 
-    'bestsellers_subtitle' => 'Customers Love',
+    'bestsellers_subtitle' => 'Most Loved Items',
     'bestsellers_title' => 'Best Sellers',
     'bestsellers_see_all' => 'See All Products',
     'bestsellers_low_stock' => 'Only %s left',
@@ -393,7 +393,7 @@ return [
 
     // ── Discount Section (Index) ─────────────────────────
     'discount_section_label' => 'Special Discounts',
-    'discount_section_title' => 'Sweet Deals Just for You!',
+    'discount_section_title' => 'Discount Items',
     'discount_section_desc' => 'Delicious cakes at special prices. Don\'t miss out!',
     'discount_limited_offer' => '🏷️ Limited Time Offer',
     'discount_up_to' => 'Up to',
@@ -438,7 +438,7 @@ return [
 
     // ── Contact Us (Index) ───────────────────────────────
     'contact_us_title' => 'Feedback',
-    'contact_us_label' => 'Contact Us',
+    // 'contact_us_label' => 'Contact Us',
     'contact_us_desc' => "We'd love to hear from you. Send us a message.",
     'contact_us_form_label' => 'Share your thoughts',
     'contact_us_form_title' => 'Leave your feedback',
@@ -723,6 +723,18 @@ return [
     'status_approved' => 'Approved',
     'status_rejected' => 'Rejected',
     'status_ordered' => 'Ordered',
+
+    // ── Customer Order Statuses ───────────────────────────
+    'customer_status_pending' => 'Pending',
+    'customer_status_processing' => 'Processing',
+    'customer_status_shipped' => 'Shipped',
+    'customer_status_delivered' => 'Delivered',
+    'customer_status_cancelled' => 'Cancelled',
+    
+    // ── Payment Statuses ──────────────────────────────────
+    'pay_status_pending' => 'Pending',
+    'pay_status_approved' => 'Approved',
+    'pay_status_rejected' => 'Rejected',
 
     // ── Admin Orders Page ─────────────────────────────────
     'order_page_title' => 'Order Management',

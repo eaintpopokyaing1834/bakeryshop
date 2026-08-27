@@ -318,6 +318,12 @@ if ($customizeRequest) {
                                     value="<?= htmlspecialchars($user['name'] ?? '') ?>"
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm">
                             </div>
+                            <div class="col-span-2">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_address') ?> <span class="text-red-500">*</span></label>
+                                <textarea name="shipping_address" required rows="3"
+                                    placeholder="<?= __('checkout_address_ph') ?>"
+                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"></textarea>
+                            </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_phone') ?> <span class="text-red-500">*</span></label>
                                 <input type="text" name="phone" required inputmode="numeric"
@@ -330,12 +336,6 @@ if ($customizeRequest) {
                                 <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_email') ?></label>
                                 <input type="email" value="<?= htmlspecialchars($user['email'] ?? '') ?>" disabled
                                     class="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 text-gray-400 text-sm">
-                            </div>
-                            <div class="col-span-2">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_address') ?> <span class="text-red-500">*</span></label>
-                                <textarea name="shipping_address" required rows="3"
-                                    placeholder="<?= __('checkout_address_ph') ?>"
-                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 text-sm resize-none"></textarea>
                             </div>
                             <div class="col-span-2">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2"><?= __('checkout_request_note') ?></label>
